@@ -1,0 +1,252 @@
+[
+  {
+    "sigla":"SP",
+    "estado":"São Paulo",
+    "total_licencas":445300,
+    "total_empreendimentos":293641.0,
+    "ano_inicio":1998.0,
+    "ano_fim":2025.0,
+    "total_tipologias":14,
+    "principais_licencas":"LICENÃA DE OPERAÃÃO (253,753); LICENÃA PRÃVIA E DE INSTALAÃÃO (68,461); LICENÃA DE INSTALAÃÃO (44,740)"
+  },
+  {
+    "sigla":"SC",
+    "estado":"Santa Catarina",
+    "total_licencas":344145,
+    "total_empreendimentos":248650.0,
+    "ano_inicio":1990.0,
+    "ano_fim":2026.0,
+    "total_tipologias":63,
+    "principais_licencas":"Atividade NÃ£o Constante (54,744); LAO (44,418); Ren. LAO (41,563)"
+  },
+  {
+    "sigla":"RS",
+    "estado":"Rio Grande do Sul",
+    "total_licencas":281769,
+    "total_empreendimentos":139844.0,
+    "ano_inicio":1990.0,
+    "ano_fim":2026.0,
+    "total_tipologias":20,
+    "principais_licencas":"LICENÃA DE OPERAÃÃO (199,824); LICENÃA AMBIENTAL ÃNICA (21,574); LICENÃA PRÃVIA (19,873)"
+  },
+  {
+    "sigla":"PA",
+    "estado":"Pará",
+    "total_licencas":245653,
+    "total_empreendimentos":61330.0,
+    "ano_inicio":1993.0,
+    "ano_fim":2026.0,
+    "total_tipologias":8,
+    "principais_licencas":"NotificaÃ§Ã£o (209,577); LicenÃ§a de OperaÃ§Ã£o (14,461); Cadastro Ambiental Rural (6,744)"
+  },
+  {
+    "sigla":"PE",
+    "estado":"Pernambuco",
+    "total_licencas":128159,
+    "total_empreendimentos":78728.0,
+    "ano_inicio":2009.0,
+    "ano_fim":2026.0,
+    "total_tipologias":18,
+    "principais_licencas":"LO (39,270); AUT (19,590); LS (17,412)"
+  },
+  {
+    "sigla":"PR",
+    "estado":"Paraná",
+    "total_licencas":125307,
+    "total_empreendimentos":95991.0,
+    "ano_inicio":2008.0,
+    "ano_fim":2026.0,
+    "total_tipologias":17,
+    "principais_licencas":"LicenÃ§a Ambiental PrÃ©via (26,544); RenovaÃ§Ã£o de LicenÃ§a Ambiental de OperaÃ§Ã£o (20,729); DeclaraÃ§Ã£o de Dispensa de Licenciamento Ambiental (17,346)"
+  },
+  {
+    "sigla":"CE",
+    "estado":"Ceará",
+    "total_licencas":111191,
+    "total_empreendimentos":86693.0,
+    "ano_inicio":2004.0,
+    "ano_fim":2026.0,
+    "total_tipologias":29,
+    "principais_licencas":"LAC (52,609); RENLO (17,714); LO (8,237)"
+  },
+  {
+    "sigla":"MG",
+    "estado":"Minas Gerais",
+    "total_licencas":109480,
+    "total_empreendimentos":86349.0,
+    "ano_inicio":1990.0,
+    "ano_fim":2024.0,
+    "total_tipologias":19,
+    "principais_licencas":"AAF (71,943); LO (13,577); LI (4,992)"
+  },
+  {
+    "sigla":"RJ",
+    "estado":"Rio de Janeiro",
+    "total_licencas":108935,
+    "total_empreendimentos":null,
+    "ano_inicio":null,
+    "ano_fim":null,
+    "total_tipologias":125,
+    "principais_licencas":"CERTIDÃO AMBIENTAL (14,747); CertidÃ£o Ambiental (13,202); LICENÃA DE OPERAÃÃO (12,875)"
+  },
+  {
+    "sigla":"PB",
+    "estado":"Paraíba",
+    "total_licencas":60325,
+    "total_empreendimentos":41022.0,
+    "ano_inicio":2003.0,
+    "ano_fim":2026.0,
+    "total_tipologias":35,
+    "principais_licencas":"LicenÃ§a de OperaÃ§Ã£o (26,774); LicenÃ§a de InstalaÃ§Ã£o (8,887); RLO (3,634)"
+  },
+  {
+    "sigla":"MT",
+    "estado":"Mato Grosso",
+    "total_licencas":52187,
+    "total_empreendimentos":22838.0,
+    "ano_inicio":1994.0,
+    "ano_fim":2026.0,
+    "total_tipologias":18,
+    "principais_licencas":"LicenÃ§a de OperaÃ§Ã£o (14,368); LicenÃ§a de InstalaÃ§Ã£o (12,680); LicenÃ§a PrÃ©via (12,176)"
+  },
+  {
+    "sigla":"RO",
+    "estado":"Rondônia",
+    "total_licencas":50599,
+    "total_empreendimentos":28520.0,
+    "ano_inicio":2020.0,
+    "ano_fim":2026.0,
+    "total_tipologias":7,
+    "principais_licencas":"CertidÃ£o de Inexigibilidade de Licenciamento Ambiental (44,568); Dispensa de Licenciamento Ambiental (4,099); AutorizaÃ§Ã£o de Transporte Intermunicipal (846)"
+  },
+  {
+    "sigla":"GO",
+    "estado":"Goiás",
+    "total_licencas":47008,
+    "total_empreendimentos":22694.0,
+    "ano_inicio":2008.0,
+    "ano_fim":2026.0,
+    "total_tipologias":41,
+    "principais_licencas":"REGISTRO ELETRÃNICO (17,727); LicenÃ§a de Funcionamento (8,162); LicenÃ§a de InstalaÃ§Ã£o (7,291)"
+  },
+  {
+    "sigla":"AM",
+    "estado":"Amazonas",
+    "total_licencas":42173,
+    "total_empreendimentos":15211.0,
+    "ano_inicio":2000.0,
+    "ano_fim":2026.0,
+    "total_tipologias":75,
+    "principais_licencas":"LO (18,059); LAU (3,565); LI (3,015)"
+  },
+  {
+    "sigla":"AC",
+    "estado":"Acre",
+    "total_licencas":39856,
+    "total_empreendimentos":24508.0,
+    "ano_inicio":2007.0,
+    "ano_fim":2025.0,
+    "total_tipologias":19,
+    "principais_licencas":"Cadastro Ambiental da Propriedade Rural (7,604); AutorizaÃ§Ã£o Ambiental atÃ© 3ha (7,545); LicenÃ§a Ambiental Rural - Simplificada (7,248)"
+  },
+  {
+    "sigla":"BA",
+    "estado":"Bahia",
+    "total_licencas":37055,
+    "total_empreendimentos":10076.0,
+    "ano_inicio":1991.0,
+    "ano_fim":2021.0,
+    "total_tipologias":40,
+    "principais_licencas":"LicenÃ§a Ambiental por AdesÃ£o e Compromisso (LAC) (7,295); LicenÃ§a Simplificada (6,548); RenovaÃ§Ã£o de LicenÃ§a Ambiental por AdesÃ£o e Compromisso (RLAC) (3,049)"
+  },
+  {
+    "sigla":"ES",
+    "estado":"Espírito Santo",
+    "total_licencas":31837,
+    "total_empreendimentos":11367.0,
+    "ano_inicio":1990.0,
+    "ano_fim":2026.0,
+    "total_tipologias":23,
+    "principais_licencas":"LICENCA DE OPERACAO (7,893); LICENCA DE INSTALACAO (6,015); LICENCA SIMPLIFICADA (5,656)"
+  },
+  {
+    "sigla":"PI",
+    "estado":"Piauí",
+    "total_licencas":23379,
+    "total_empreendimentos":18346.0,
+    "ano_inicio":2021.0,
+    "ano_fim":2026.0,
+    "total_tipologias":10,
+    "principais_licencas":"DDLAE - DeclaraÃ§Ã£o de Dispensa de Licenciamento Ambiental Estadual (19,343); LP - LicenÃ§a PrÃ©via (1,031); LI - LicenÃ§a de InstalaÃ§Ã£o (890)"
+  },
+  {
+    "sigla":"SE",
+    "estado":"Sergipe",
+    "total_licencas":22756,
+    "total_empreendimentos":18082.0,
+    "ano_inicio":2008.0,
+    "ano_fim":2026.0,
+    "total_tipologias":19,
+    "principais_licencas":"LicenÃ§a de OperaÃ§Ã£o (4,355); RenovaÃ§Ã£o LicenÃ§a de OperaÃ§Ã£o (3,304); LicenÃ§a de InstalaÃ§Ã£o (3,285)"
+  },
+  {
+    "sigla":"IBAMA",
+    "estado":"Âmbito Federal (IBAMA)",
+    "total_licencas":22066,
+    "total_empreendimentos":39.0,
+    "ano_inicio":1990.0,
+    "ano_fim":2025.0,
+    "total_tipologias":60,
+    "principais_licencas":"AutorizaÃ§Ã£o de SupressÃ£o de VegetaÃ§Ã£o (2,194); AutorizaÃ§Ã£o de Captura, Coleta e Transporte de Material BiolÃ³gico (2,142); LicenÃ§a de OperaÃ§Ã£o (1,601)"
+  },
+  {
+    "sigla":"MA",
+    "estado":"Maranhão",
+    "total_licencas":21546,
+    "total_empreendimentos":11949.0,
+    "ano_inicio":2013.0,
+    "ano_fim":2026.0,
+    "total_tipologias":12,
+    "principais_licencas":"DLA - Dispensa de Licenciamento Ambiental (8,428); RenLO - RenovaÃ§Ã£o de LicenÃ§a de OperaÃ§Ã£o (3,739); LO - LicenÃ§a de OperaÃ§Ã£o (3,103)"
+  },
+  {
+    "sigla":"MS",
+    "estado":"Mato Grosso do Sul",
+    "total_licencas":18692,
+    "total_empreendimentos":13054.0,
+    "ano_inicio":2004.0,
+    "ano_fim":2024.0,
+    "total_tipologias":17,
+    "principais_licencas":"LicenÃ§a de OperaÃ§Ã£o (4,340); AutorizaÃ§Ã£o Ambiental (3,755); RenovaÃ§Ã£o de LicenÃ§a de OperaÃ§Ã£o (2,329)"
+  },
+  {
+    "sigla":"AL",
+    "estado":"Alagoas",
+    "total_licencas":17366,
+    "total_empreendimentos":10446.0,
+    "ano_inicio":2017.0,
+    "ano_fim":2026.0,
+    "total_tipologias":19,
+    "principais_licencas":"AutorizaÃ§Ã£o  Geral (4,767); LicenÃ§a de OperaÃ§Ã£o - RenovaÃ§Ã£o (4,401); LicenÃ§a de OperaÃ§Ã£o - RegularizaÃ§Ã£o (1,846)"
+  },
+  {
+    "sigla":"DF",
+    "estado":"Distrito Federal",
+    "total_licencas":8412,
+    "total_empreendimentos":2902.0,
+    "ano_inicio":1990.0,
+    "ano_fim":2026.0,
+    "total_tipologias":32,
+    "principais_licencas":"LICENÃA DE OPERAÃÃO (2,384); LO (1,646); AA (527)"
+  },
+  {
+    "sigla":"RR",
+    "estado":"Roraima",
+    "total_licencas":2288,
+    "total_empreendimentos":null,
+    "ano_inicio":null,
+    "ano_fim":null,
+    "total_tipologias":22,
+    "principais_licencas":"AUAS (427); CRRA (323); LO (234)"
+  }
+]

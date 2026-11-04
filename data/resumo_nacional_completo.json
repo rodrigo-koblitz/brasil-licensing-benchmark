@@ -1,0 +1,2325 @@
+{
+  "total_files": 25,
+  "national_total": 2397484,
+  "national_years": {
+    "2008": 84619,
+    "2007": 68268,
+    "2009": 93819,
+    "2013": 109001,
+    "2012": 110014,
+    "2018": 86069,
+    "2016": 94008,
+    "2015": 96223,
+    "2022": 116545,
+    "2017": 95803,
+    "2011": 111802,
+    "2010": 104730,
+    "2019": 82377,
+    "2024": 102702,
+    "2025": 87874,
+    "2014": 119288,
+    "2020": 80639,
+    "2021": 102426,
+    "2023": 111608,
+    "2026": 59705,
+    "2006": 47933,
+    "2002": 22209,
+    "2000": 17103,
+    "2001": 19610,
+    "2005": 41030,
+    "2003": 27259,
+    "1994": 3421,
+    "1995": 5067,
+    "1996": 7125,
+    "1997": 10170,
+    "1998": 11033,
+    "1999": 15428,
+    "2004": 36105,
+    "1993": 1733,
+    "1991": 720,
+    "1990": 521,
+    "1992": 1100
+  },
+  "national_top_types": [
+    [
+      "LICENÇA DE OPERAÇÃO",
+      468836
+    ],
+    [
+      "Notificação",
+      209577
+    ],
+    [
+      "LO",
+      82045
+    ],
+    [
+      "Licença de Operação",
+      77468
+    ],
+    [
+      "LAC",
+      74821
+    ],
+    [
+      "AAF",
+      71943
+    ],
+    [
+      "LICENÇA PRÉVIA E DE INSTALAÇÃO",
+      69781
+    ],
+    [
+      "LICENÇA DE INSTALAÇÃO",
+      69326
+    ],
+    [
+      "LICENÇA PRÉVIA",
+      60568
+    ],
+    [
+      "Atividade Não Constante",
+      54744
+    ],
+    [
+      "LAO",
+      44746
+    ],
+    [
+      "Certidão de Inexigibilidade de Licenciamento Ambiental",
+      44568
+    ],
+    [
+      "Ren. LAO",
+      41563
+    ],
+    [
+      "Licença de Instalação",
+      40575
+    ],
+    [
+      "Conformidade Ambiental",
+      37243
+    ],
+    [
+      "LI",
+      27892
+    ],
+    [
+      "Autorização Ambiental",
+      26965
+    ],
+    [
+      "Licença Ambiental Prévia",
+      26544
+    ],
+    [
+      "Licença Prévia",
+      24178
+    ],
+    [
+      "LAP+LAI",
+      23811
+    ]
+  ],
+  "states": [
+    {
+      "sigla": "AC",
+      "filename": "AC2026-10-29_13-318842134385491100954.csv",
+      "total": 39856,
+      "years": {
+        "2008": 2300,
+        "2007": 2454,
+        "2009": 3297,
+        "2013": 3746,
+        "2012": 4469,
+        "2018": 717,
+        "2016": 1212,
+        "2015": 1822,
+        "2022": 472,
+        "2017": 795,
+        "2011": 6376,
+        "2010": 6658,
+        "2019": 536,
+        "2024": 956,
+        "2025": 250,
+        "2014": 2410,
+        "2020": 400,
+        "2021": 440,
+        "2023": 546
+      },
+      "top_types": [
+        [
+          "Cadastro Ambiental da Propriedade Rural",
+          7604
+        ],
+        [
+          "Autorização Ambiental até 3ha",
+          7545
+        ],
+        [
+          "Licença Ambiental Rural - Simplificada",
+          7248
+        ],
+        [
+          "Licença de Operação",
+          4865
+        ],
+        [
+          "Licença Ambiental Única",
+          3924
+        ],
+        [
+          "Dispensa de Piscicultura",
+          3687
+        ],
+        [
+          "Autorização Ambiental",
+          1534
+        ],
+        [
+          "Licença Prévia",
+          1344
+        ],
+        [
+          "Licença de Instalação",
+          1219
+        ],
+        [
+          "Licença Ambiental Rural",
+          382
+        ],
+        [
+          "Licença de Instalação e Operação",
+          235
+        ],
+        [
+          "Plano de Manejo Florestal Sustentavel",
+          223
+        ],
+        [
+          "Licença de Regularização de Operação",
+          17
+        ],
+        [
+          "Renovação da Licença de Operação",
+          12
+        ],
+        [
+          "Licença Prévia e de Instalação",
+          9
+        ]
+      ],
+      "total_types": 19
+    },
+    {
+      "sigla": "AL",
+      "filename": "AL2026-10-29_14-343899211294477651406.csv",
+      "total": 17366,
+      "years": {
+        "2018": 1375,
+        "2019": 1418,
+        "2020": 1657,
+        "2021": 1844,
+        "2022": 2089,
+        "2023": 1989,
+        "2024": 2111,
+        "2025": 2320,
+        "2026": 2063,
+        "2017": 500
+      },
+      "top_types": [
+        [
+          "Autorização  Geral",
+          4767
+        ],
+        [
+          "Licença de Operação - Renovação",
+          4401
+        ],
+        [
+          "Licença de Operação - Regularização",
+          1846
+        ],
+        [
+          "Autorização ATPP",
+          1219
+        ],
+        [
+          "Licença Prévia",
+          879
+        ],
+        [
+          "Licença de Operação",
+          813
+        ],
+        [
+          "Licença de Instalação",
+          591
+        ],
+        [
+          "Autorização de Supressão",
+          541
+        ],
+        [
+          "Licença de Instalação - Regularização",
+          521
+        ],
+        [
+          "Autorização ATRP",
+          473
+        ],
+        [
+          "Licença de Instalação - Prorrogação",
+          402
+        ],
+        [
+          "Autorização",
+          372
+        ],
+        [
+          "Licença Ambiental Simplificada - LAS",
+          362
+        ],
+        [
+          "Certificado",
+          148
+        ],
+        [
+          "Licença Ambiental por Compromisso",
+          17
+        ]
+      ],
+      "total_types": 19
+    },
+    {
+      "sigla": "AM",
+      "filename": "AM2026-10-29_13-355071024772480395453.csv",
+      "total": 42173,
+      "years": {
+        "2018": 2650,
+        "2016": 625,
+        "2017": 2135,
+        "2015": 119,
+        "2014": 33,
+        "2021": 2701,
+        "2013": 25,
+        "2019": 2904,
+        "2007": 7,
+        "2010": 12,
+        "2023": 725,
+        "2009": 8,
+        "2020": 1992,
+        "2022": 2543,
+        "2011": 4,
+        "2006": 2,
+        "2002": 2,
+        "2000": 2,
+        "2008": 5,
+        "2001": 3,
+        "2005": 1,
+        "2003": 1,
+        "2012": 2,
+        "2024": 960,
+        "2025": 1266,
+        "2026": 681
+      },
+      "top_types": [
+        [
+          "LO",
+          18059
+        ],
+        [
+          "LAU",
+          3565
+        ],
+        [
+          "LI",
+          3015
+        ],
+        [
+          "LA",
+          2122
+        ],
+        [
+          "OUTORGA",
+          1805
+        ],
+        [
+          "LP",
+          1553
+        ],
+        [
+          "RLO",
+          1494
+        ],
+        [
+          "CA",
+          1191
+        ],
+        [
+          "LAU PASSERIFORMES",
+          750
+        ],
+        [
+          "SUPRESSÃO VEGETAL",
+          651
+        ],
+        [
+          "PA",
+          508
+        ],
+        [
+          "AQ",
+          354
+        ],
+        [
+          "DISPENSA",
+          306
+        ],
+        [
+          "LO PLANO DE MANEJO",
+          299
+        ],
+        [
+          "CR",
+          260
+        ]
+      ],
+      "total_types": 75
+    },
+    {
+      "sigla": "BA",
+      "filename": "BA2026-10-29_13-374424698498423564249.csv",
+      "total": 37055,
+      "years": {
+        "2000": 295,
+        "2001": 756,
+        "2002": 1284,
+        "1994": 12,
+        "1995": 40,
+        "1996": 104,
+        "1997": 165,
+        "1998": 230,
+        "1999": 173,
+        "2003": 1664,
+        "2004": 1531,
+        "2005": 1313,
+        "2006": 1220,
+        "2007": 907,
+        "2008": 993,
+        "2009": 1400,
+        "2010": 1829,
+        "2011": 1593,
+        "2012": 793,
+        "2013": 82,
+        "2014": 43,
+        "2015": 8,
+        "1993": 2,
+        "2017": 11,
+        "2016": 1,
+        "2021": 1,
+        "1991": 1,
+        "2018": 1
+      },
+      "top_types": [
+        [
+          "Licença Ambiental por Adesão e Compromisso (LAC)",
+          7295
+        ],
+        [
+          "Licença Simplificada",
+          6548
+        ],
+        [
+          "Renovação de Licença Ambiental por Adesão e Compromisso (RLAC)",
+          3049
+        ],
+        [
+          "Licença de Operação",
+          1736
+        ],
+        [
+          "Licença Unificada (LU)",
+          1497
+        ],
+        [
+          "Licença de Operação (LO)",
+          1335
+        ],
+        [
+          "Licença de Alteração (LA)",
+          1326
+        ],
+        [
+          "Dispensa de Licença Ambiental",
+          1324
+        ],
+        [
+          "Renovação de Licença de Operação (RLO)",
+          1257
+        ],
+        [
+          "Licença Unificada",
+          1157
+        ],
+        [
+          "Licença de Instalação (LI)",
+          1155
+        ],
+        [
+          "Licença Prévia (LP)",
+          881
+        ],
+        [
+          "Termo de Compromisso de Responsabilidade Ambiental",
+          862
+        ],
+        [
+          "Licença de Localização",
+          858
+        ],
+        [
+          "Autorização Ambiental (AA)",
+          802
+        ]
+      ],
+      "total_types": 40
+    },
+    {
+      "sigla": "CE",
+      "filename": "CE2026-10-29_13-375480922598057627994.csv",
+      "total": 111191,
+      "years": {
+        "2019": 2323,
+        "2022": 21663,
+        "2023": 10576,
+        "2021": 15063,
+        "2020": 1754,
+        "2018": 3506,
+        "2014": 2938,
+        "2015": 3499,
+        "2017": 3768,
+        "2016": 4039,
+        "2024": 5015,
+        "2012": 3292,
+        "2006": 2674,
+        "2005": 3001,
+        "2007": 3086,
+        "2011": 3971,
+        "2004": 2267,
+        "2008": 4188,
+        "2009": 4031,
+        "2010": 3113,
+        "2013": 2285,
+        "2026": 769,
+        "2025": 4370
+      },
+      "top_types": [
+        [
+          "LAC",
+          52609
+        ],
+        [
+          "RENLO",
+          17714
+        ],
+        [
+          "LO",
+          8237
+        ],
+        [
+          "LI",
+          7403
+        ],
+        [
+          "LP",
+          6604
+        ],
+        [
+          "REGLO",
+          5947
+        ],
+        [
+          "LSAD",
+          3268
+        ],
+        [
+          "REGLI",
+          2594
+        ],
+        [
+          "RENLI",
+          1290
+        ],
+        [
+          "LIAM",
+          1206
+        ],
+        [
+          "RENLAC",
+          1014
+        ],
+        [
+          "LAU",
+          847
+        ],
+        [
+          "LS",
+          563
+        ],
+        [
+          "LIO",
+          490
+        ],
+        [
+          "REGLS",
+          365
+        ]
+      ],
+      "total_types": 29
+    },
+    {
+      "sigla": "DF",
+      "filename": "DF2026-10-29_13-374664046013768930242.csv",
+      "total": 8412,
+      "years": {
+        "2017": 335,
+        "2019": 416,
+        "2018": 374,
+        "2015": 188,
+        "2014": 177,
+        "2006": 255,
+        "2012": 206,
+        "2016": 118,
+        "2009": 519,
+        "2013": 292,
+        "2020": 412,
+        "2011": 340,
+        "2010": 279,
+        "2023": 333,
+        "2007": 226,
+        "1997": 123,
+        "2000": 200,
+        "2003": 269,
+        "2008": 346,
+        "2021": 370,
+        "1998": 126,
+        "1994": 51,
+        "2005": 247,
+        "2002": 293,
+        "2022": 356,
+        "2024": 255,
+        "2025": 338,
+        "2026": 99,
+        "1990": 14,
+        "1991": 49,
+        "1992": 47,
+        "1993": 30,
+        "1995": 76,
+        "1996": 82,
+        "1999": 92,
+        "2001": 218,
+        "2004": 195
+      },
+      "top_types": [
+        [
+          "LICENÇA DE OPERAÇÃO",
+          2384
+        ],
+        [
+          "LO",
+          1646
+        ],
+        [
+          "AA",
+          527
+        ],
+        [
+          "AUTORIZAÇÃO AMBIENTAL",
+          482
+        ],
+        [
+          "LICENÇA DE INSTALAÇÃO",
+          445
+        ],
+        [
+          "LICENÇA PREVIA",
+          436
+        ],
+        [
+          "LI",
+          411
+        ],
+        [
+          "ATUALIZAR",
+          410
+        ],
+        [
+          "ASV",
+          333
+        ],
+        [
+          "INFRAÇÃO",
+          306
+        ],
+        [
+          "LP",
+          240
+        ],
+        [
+          "LAS",
+          234
+        ],
+        [
+          "TCA",
+          67
+        ],
+        [
+          "CF",
+          65
+        ],
+        [
+          "LAC",
+          61
+        ]
+      ],
+      "total_types": 32
+    },
+    {
+      "sigla": "ES",
+      "filename": "ES2026-10-29_13-393029672481548514429.csv",
+      "total": 31837,
+      "years": {
+        "2008": 1913,
+        "2009": 2397,
+        "2000": 929,
+        "2007": 2104,
+        "1993": 249,
+        "2005": 1858,
+        "2004": 1911,
+        "2006": 1968,
+        "2001": 1106,
+        "2003": 1607,
+        "1994": 266,
+        "1997": 374,
+        "1995": 260,
+        "2002": 1343,
+        "1999": 538,
+        "1996": 318,
+        "1991": 150,
+        "1990": 95,
+        "1998": 295,
+        "1992": 195,
+        "2010": 2202,
+        "2013": 1642,
+        "2011": 2036,
+        "2012": 1589,
+        "2014": 1000,
+        "2016": 655,
+        "2017": 455,
+        "2015": 425,
+        "2021": 413,
+        "2018": 210,
+        "2019": 235,
+        "2020": 330,
+        "2022": 338,
+        "2023": 90,
+        "2024": 18,
+        "2026": 9,
+        "2025": 2
+      },
+      "top_types": [
+        [
+          "LICENCA DE OPERACAO",
+          7893
+        ],
+        [
+          "LICENCA DE INSTALACAO",
+          6015
+        ],
+        [
+          "LICENCA SIMPLIFICADA",
+          5656
+        ],
+        [
+          "LICENCA PREVIA",
+          5525
+        ],
+        [
+          "LICENCA AMBIENTAL DE REGULARIZACAO",
+          2631
+        ],
+        [
+          "LICENCA UNICA",
+          1346
+        ],
+        [
+          "LICENCA AMBIENTAL UNICA",
+          1023
+        ],
+        [
+          "LICENCA AMBIENTAL POR ADESAO E COMPROMISSO",
+          909
+        ],
+        [
+          "LICENCA DE OPERACAO CORRETIVA",
+          485
+        ],
+        [
+          "LICENCA AMBIENTAL DE REGULARIZACAO DE SANEAMENTO",
+          222
+        ],
+        [
+          "LICENCA DE OPERACAO PARA PESQUISA MINERAL",
+          30
+        ],
+        [
+          "Licenca Ambiental Unica",
+          15
+        ],
+        [
+          "LICENCA PROVISORIA DE OPERACAO",
+          13
+        ],
+        [
+          "Declaracao de Dispensa Auto-declaratoria",
+          7
+        ],
+        [
+          "Licenca de Instalacao",
+          3
+        ]
+      ],
+      "total_types": 23
+    },
+    {
+      "sigla": "GO",
+      "filename": "GO2026-10-29_13-384354953497111647657.csv",
+      "total": 47008,
+      "years": {
+        "2020": 314,
+        "2021": 1480,
+        "2022": 2084,
+        "2023": 8502,
+        "2024": 4399,
+        "2025": 5315,
+        "2026": 2825,
+        "2009": 821,
+        "2010": 2181,
+        "2008": 67,
+        "2011": 3523,
+        "2012": 2745,
+        "2013": 3342,
+        "2014": 3342,
+        "2015": 2525,
+        "2016": 1546,
+        "2017": 950,
+        "2018": 605,
+        "2019": 442
+      },
+      "top_types": [
+        [
+          "REGISTRO ELETRÔNICO",
+          17727
+        ],
+        [
+          "Licença de Funcionamento",
+          8162
+        ],
+        [
+          "Licença de Instalação",
+          7291
+        ],
+        [
+          "LICENÇA AMBIENTAL ORDINÁRIA",
+          2814
+        ],
+        [
+          "Licença Ambiental Simplificada",
+          2333
+        ],
+        [
+          "Licença de Exploração Florestal",
+          1417
+        ],
+        [
+          "Licença de Supressão de Vegetação Nativa para Uso Alternativo do Solo",
+          1412
+        ],
+        [
+          "Licença Ambiental por Adesão e Compromisso",
+          1207
+        ],
+        [
+          "Licença de Operação",
+          1019
+        ],
+        [
+          "Licença Prévia",
+          886
+        ],
+        [
+          "REGISTRO ELETRÔNICO - AUTORIZAÇÃO DE QUEIMA CONTROLADA",
+          459
+        ],
+        [
+          "Licença Corretiva",
+          329
+        ],
+        [
+          "Licença Ambiental Única",
+          222
+        ],
+        [
+          "REGISTRO ELETRÔNICO - LIMPEZA DE ÁREAS JÁ ANTROPIZADAS E QUE TENHAM PERMANECIDO SEM UTILIZAÇÃO EM NO MÁXIMO 5 (CINCO) ANOS.",
+          207
+        ],
+        [
+          "REGISTRO ELETRÔNICO (INTEGRAÇÃO)",
+          205
+        ]
+      ],
+      "total_types": 41
+    },
+    {
+      "sigla": "IBAMA",
+      "filename": "IBAMA2026-10-29_13-398653724497970082220.csv",
+      "total": 22066,
+      "years": {
+        "2008": 2,
+        "2007": 5,
+        "2025": 3,
+        "2004": 6,
+        "2022": 5,
+        "2005": 1,
+        "2001": 1,
+        "1999": 1,
+        "2010": 5,
+        "1990": 1,
+        "1991": 1,
+        "1993": 1,
+        "1996": 1,
+        "2003": 4,
+        "2006": 2,
+        "2009": 3,
+        "1998": 1,
+        "2000": 1,
+        "2014": 3,
+        "2017": 1,
+        "2023": 1,
+        "2011": 2
+      },
+      "top_types": [
+        [
+          "Autorização de Supressão de Vegetação",
+          2194
+        ],
+        [
+          "Autorização de Captura, Coleta e Transporte de Material Biológico",
+          2142
+        ],
+        [
+          "Licença de Operação",
+          1601
+        ],
+        [
+          "Licença de Instalação",
+          1436
+        ],
+        [
+          "Retificação de Autorização de Captura, Coleta e Transporte de Material Biológico",
+          846
+        ],
+        [
+          "Licença Prévia",
+          803
+        ],
+        [
+          "Renovação de Licença de Operação",
+          675
+        ],
+        [
+          "Anuência",
+          642
+        ],
+        [
+          "Renovação de Autorização de Captura, Coleta e Transporte de Material Biológico",
+          609
+        ],
+        [
+          "Renovação de Autorização de Supressão de Vegetação",
+          438
+        ],
+        [
+          "Retificação de Licença de Operação",
+          401
+        ],
+        [
+          "Retificação de Licença de Instalação",
+          324
+        ],
+        [
+          "Prorrogação de Licença de Instalação",
+          303
+        ],
+        [
+          "Retificação de Autorização de Supressão de Vegetação",
+          294
+        ],
+        [
+          "Retificação da Renovação de Autorização de Captura, Coleta e Transporte de Material Biológico",
+          270
+        ]
+      ],
+      "total_types": 60
+    },
+    {
+      "sigla": "MA",
+      "filename": "MA2026-10-29_14-343457714232924958566.csv",
+      "total": 21546,
+      "years": {
+        "2013": 199,
+        "2014": 959,
+        "2015": 1148,
+        "2016": 1369,
+        "2017": 1714,
+        "2018": 2259,
+        "2019": 1592,
+        "2020": 1697,
+        "2021": 2854,
+        "2022": 2468,
+        "2023": 2122,
+        "2024": 1345,
+        "2025": 1014,
+        "2026": 806
+      },
+      "top_types": [
+        [
+          "DLA - Dispensa de Licenciamento Ambiental",
+          8428
+        ],
+        [
+          "RenLO - Renovação de Licença de Operação",
+          3739
+        ],
+        [
+          "LO - Licença de Operação",
+          3103
+        ],
+        [
+          "LAR - Licença Ambiental de Regularização",
+          2533
+        ],
+        [
+          "LI - Licença de Instalação",
+          1448
+        ],
+        [
+          "LP - Licença Prévia",
+          1002
+        ],
+        [
+          "LAU - Licença Ambiental Única",
+          557
+        ],
+        [
+          "LUAR - Licença Única Ambiental de Regularização",
+          237
+        ],
+        [
+          "LUA - Licença Única Ambiental",
+          209
+        ],
+        [
+          "LPper - Licença Prévia para Perfuração",
+          201
+        ],
+        [
+          "ReLUA - Renovação de Licença Única Ambiental",
+          85
+        ],
+        [
+          "LPpro - Licença Prévia de Produção para Pesquisa",
+          3
+        ]
+      ],
+      "total_types": 12
+    },
+    {
+      "sigla": "MG",
+      "filename": "MG2026-10-29_13-402745963945525016847.csv",
+      "total": 109480,
+      "years": {
+        "1991": 375,
+        "1992": 441,
+        "1993": 483,
+        "1994": 641,
+        "1995": 738,
+        "1996": 836,
+        "1997": 934,
+        "1998": 1036,
+        "1999": 1104,
+        "2000": 1057,
+        "2001": 1652,
+        "2002": 2171,
+        "2003": 2011,
+        "2004": 2552,
+        "2005": 3061,
+        "2006": 4235,
+        "2007": 5576,
+        "2008": 6104,
+        "2009": 5184,
+        "2011": 6677,
+        "2012": 7779,
+        "2013": 8364,
+        "2015": 7629,
+        "2016": 8780,
+        "2017": 10590,
+        "2019": 1995,
+        "1990": 306,
+        "2010": 5537,
+        "2014": 7442,
+        "2018": 3116,
+        "2020": 213,
+        "2021": 35,
+        "2022": 1,
+        "2024": 1
+      },
+      "top_types": [
+        [
+          "AAF",
+          71943
+        ],
+        [
+          "LO",
+          13577
+        ],
+        [
+          "LI",
+          4992
+        ],
+        [
+          "LOC",
+          4536
+        ],
+        [
+          "REVLO",
+          3673
+        ],
+        [
+          "LP",
+          3351
+        ],
+        [
+          "LAS",
+          2962
+        ],
+        [
+          "LP+LI",
+          1870
+        ],
+        [
+          "LAC",
+          1293
+        ],
+        [
+          "LOP",
+          554
+        ],
+        [
+          "LIC",
+          312
+        ],
+        [
+          "LP+LI+LO",
+          150
+        ],
+        [
+          "LAT",
+          123
+        ],
+        [
+          "LO-IC",
+          73
+        ],
+        [
+          "NP",
+          42
+        ]
+      ],
+      "total_types": 19
+    },
+    {
+      "sigla": "MS",
+      "filename": "MS2026-10-29_13-404800233615947081612.csv",
+      "total": 18692,
+      "years": {
+        "2009": 2410,
+        "2008": 1717,
+        "2010": 2204,
+        "2007": 443,
+        "2004": 47,
+        "2011": 1885,
+        "2006": 232,
+        "2005": 201,
+        "2013": 945,
+        "2014": 951,
+        "2016": 827,
+        "2012": 1510,
+        "2018": 846,
+        "2017": 804,
+        "2015": 944,
+        "2020": 613,
+        "2021": 646,
+        "2019": 814,
+        "2022": 327,
+        "2023": 255,
+        "2024": 9
+      },
+      "top_types": [
+        [
+          "Licença de Operação",
+          4340
+        ],
+        [
+          "Autorização Ambiental",
+          3755
+        ],
+        [
+          "Renovação de Licença de Operação",
+          2329
+        ],
+        [
+          "Termo de Compromisso de Reserva Legal",
+          2099
+        ],
+        [
+          "Licença Prévia",
+          1950
+        ],
+        [
+          "Declaração Ambiental",
+          1349
+        ],
+        [
+          "Licença de Instalação e Operação",
+          1284
+        ],
+        [
+          "Licença de Instalação",
+          1241
+        ],
+        [
+          "Renovação de Autorização Ambiental",
+          144
+        ],
+        [
+          "Renovação de Licença de Instalação",
+          99
+        ],
+        [
+          "Renovação de Licença Prévia",
+          81
+        ],
+        [
+          "Licença Ambiental",
+          7
+        ],
+        [
+          "Licença de Operação PROVE",
+          7
+        ],
+        [
+          "Renovação de Licença de Instalação e Operação",
+          4
+        ],
+        [
+          "Renovação de Licença Ambiental",
+          1
+        ]
+      ],
+      "total_types": 17
+    },
+    {
+      "sigla": "MT",
+      "filename": "MT2026-10-29_13-412074022631696911274.csv",
+      "total": 52187,
+      "years": {
+        "2022": 2975,
+        "2021": 2495,
+        "2014": 2150,
+        "2023": 2458,
+        "2017": 2112,
+        "2009": 2953,
+        "2016": 1686,
+        "2018": 2147,
+        "2013": 2400,
+        "2020": 2420,
+        "2019": 2191,
+        "2010": 2671,
+        "2006": 2940,
+        "2012": 2121,
+        "2007": 2833,
+        "2008": 3183,
+        "2015": 1766,
+        "2005": 1001,
+        "2011": 2527,
+        "2024": 2559,
+        "2025": 2668,
+        "2004": 157,
+        "2003": 242,
+        "2002": 27,
+        "2026": 1409,
+        "2000": 3,
+        "2001": 4,
+        "1999": 1,
+        "1994": 1
+      },
+      "top_types": [
+        [
+          "Licença de Operação",
+          14368
+        ],
+        [
+          "Licença de Instalação",
+          12680
+        ],
+        [
+          "Licença Prévia",
+          12176
+        ],
+        [
+          "Autorização para Queima Controlada",
+          3071
+        ],
+        [
+          "Autorização Geral",
+          2997
+        ],
+        [
+          "Licença Ambiental Unica",
+          1304
+        ],
+        [
+          "Licença de Operação Provisória",
+          1207
+        ],
+        [
+          "Licença Florestal",
+          955
+        ],
+        [
+          "Autorização Para Exploração Florestal (AUTEX - PMFS)",
+          919
+        ],
+        [
+          "Autorização para Desmatamento",
+          850
+        ],
+        [
+          "Autorização Para Exploração Florestal",
+          824
+        ],
+        [
+          "Retificação da Autorização para Exploração Florestal-PMFS",
+          443
+        ],
+        [
+          "Retificação da Licença Ambiental Única",
+          141
+        ],
+        [
+          "Retificação de Autorização para Exploração Florestal",
+          114
+        ],
+        [
+          "Renovação de Autorização Para Desmatamento",
+          75
+        ]
+      ],
+      "total_types": 18
+    },
+    {
+      "sigla": "PA",
+      "filename": "PA2026-10-29_13-431546886758361406937.csv",
+      "total": 245653,
+      "years": {
+        "2008": 8080,
+        "2009": 8680,
+        "2010": 14360,
+        "2005": 736,
+        "2007": 10674,
+        "2006": 3719,
+        "2011": 14281,
+        "2004": 393,
+        "2016": 9107,
+        "2019": 8469,
+        "2018": 9778,
+        "2017": 10352,
+        "2020": 12027,
+        "2015": 9499,
+        "2014": 10688,
+        "2012": 13379,
+        "2013": 13105,
+        "2022": 12240,
+        "2023": 6903,
+        "2021": 15190,
+        "2025": 6820,
+        "2024": 6610,
+        "2026": 5842,
+        "2000": 96,
+        "2002": 72,
+        "2003": 157,
+        "2001": 66,
+        "1997": 5,
+        "1999": 29,
+        "1996": 1,
+        "1993": 3,
+        "1998": 4
+      },
+      "top_types": [
+        [
+          "Notificação",
+          209577
+        ],
+        [
+          "Licença de Operação",
+          14461
+        ],
+        [
+          "Cadastro Ambiental Rural",
+          6744
+        ],
+        [
+          "Licença de Atividade Rural",
+          5211
+        ],
+        [
+          "Autorização para Exploração Florestal",
+          4467
+        ],
+        [
+          "Licença de Instalação",
+          3267
+        ],
+        [
+          "Licença Prévia",
+          1835
+        ],
+        [
+          "Licença de Instalação/Operação",
+          91
+        ]
+      ],
+      "total_types": 8
+    },
+    {
+      "sigla": "PB",
+      "filename": "PB2026-10-29_13-434486307238022968844.csv",
+      "total": 60325,
+      "years": {
+        "2022": 54,
+        "2023": 4651,
+        "2024": 4896,
+        "2025": 4903,
+        "2026": 2382,
+        "2003": 2,
+        "2004": 32,
+        "2005": 838,
+        "2006": 2475,
+        "2007": 2340,
+        "2008": 2545,
+        "2009": 2530,
+        "2010": 3109,
+        "2011": 3677,
+        "2012": 4309,
+        "2013": 3492,
+        "2014": 3720,
+        "2015": 2807,
+        "2016": 3190,
+        "2017": 2565,
+        "2018": 2350,
+        "2019": 1878,
+        "2020": 1428,
+        "2021": 152
+      },
+      "top_types": [
+        [
+          "Licença de Operação",
+          26774
+        ],
+        [
+          "Licença de Instalação",
+          8887
+        ],
+        [
+          "RLO",
+          3634
+        ],
+        [
+          "LAC",
+          3476
+        ],
+        [
+          "Autorização Ambiental",
+          2829
+        ],
+        [
+          "Licença Prévia",
+          2439
+        ],
+        [
+          "DL",
+          2265
+        ],
+        [
+          "Licença de Alteração",
+          1465
+        ],
+        [
+          "LI",
+          1085
+        ],
+        [
+          "LTE",
+          1067
+        ],
+        [
+          "LO",
+          1022
+        ],
+        [
+          "AA",
+          909
+        ],
+        [
+          "LS",
+          855
+        ],
+        [
+          "LRO",
+          694
+        ],
+        [
+          "RLI",
+          586
+        ]
+      ],
+      "total_types": 35
+    },
+    {
+      "sigla": "PE",
+      "filename": "PE2026-10-29_13-441193776483041110367.csv",
+      "total": 128159,
+      "years": {
+        "2009": 6504,
+        "2010": 7239,
+        "2011": 6722,
+        "2012": 7413,
+        "2013": 8009,
+        "2014": 7842,
+        "2015": 6671,
+        "2016": 5069,
+        "2017": 4093,
+        "2018": 4477,
+        "2019": 5657,
+        "2020": 3362,
+        "2021": 5645,
+        "2022": 9416,
+        "2023": 9577,
+        "2024": 11193,
+        "2025": 10625,
+        "2026": 8642
+      },
+      "top_types": [
+        [
+          "LO",
+          39270
+        ],
+        [
+          "AUT",
+          19590
+        ],
+        [
+          "LS",
+          17412
+        ],
+        [
+          "REG",
+          15785
+        ],
+        [
+          "RLO",
+          12998
+        ],
+        [
+          "LI",
+          10760
+        ],
+        [
+          "LP",
+          6494
+        ],
+        [
+          "CP",
+          2438
+        ],
+        [
+          "PLI",
+          1605
+        ],
+        [
+          "RLS",
+          563
+        ],
+        [
+          "QC",
+          476
+        ],
+        [
+          "PLP",
+          346
+        ],
+        [
+          "LAC",
+          225
+        ],
+        [
+          "MODF",
+          149
+        ],
+        [
+          "LAU",
+          38
+        ]
+      ],
+      "total_types": 18
+    },
+    {
+      "sigla": "PI",
+      "filename": "PI2026-10-29_13-441760262165506419331.csv",
+      "total": 23379,
+      "years": {
+        "2026": 5694,
+        "2025": 5027,
+        "2024": 4352,
+        "2023": 3595,
+        "2022": 3095,
+        "2021": 1611
+      },
+      "top_types": [
+        [
+          "DDLAE - Declaração de Dispensa de Licenciamento Ambiental Estadual",
+          19343
+        ],
+        [
+          "LP - Licença Prévia",
+          1031
+        ],
+        [
+          "LI - Licença de Instalação",
+          890
+        ],
+        [
+          "DBIA - Declaração de Baixo Impacto Ambiental",
+          700
+        ],
+        [
+          "LO - Licença de Operação",
+          456
+        ],
+        [
+          "LO-R - Licença de Operação de Regularização",
+          333
+        ],
+        [
+          "LOT - Licença de Operação para Transporte",
+          226
+        ],
+        [
+          "AA - Autorização Ambiental",
+          216
+        ],
+        [
+          "PLI - Prorrogação de Licença de Instalação",
+          125
+        ],
+        [
+          "R-DBIA - Renovação de Declaração de Baixo Impacto Ambiental",
+          59
+        ]
+      ],
+      "total_types": 10
+    },
+    {
+      "sigla": "PR",
+      "filename": "PR2026-10-29_13-488293697106391347103.csv",
+      "total": 125307,
+      "years": {
+        "2011": 12314,
+        "2010": 12277,
+        "2014": 16534,
+        "2012": 13854,
+        "2008": 10991,
+        "2009": 11735,
+        "2013": 16165,
+        "2025": 971,
+        "2026": 758,
+        "2017": 4224,
+        "2016": 4681,
+        "2015": 7778,
+        "2018": 3815,
+        "2024": 995,
+        "2023": 1059,
+        "2021": 1457,
+        "2022": 1208,
+        "2019": 2829,
+        "2020": 1662
+      },
+      "top_types": [
+        [
+          "Licença Ambiental Prévia",
+          26544
+        ],
+        [
+          "Renovação de Licença Ambiental de Operação",
+          20729
+        ],
+        [
+          "Declaração de Dispensa de Licenciamento Ambiental",
+          17346
+        ],
+        [
+          "Licença Ambiental de Instalação",
+          16614
+        ],
+        [
+          "Licença Ambiental de Operação",
+          16191
+        ],
+        [
+          "Autorização Ambiental",
+          12567
+        ],
+        [
+          "Licença Ambiental Simplificada",
+          7980
+        ],
+        [
+          "Licença de Operação de Regularização",
+          3140
+        ],
+        [
+          "Renovação de Licença Ambiental de Instalação",
+          2674
+        ],
+        [
+          "Renovaçao de Licença Ambiental Simplificada",
+          730
+        ],
+        [
+          "Licença Ambiental Simplificada de Regularização",
+          503
+        ],
+        [
+          "Declaração de Cadastro Ambiental",
+          198
+        ],
+        [
+          "Anuência Prévia",
+          65
+        ],
+        [
+          "Autorização Florestal",
+          14
+        ],
+        [
+          "Licença Ambiental por Adesão e Compromisso",
+          7
+        ]
+      ],
+      "total_types": 17
+    },
+    {
+      "sigla": "RJ",
+      "filename": "RJ2026-10-29_13-454458732493314090459.csv",
+      "total": 108935,
+      "years": {},
+      "top_types": [
+        [
+          "CERTIDÃO AMBIENTAL",
+          14747
+        ],
+        [
+          "Certidão Ambiental",
+          13202
+        ],
+        [
+          "LICENÇA DE OPERAÇÃO",
+          12875
+        ],
+        [
+          "LICENÇA DE INSTALAÇÃO",
+          5325
+        ],
+        [
+          "AUTORIZAÇÃO AMBIENTAL",
+          4914
+        ],
+        [
+          "Licença de Operação",
+          3136
+        ],
+        [
+          "LICENÇA AMBIENTAL SIMPLIFICADA",
+          2927
+        ],
+        [
+          "Autorização Ambiental",
+          2754
+        ],
+        [
+          "OUTORGA DE DIREITO DE USO DE RECURSOS HÍDRICOS",
+          2217
+        ],
+        [
+          "CERTIFICADO DE REGISTRO - HIGIENIZAÇÃO",
+          1761
+        ],
+        [
+          "LICENÇA PRÉVIA",
+          1334
+        ],
+        [
+          "CERTIFICADO DE REGISTRO - VETORES",
+          1331
+        ],
+        [
+          "LICENÇA PRÉVIA E DE INSTALAÇÃO",
+          1320
+        ],
+        [
+          "CERTIFICADO DE FAIXA MARGINAL DE PROTEÇÃO",
+          1311
+        ],
+        [
+          "Certificado de Uso Insignificante de Recursos Hídricos",
+          1228
+        ]
+      ],
+      "total_types": 125
+    },
+    {
+      "sigla": "RO",
+      "filename": "RO2026-10-29_13-48545940756197951174.csv",
+      "total": 50599,
+      "years": {
+        "2025": 11447,
+        "2024": 10062,
+        "2023": 9613,
+        "2021": 899,
+        "2022": 2973,
+        "2020": 850,
+        "2026": 14752
+      },
+      "top_types": [
+        [
+          "Certidão de Inexigibilidade de Licenciamento Ambiental",
+          44568
+        ],
+        [
+          "Dispensa de Licenciamento Ambiental",
+          4099
+        ],
+        [
+          "Autorização de Transporte Intermunicipal",
+          846
+        ],
+        [
+          "Autorização de Uso de Fogo",
+          699
+        ],
+        [
+          "Licenciamento Ambiental Simplificado",
+          207
+        ],
+        [
+          "Dispensa de Licenciamento Ambiental para Extração de Cascalho",
+          91
+        ],
+        [
+          "Dispensa de Licenciamento Ambiental para Pavimentação Asfáltica",
+          89
+        ]
+      ],
+      "total_types": 7
+    },
+    {
+      "sigla": "RR",
+      "filename": "RR2026-10-29_13-483718908669729322662.csv",
+      "total": 2288,
+      "years": {},
+      "top_types": [
+        [
+          "AUAS",
+          427
+        ],
+        [
+          "CRRA",
+          323
+        ],
+        [
+          "LO",
+          234
+        ],
+        [
+          "LI",
+          226
+        ],
+        [
+          "ASV",
+          222
+        ],
+        [
+          "LP",
+          187
+        ],
+        [
+          "DRA",
+          181
+        ],
+        [
+          "LO(CRRA)",
+          168
+        ],
+        [
+          "PMFS",
+          96
+        ],
+        [
+          "POA",
+          80
+        ],
+        [
+          "LA",
+          67
+        ],
+        [
+          "AA",
+          23
+        ],
+        [
+          "LO(DRA)",
+          22
+        ],
+        [
+          "CRMAP",
+          6
+        ],
+        [
+          "AUMPF",
+          5
+        ]
+      ],
+      "total_types": 22
+    },
+    {
+      "sigla": "RS",
+      "filename": "RS2026-10-29_13-522623601773507765403.csv",
+      "total": 281769,
+      "years": {
+        "1997": 8032,
+        "1998": 8198,
+        "1994": 2387,
+        "1995": 3709,
+        "1996": 5474,
+        "2000": 7718,
+        "2008": 14233,
+        "2004": 13817,
+        "2002": 8354,
+        "2001": 8107,
+        "1993": 877,
+        "2011": 10499,
+        "1999": 7760,
+        "2007": 11113,
+        "1991": 65,
+        "2005": 10918,
+        "1990": 58,
+        "2006": 8743,
+        "2003": 11073,
+        "2010": 10451,
+        "2020": 8781,
+        "2016": 9240,
+        "2012": 11145,
+        "2024": 7339,
+        "2022": 7756,
+        "2017": 7607,
+        "1992": 352,
+        "2013": 9072,
+        "2023": 7628,
+        "2009": 12879,
+        "2021": 4217,
+        "2019": 10467,
+        "2014": 8774,
+        "2018": 9252,
+        "2025": 6121,
+        "2026": 1722,
+        "2015": 7800
+      },
+      "top_types": [
+        [
+          "LICENÇA DE OPERAÇÃO",
+          199824
+        ],
+        [
+          "LICENÇA AMBIENTAL ÚNICA",
+          21574
+        ],
+        [
+          "LICENÇA PRÉVIA",
+          19873
+        ],
+        [
+          "LICENÇA DE INSTALAÇÃO",
+          18816
+        ],
+        [
+          "LICENÇA DE INSTALAÇÃO DE AMPLIAÇÃO",
+          5988
+        ],
+        [
+          "LICENÇA PRÉVIA DE AMPLIAÇÃO",
+          5315
+        ],
+        [
+          "LICENÇA PRÉVIA E DE INSTALAÇÃO PARA ALTERAÇÃO",
+          4187
+        ],
+        [
+          "LICENÇA DE OPERAÇÃO CORRETIVA",
+          2232
+        ],
+        [
+          "LICENÇA PRÉVIA E DE INSTALAÇÃO UNIFICADAS",
+          1797
+        ],
+        [
+          "TERMO DE ENCERRAMENTO",
+          900
+        ],
+        [
+          "LICENÇA AMBIENTAL POR COMPROMISSO",
+          260
+        ],
+        [
+          "LICENÇA DE INSTALAÇÃO EIA/RIMA",
+          213
+        ],
+        [
+          "LICENÇA PRÉVIA EIA/RIMA",
+          205
+        ],
+        [
+          "LICENÇA DE INSTALAÇÃO E OPERAÇÃO",
+          183
+        ],
+        [
+          "LICENÇA DE INSTALAÇÃO DE MODERNIZAÇÃO AMBIENTAL",
+          169
+        ]
+      ],
+      "total_types": 20
+    },
+    {
+      "sigla": "SC",
+      "filename": "SC2026-10-29_14-067750281505362070771.csv",
+      "total": 344145,
+      "years": {
+        "2026": 11170,
+        "2021": 21132,
+        "2023": 18938,
+        "2020": 20251,
+        "2019": 18230,
+        "2025": 15859,
+        "2018": 20121,
+        "2024": 17432,
+        "2022": 21176,
+        "2016": 19088,
+        "2017": 20219,
+        "2015": 17908,
+        "2014": 24394,
+        "2003": 1953,
+        "2013": 10750,
+        "2009": 10558,
+        "2000": 1174,
+        "2011": 12817,
+        "2010": 10798,
+        "2012": 12152,
+        "2007": 9157,
+        "2004": 2855,
+        "2001": 1313,
+        "2002": 1932,
+        "2006": 6393,
+        "2008": 9809,
+        "2005": 3330,
+        "1991": 79,
+        "1998": 822,
+        "1994": 63,
+        "1996": 309,
+        "1999": 872,
+        "1990": 47,
+        "1997": 537,
+        "1995": 244,
+        "1992": 65,
+        "1993": 88
+      },
+      "top_types": [
+        [
+          "Atividade Não Constante",
+          54744
+        ],
+        [
+          "LAO",
+          44418
+        ],
+        [
+          "Ren. LAO",
+          41563
+        ],
+        [
+          "Conformidade Ambiental",
+          37243
+        ],
+        [
+          "LAP+LAI",
+          23811
+        ],
+        [
+          "LAP",
+          18294
+        ],
+        [
+          "LAC",
+          17157
+        ],
+        [
+          "LAI",
+          13801
+        ],
+        [
+          "LAO Corretiva",
+          8874
+        ],
+        [
+          "LAP+LAI+LAO",
+          8463
+        ],
+        [
+          "Autorização Ambiental (AuA)",
+          8359
+        ],
+        [
+          "LAC (p/ Ren.)",
+          8221
+        ],
+        [
+          "Amp. LAO",
+          6751
+        ],
+        [
+          "Amp. LAI",
+          5558
+        ],
+        [
+          "Renovação de AuA",
+          5508
+        ]
+      ],
+      "total_types": 63
+    },
+    {
+      "sigla": "SE",
+      "filename": "SE2026-10-29_13-513190499197206190675.csv",
+      "total": 22756,
+      "years": {
+        "2008": 991,
+        "2009": 1425,
+        "2010": 1739,
+        "2011": 1913,
+        "2012": 1884,
+        "2013": 2121,
+        "2014": 1610,
+        "2015": 1080,
+        "2016": 1159,
+        "2017": 1381,
+        "2018": 1311,
+        "2019": 1235,
+        "2020": 1255,
+        "2021": 1168,
+        "2022": 1208,
+        "2023": 639,
+        "2024": 400,
+        "2025": 155,
+        "2026": 82
+      },
+      "top_types": [
+        [
+          "Licença de Operação",
+          4355
+        ],
+        [
+          "Renovação Licença de Operação",
+          3304
+        ],
+        [
+          "Licença de Instalação",
+          3285
+        ],
+        [
+          "Licença Simplificada",
+          3189
+        ],
+        [
+          "Autorização Ambiental",
+          2825
+        ],
+        [
+          "Licença Prévia",
+          1732
+        ],
+        [
+          "Renovação Licença de Instalação",
+          1208
+        ],
+        [
+          "Certificado de Dispensa de Licenciamento",
+          1035
+        ],
+        [
+          "Licença Prévia de Perfuração",
+          794
+        ],
+        [
+          "Licença de Regularizaçao de Operação",
+          296
+        ],
+        [
+          "Renovação Licença Prévia",
+          211
+        ],
+        [
+          "Autorização Ambiental de Queima",
+          151
+        ],
+        [
+          "Licença Única de Plantio",
+          139
+        ],
+        [
+          "Licença Única",
+          116
+        ],
+        [
+          "Licença Prévia de Produção",
+          53
+        ]
+      ],
+      "total_types": 19
+    },
+    {
+      "sigla": "SP",
+      "filename": "SP2026-10-29_13-525373961977343483374.csv",
+      "total": 445300,
+      "years": {
+        "2009": 16485,
+        "2010": 18066,
+        "2012": 21372,
+        "2013": 22965,
+        "2000": 5628,
+        "2001": 6384,
+        "2002": 6731,
+        "2011": 20645,
+        "2003": 8276,
+        "2004": 10342,
+        "2005": 14524,
+        "2006": 13075,
+        "2007": 17343,
+        "2008": 17152,
+        "1999": 4858,
+        "2014": 24278,
+        "1998": 321,
+        "2015": 22607,
+        "2016": 21616,
+        "2018": 17159,
+        "2017": 21192,
+        "2020": 19221,
+        "2021": 22613,
+        "2022": 22098,
+        "2019": 18746,
+        "2024": 21795,
+        "2023": 21408,
+        "2025": 8400
+      },
+      "top_types": [
+        [
+          "LICENÇA DE OPERAÇÃO",
+          253753
+        ],
+        [
+          "LICENÇA PRÉVIA E DE INSTALAÇÃO",
+          68461
+        ],
+        [
+          "LICENÇA DE INSTALAÇÃO",
+          44740
+        ],
+        [
+          "LICENÇA PRÉVIA",
+          39361
+        ],
+        [
+          "PARECER TÉCNICO",
+          11437
+        ],
+        [
+          "LIC PRÉVIA INSTALAÇÃO OPERAÇÃO",
+          9510
+        ],
+        [
+          "LO SIMPLIFICADA",
+          8639
+        ],
+        [
+          "LICENÇA OPERAÇÃO LOTEAMENTO",
+          6906
+        ],
+        [
+          "LP/LI DE LOTEAMENTO",
+          1188
+        ],
+        [
+          "LP/LI DE DESMEMBRAMENTO",
+          532
+        ],
+        [
+          "LICENÇA INST. DESMEMBRAMENTO",
+          279
+        ],
+        [
+          "LICENÇA OPERA. DESMEMBRAMENTO",
+          277
+        ],
+        [
+          "LICENÇA INSTALAÇÃO LOTEAMENTO",
+          188
+        ],
+        [
+          "L.I. SIST. DEST. RES. NO SOLO",
+          29
+        ]
+      ],
+      "total_types": 14
+    }
+  ]
+}
