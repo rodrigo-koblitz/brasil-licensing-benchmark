@@ -1,0 +1,51 @@
+[
+  {
+    "tipo_licenca": "Licença de Operação (LO)",
+    "grau_viabilidade": "Excelente (100%)",
+    "relacao_financeira": "Faturamento Anual / CAPEX Instalado",
+    "fonte_estimativa": "BNDES Operações Não Automáticas + Tabelas Estaduais (Taxa de Análise / Renovação)",
+    "aplicabilidade": "Nacional (todos os estados). Reflete a empresa já em produção contínua."
+  },
+  {
+    "tipo_licenca": "Licença de Instalação (LI)",
+    "grau_viabilidade": "Excelente (100%)",
+    "relacao_financeira": "Orçamento de Obras Civis e Equipamentos (CAPEX)",
+    "fonte_estimativa": "BNDES Contratos de Financiamento de Infraestrutura / Indústria",
+    "aplicabilidade": "Nacional. Diretamente ligada ao desembolso financeiro da fase construtiva."
+  },
+  {
+    "tipo_licenca": "Licença Prévia (LP)",
+    "grau_viabilidade": "Muito Alta (90%)",
+    "relacao_financeira": "Valor Projetado do Investimento (Estudo de Viabilidade / EIA-RIMA)",
+    "fonte_estimativa": "Orçamento do Projeto Declarado no BNDES / Termo de Referência",
+    "aplicabilidade": "Projetos de médio e grande porte em fase prévia de engenharia."
+  },
+  {
+    "tipo_licenca": "Licença Ambiental Única (LAU / LAC / LAS)",
+    "grau_viabilidade": "Alta (85%)",
+    "relacao_financeira": "Receita Bruta Presumida / Porte PME (Micro e Pequeno)",
+    "fonte_estimativa": "BNDES Automático Indireto (Repasses via Bancos Comerciais)",
+    "aplicabilidade": "Comércio, postos, serviços, pequenas indústrias e distribuição de energia."
+  },
+  {
+    "tipo_licenca": "Licenciamento Rural (CAR / LAR / LARS)",
+    "grau_viabilidade": "Alta (Modelagem Agro)",
+    "relacao_financeira": "Valor da Terra Nua (VTN) / Módulos Fiscais / Crédito Agrícola",
+    "fonte_estimativa": "Plano Safra / PRONAF / BNDES Agro / Financiamento Custeio",
+    "aplicabilidade": "Propriedades rurais consolidadas, pecuária e agricultura."
+  },
+  {
+    "tipo_licenca": "Planos de Manejo Florestal Sustentável (PMFS)",
+    "grau_viabilidade": "Média-Alta",
+    "relacao_financeira": "Volume Comercial de Madeira (m³) x Preço Médio de Pauta SEFAZ",
+    "fonte_estimativa": "Pauta Fiscal SEFAZ / SINAFLOR / Contratos Madeireiros",
+    "aplicabilidade": "Estados amazônicos (AC, AM, PA, MT, RO)."
+  },
+  {
+    "tipo_licenca": "Dispensas / Atos Declaratórios",
+    "grau_viabilidade": "Econômica Simbólica (Isenção)",
+    "relacao_financeira": "Custo de Anuidade / Isenção Legal de Taxas",
+    "fonte_estimativa": "Normativas de gratuidade para agricultura familiar / piscicultura artesanal",
+    "aplicabilidade": "Pequenos produtores, colônias de pesca e assentamentos."
+  }
+]

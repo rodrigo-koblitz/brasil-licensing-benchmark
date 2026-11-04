@@ -260,10 +260,11 @@ elif modulo == "📊 Benchmark Financeiro & BNDES":
 
     st.markdown("---")
 
-    b_tab1, b_tab2, b_tab3 = st.tabs([
+    b_tab1, b_tab2, b_tab3, b_tab4 = st.tabs([
         "📊 Mediana e Média por Tipo de Licença",
         "🏢 Distribuição por Porte e Subsetor",
-        "🔎 Explorador de Empresas & CNPJ"
+        "🔎 Explorador de Empresas & CNPJ",
+        "🗺️ Viabilidade de Estimativa Financeira por Estado & Tipo"
     ])
 
     with b_tab1:
@@ -345,3 +346,62 @@ elif modulo == "📊 Benchmark Financeiro & BNDES":
             }),
             use_container_width=True
         )
+
+    with b_tab4:
+        st.subheader("4. Matriz de Viabilidade para Estimativa Financeira: Estados & Modalidades de Licença")
+        st.markdown("""
+        Esta seção detalha **em quais estados e para quais tipos de licença** é metodologicamente viável utilizar dados financeiros 
+        (seja via **custo administrativo/taxa de análise estadual** ou via **escala de investimento/CAPEX pelo BNDES**) para estimar a dimensão econômica do licenciamento.
+        """)
+        
+        # Load feasibility matrices
+        f_estados_path = os.path.join(DATA_DIR, "viabilidade_financeira_estados.json")
+        f_licencas_path = os.path.join(DATA_DIR, "viabilidade_financeira_licencas.json")
+        
+        try:
+            with open(f_estados_path, 'r', encoding='utf-8') as f1, open(f_licencas_path, 'r', encoding='utf-8') as f2:
+                viab_estados = json.load(f1)
+                viab_licencas = json.load(f2)
+            df_v_est = pd.DataFrame(viab_estados)
+            df_v_lic = pd.DataFrame(viab_licencas)
+        except Exception as e:
+            st.error(f"Erro ao carregar dados de viabilidade: {e}")
+            st.stop()
+            
+        st.markdown("### A. Viabilidade de Estimativa por Estado e Órgão Regulador")
+        st.caption("Classificação baseada na qualidade de CNPJs no banco de dados, presença do porte (P, M, G) e clareza da tabela normativa de taxas e custos.")
+        
+        st.dataframe(
+            df_v_est.rename(columns={
+                'uf': 'UF',
+                'estado': 'Estado / Âmbito',
+                'orgao': 'Órgão Ambiental',
+                'viabilidade_financeira': 'Grau de Viabilidade',
+                'nivel_precisao': 'Métrica Normativa',
+                'metodo_indicado': 'Metodologia de Estimativa Recomendada',
+                'cobertura_dados': 'Qualidade do Cadastro',
+                'licencas_prioritarias': 'Modalidades com Alta Resolução'
+            }),
+            use_container_width=True
+        )
+        
+        st.markdown("---")
+        st.markdown("### B. Viabilidade de Estimativa por Modalidade de Licenciamento")
+        st.caption("Quais tipos de licença possuem correlação direta com o orçamento e investimentos da empresa.")
+        
+        st.dataframe(
+            df_v_lic.rename(columns={
+                'tipo_licenca': 'Modalidade de Licença',
+                'grau_viabilidade': 'Acurácia Financeira Estimável',
+                'relacao_financeira': 'Dimensão Econômica Representada',
+                'fonte_estimativa': 'Base de Dados de Referência',
+                'aplicabilidade': 'Aplicação Prática no Brasil'
+            }),
+            use_container_width=True
+        )
+        
+        st.info("""
+        💡 **Síntese Metodológica:**
+        - **Para Licenças Trifásicas (LP, LI, LO):** Os estados com sistemas analíticos maduros (**SP/CETESB, MG/COPAM, RJ/INEA, PR/IAT, RS/FEPAM e IBAMA**) permitem estimar tanto a **taxa administrativa de análise** (via fórmulas matemáticas paramétricas publicadas) quanto o **volume total de investimento das empresas** (via cruzamento por CNPJ com o BNDES).
+        - **Para Licenças Simplificadas e Rurais (LAU, LAC, LARS, CAR):** A estimativa é parametrizada com alta precisão através do porte do imóvel (módulos fiscais) ou faixa de faturamento presumido das PMEs.
+        """)

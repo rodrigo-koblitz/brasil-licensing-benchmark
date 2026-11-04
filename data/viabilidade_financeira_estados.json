@@ -1,0 +1,102 @@
+[
+  {
+    "uf": "SP",
+    "estado": "São Paulo",
+    "orgao": "CETESB",
+    "viabilidade_financeira": "Muito Alta (Grau A)",
+    "nivel_precisao": "Direto por DAE / Fator FIP",
+    "metodo_indicado": "Fórmula CETESB (W = Taxa base x Porte x Potencial x Complexidade)",
+    "cobertura_dados": "Excepcional (>90% com CNPJ/Porte)",
+    "licencas_prioritarias": "LP, LI, LO, Renovação de LO, Licença de Instalação e Operação"
+  },
+  {
+    "uf": "MG",
+    "estado": "Minas Gerais",
+    "orgao": "SEMAD / FEAM / IEF",
+    "viabilidade_financeira": "Muito Alta (Grau A)",
+    "nivel_precisao": "Classe Normativa COPAM 1 a 6",
+    "metodo_indicado": "Tabela COPAM nº 217/2017 (Valor fixo + Variável por Classe/Faturamento)",
+    "cobertura_dados": "Muito Alta (>85% identificável)",
+    "licencas_prioritarias": "LAS (Cadastro/RAS), LAT (Trifásico LP/LI/LO), LOC (Concomitante)"
+  },
+  {
+    "uf": "RJ",
+    "estado": "Rio de Janeiro",
+    "orgao": "INEA",
+    "viabilidade_financeira": "Alta (Grau A-)",
+    "nivel_precisao": "UPERJ / UFIR-RJ",
+    "metodo_indicado": "Tabela SLAM INEA (Porte x Classe de Impacto x Custos de Análise)",
+    "cobertura_dados": "Alta",
+    "licencas_prioritarias": "LP, LI, LO, LOR (Recuperação), LMO (Movimentação Solo)"
+  },
+  {
+    "uf": "PR",
+    "estado": "Paraná",
+    "orgao": "IAT",
+    "viabilidade_financeira": "Alta (Grau B+)",
+    "nivel_precisao": "Tabela de Custos IAT / UPF-PR",
+    "metodo_indicado": "Resolução SEDEST nº 051/2021 (Porte Econômico x Tipologia)",
+    "cobertura_dados": "Alta",
+    "licencas_prioritarias": "LP, LI, LO, DLAE (Dispensa), LAS (Simplificada)"
+  },
+  {
+    "uf": "RS",
+    "estado": "Rio Grande do Sul",
+    "orgao": "FEPAM",
+    "viabilidade_financeira": "Alta (Grau B+)",
+    "nivel_precisao": "UPF-RS / Resolução CONSEMA",
+    "metodo_indicado": "Tabela FEPAM de Ressarcimento de Custos",
+    "cobertura_dados": "Alta",
+    "licencas_prioritarias": "LP, LI, LO, LU (Única), Regularização"
+  },
+  {
+    "uf": "BA",
+    "estado": "Bahia",
+    "orgao": "INEMA",
+    "viabilidade_financeira": "Média-Alta (Grau B)",
+    "nivel_precisao": "Decreto Estadual de Taxas / SEIA",
+    "metodo_indicado": "Cruzamento BNDES + Tabela de Taxas Ambientais INEMA",
+    "cobertura_dados": "Média-Alta",
+    "licencas_prioritarias": "LP, LI, LO, LAC (Adesão e Compromisso)"
+  },
+  {
+    "uf": "IBAMA",
+    "estado": "Âmbito Federal",
+    "orgao": "IBAMA",
+    "viabilidade_financeira": "Muito Alta (Grau A+)",
+    "nivel_precisao": "Portaria Interministerial / Lei 6.938",
+    "metodo_indicado": "Custo de Análise Federal (Portaria MMA nº 432/2013) + CAPEX BNDES",
+    "cobertura_dados": "Muito Alta (>90% Grandes Obras/Infra)",
+    "licencas_prioritarias": "LP, LI, LO, Licença de Operação Corretiva (LOC), Supressão (ASV)"
+  },
+  {
+    "uf": "PA",
+    "estado": "Pará",
+    "orgao": "SEMAS-PA",
+    "viabilidade_financeira": "Média (Grau B-)",
+    "nivel_precisao": "UPF-PA / Fator Florestal",
+    "metodo_indicado": "Modelagem BNDES por Subsetor Mineração / Energia / Agro",
+    "cobertura_dados": "Média (alto volume de notificações/rurais)",
+    "licencas_prioritarias": "LP, LI, LO, LAR (Rural), Autorização de Supressão"
+  },
+  {
+    "uf": "AC",
+    "estado": "Acre",
+    "orgao": "IMAC",
+    "viabilidade_financeira": "Média (Grau B-)",
+    "nivel_precisao": "Resoluções CEMACT / S-IMAC",
+    "metodo_indicado": "Benchmark BNDES Calibrado por Porte (P, M, G)",
+    "cobertura_dados": "Validado no Benchmark atual",
+    "licencas_prioritarias": "LAU, LO, LI, LP, LARS"
+  },
+  {
+    "uf": "Demais Estados (AM, CE, GO, MT, MS, SC, ES...)",
+    "estado": "Estados com Sistemas Próprios",
+    "orgao": "Órgãos Estaduais",
+    "viabilidade_financeira": "Viável por Transferência Paramétrica",
+    "nivel_precisao": "Estimativa Paramétrica por Porte BNDES",
+    "metodo_indicado": "Imputação da Mediana por Categoria de Licença e Porte (P, M, G)",
+    "cobertura_dados": "Variável conforme órgão estadual",
+    "licencas_prioritarias": "Trifásico Padrão (LP, LI, LO) e Simplificadas (LAC/LAU)"
+  }
+]
