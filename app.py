@@ -8,7 +8,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 st.set_page_config(
-    page_title="Plataforma Integrada: Licenciamento Ambiental, Desmatamento & Benchmark - Brasil",
+    page_title="Plataforma Integrada: Licenciamento Ambiental, Desmatamento & Modelagem Estatística - Brasil",
     page_icon="🇧🇷",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -29,7 +29,7 @@ PDF_DIR = os.path.join(BASE_DIR, "reports_pdf")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
 # ==========================================
-# SIDEBAR NAVIGATION (Three Main Modules)
+# SIDEBAR NAVIGATION (Four Main Modules)
 # ==========================================
 st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Flag_of_Brazil.svg/200px-Flag_of_Brazil.svg.png", width=80)
 st.sidebar.title("Navegação Principal")
@@ -38,6 +38,7 @@ modulo = st.sidebar.radio(
     options=[
         "🌱 Licenciamento Ambiental Brasil",
         "🌳 Desmatamento (MapBiomas)",
+        "⚖️ Modelagem: Desmatamento X Licenciamento",
         "📊 Benchmark Financeiro & BNDES"
     ],
     index=0
@@ -239,7 +240,6 @@ elif modulo == "🌳 Desmatamento (MapBiomas)":
     st.markdown('<div class="main-header">🌳 Desmatamento & Supressão de Vegetação Nativa (MapBiomas)</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-header">Monitoramento e estatísticas oficiais de desmatamento anual no Brasil por Estado e Bioma (Série Histórica MapBiomas Coleção 11 – Resolução Espacial 30m / Landsat).</div>', unsafe_allow_html=True)
 
-    # Load Deforestation Datasets
     f_uf = os.path.join(DATA_DIR, "mapbiomas_desmatamento_estado_ano.csv")
     f_bioma = os.path.join(DATA_DIR, "mapbiomas_desmatamento_bioma_ano.csv")
     f_br = os.path.join(DATA_DIR, "mapbiomas_desmatamento_brasil_ano.csv")
@@ -252,7 +252,7 @@ elif modulo == "🌳 Desmatamento (MapBiomas)":
         st.error(f"Erro ao carregar dados de desmatamento: {e}")
         st.stop()
 
-    # KPIs (Year 2024 / Total Cumulative 2000-2025)
+    # KPIs
     d1, d2, d3, d4 = st.columns(4)
     total_acum_ha = df_desm_br['area_ha'].sum()
     total_acum_km2 = df_desm_br['area_km2'].sum()
@@ -266,10 +266,9 @@ elif modulo == "🌳 Desmatamento (MapBiomas)":
 
     st.markdown("---")
 
-    d_tab1, d_tab2, d_tab3, d_tab4, d_tab5 = st.tabs([
+    d_tab1, d_tab2, d_tab3, d_tab4 = st.tabs([
         "📈 Série Histórica por Estado & Bioma",
         "🗺️ Ranking Anual de Desmatamento",
-        "⚖️ Cruzamento Licenciamento vs. Desmatamento",
         "📥 Download das Séries Temporais (CSV/JSON)",
         "📑 Relatório Metodológico MapBiomas"
     ])
@@ -277,11 +276,9 @@ elif modulo == "🌳 Desmatamento (MapBiomas)":
     with d_tab1:
         st.subheader("1. Evolução Histórica Anual do Desmatamento")
         
-        # Metric Selector
         unidade = st.radio("Unidade de Visualização:", ["Hectares (ha)", "Quilômetros Quadrados (km²)"], horizontal=True)
         col_area = 'area_ha' if unidade == "Hectares (ha)" else 'area_km2'
         
-        # State Filter
         ufs_disponiveis = sorted(df_desm_uf['UF'].unique())
         selected_ufs = st.multiselect(
             "Selecione os Estados para comparar a curva de desmatamento:",
@@ -351,54 +348,7 @@ elif modulo == "🌳 Desmatamento (MapBiomas)":
             )
 
     with d_tab3:
-        st.subheader("3. Cruzamento: Licenciamento Ambiental vs. Curva de Desmatamento")
-        st.caption("Compara a dinâmica temporal entre o número de licenças emitidas pelos órgãos ambientais e o desmatamento registrado no mesmo estado.")
-        
-        ts_lic_file = os.path.join(DATA_DIR, "serie_temporal_nacional.json")
-        with open(ts_lic_file, 'r', encoding='utf-8') as f:
-            lic_ts_data = json.load(f)
-            
-        state_choices = sorted([s for s in lic_ts_data['states'] if s in df_desm_uf['UF'].unique()])
-        sel_cross_state = st.selectbox("Selecione o Estado para Cruzamento:", state_choices, index=0)
-        
-        # Prepare merged timeseries
-        lic_years = [str(y) for y in lic_ts_data['years']]
-        state_lics = lic_ts_data['state_year_licenses'].get(sel_cross_state, {})
-        lic_curve = [state_lics.get(y, 0) for y in lic_years]
-        
-        df_lic_st = pd.DataFrame({'ano': [int(y) for y in lic_years], 'licencas': lic_curve})
-        df_desm_st = df_desm_uf[df_desm_uf['UF'] == sel_cross_state][['ano', 'area_ha', 'area_km2']]
-        
-        df_cross = pd.merge(df_lic_st, df_desm_st, on='ano', how='inner')
-        
-        # Dual axis line chart
-        fig_cross = go.Figure()
-        fig_cross.add_trace(go.Scatter(
-            x=df_cross['ano'], y=df_cross['licencas'],
-            name='Licenças Emitidas',
-            mode='lines+markers',
-            line=dict(color='#059669', width=3),
-            yaxis='y1'
-        ))
-        fig_cross.add_trace(go.Scatter(
-            x=df_cross['ano'], y=df_cross['area_ha'],
-            name='Desmatamento MapBiomas (ha)',
-            mode='lines+markers',
-            line=dict(color='#DC2626', width=3, dash='dot'),
-            yaxis='y2'
-        ))
-        fig_cross.update_layout(
-            title=f"Cruzamento Temporal: Licenças Emitidas vs. Desmatamento - {sel_cross_state} ({state_names.get(sel_cross_state, sel_cross_state)})",
-            xaxis=dict(title='Ano'),
-            yaxis=dict(title='Volume de Licenças Emitidas', titlefont=dict(color='#059669'), tickfont=dict(color='#059669')),
-            yaxis2=dict(title='Área Desmatada (ha)', titlefont=dict(color='#DC2626'), tickfont=dict(color='#DC2626'), overlaying='y', side='right'),
-            hovermode="x unified",
-            height=480
-        )
-        st.plotly_chart(fig_cross, use_container_width=True)
-
-    with d_tab4:
-        st.subheader("4. Base de Dados Oficial de Desmatamento (Download)")
+        st.subheader("3. Base de Dados Oficial de Desmatamento (Download)")
         st.write("Baixe a base de dados tratada de desmatamento anual em formato aberto para análises espaciais e estatísticas.")
         
         dc1, dc2 = st.columns(2)
@@ -411,8 +361,8 @@ elif modulo == "🌳 Desmatamento (MapBiomas)":
             
         st.dataframe(df_desm_uf.rename(columns={'UF': 'Estado', 'ano': 'Ano', 'area_ha': 'Área (ha)', 'area_km2': 'Área (km²)'}), use_container_width=True)
 
-    with d_tab5:
-        st.subheader("5. Relatório Metodológico e Esclarecimento de Resolução Espacial")
+    with d_tab4:
+        st.subheader("4. Relatório Metodológico e Esclarecimento de Resolução Espacial")
         st.markdown("""
         ### Fonte e Curadoria dos Dados
         - **Iniciativa:** Rede MapBiomas Brasil (Coleção 11 - Módulo Desmatamento / Perda de Vegetação Nativa).
@@ -430,7 +380,194 @@ elif modulo == "🌳 Desmatamento (MapBiomas)":
         """)
 
 # ==============================================================================
-# MÓDULO 3: BENCHMARK FINANCEIRO & BNDES
+# MÓDULO 3: MODELAGEM ESTATÍSTICA: DESMATAMENTO X LICENCIAMENTO
+# ==============================================================================
+elif modulo == "⚖️ Modelagem: Desmatamento X Licenciamento":
+    st.markdown('<div class="main-header">⚖️ Modelagem Estatística: Desmatamento X Licenciamento Ambiental</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Investigação econométrica da relação temporal entre modalidades de licenciamento e supressão florestal em três níveis: Brasil (Nacional), Regiões e Estados.</div>', unsafe_allow_html=True)
+
+    # Load panel and correlation data
+    f_panel = os.path.join(DATA_DIR, "painel_desmatamento_licenciamento_estado_ano.csv")
+    f_corr = os.path.join(DATA_DIR, "correlacao_desmatamento_licenciamento.csv")
+
+    try:
+        df_panel = pd.read_csv(f_panel)
+        df_corr = pd.read_csv(f_corr)
+    except Exception as e:
+        st.error(f"Erro ao carregar dados de modelagem: {e}")
+        st.stop()
+
+    macro_labels = {
+        'TOTAL_LICENCAS': 'Total Geral de Licenças',
+        'RURAL_VEG': 'Licenciamento Rural & Supressão (ASV/CAR/LAR/LARS)',
+        'INFRA_CONSTR': 'Obras e Implantação (LP / LI / LPI)',
+        'INFRA_OP': 'Operação e Funcionamento (LO / Regularização)',
+        'SIMPLIF': 'Licenças Simplificadas / Únicas (LAU/LAC/LAS)',
+        'MANEJO': 'Manejo Florestal Sustentável (PMFS/POA)'
+    }
+
+    # Top KPIs
+    k1, k2, k3, k4 = st.columns(4)
+    k1.metric("Painel de Dados Integrado", f"{len(df_panel):,} observações (UF x Ano)")
+    k2.metric("Período Coberto", "2000 a 2025")
+    k3.metric("Macro-Tipologias Analisadas", "6 Categorias")
+    k4.metric("Estrutura de Defasagem", "Lags t (0) e t-1 (1 ano)")
+
+    st.markdown("---")
+
+    m_tab1, m_tab2, m_tab3, m_tab4 = st.tabs([
+        "🇧🇷 1. Nível Nacional (Brasil)",
+        "🗺️ 2. Nível Regional (Grandes Regiões)",
+        "📍 3. Nível Estadual (Por UF)",
+        "📐 4. Estratégia Metodológica & Painel Completo"
+    ])
+
+    with m_tab1:
+        st.subheader("1. Análise em Escala Nacional (Brasil)")
+        st.markdown("""
+        Em nível agregado do país, avalia-se se picos na concessão de licenças (totais ou por modalidade) 
+        coincidem ou precedem ciclos de maior ou menor supressão de vegetação nativa no território.
+        """)
+
+        df_nat_corr = df_corr[df_corr['escala'] == 'Brasil (Nacional)'].copy()
+        df_nat_corr['Tipologia'] = df_nat_corr['macro_tipo'].map(macro_labels).fillna(df_nat_corr['macro_tipo'])
+        
+        # Heatmap / Bar chart of national correlations
+        fig_nat_bar = px.bar(
+            df_nat_corr,
+            x='Tipologia',
+            y='pearson_r',
+            color='lag_anos',
+            barmode='group',
+            labels={'pearson_r': 'Coeficiente de Correlação de Pearson (r)', 'lag_anos': 'Defasagem (Lags em Anos)'},
+            title="Correlação Linear entre Licenças e Desmatamento no Brasil (por Defasagem Temporal)"
+        )
+        fig_nat_bar.update_layout(height=420, xaxis_tickangle=-25)
+        st.plotly_chart(fig_nat_bar, use_container_width=True)
+
+        st.markdown("### Tabela de Coeficientes e Significância Estatística (Nacional)")
+        st.dataframe(
+            df_nat_corr[['Tipologia', 'lag_anos', 'pearson_r', 'p_valor', 'spearman_rho', 'n_observacoes']].rename(columns={
+                'lag_anos': 'Defasagem (Anos)',
+                'pearson_r': 'Pearson (r)',
+                'p_valor': 'P-Valor',
+                'spearman_rho': 'Spearman (rho)',
+                'n_observacoes': 'Anos Analisados'
+            }),
+            use_container_width=True
+        )
+
+    with m_tab2:
+        st.subheader("2. Análise por Grandes Regiões Geográficas")
+        st.markdown("""
+        O comportamento entre licenciamento e desmatamento varia radicalmente entre a **Fronteira Agrícola/Amazônica** 
+        (Norte e Centro-Oeste) e as **Regiões Consolidadas** (Sudeste e Sul).
+        """)
+
+        df_reg_corr = df_corr[df_corr['escala'] == 'Regional'].copy()
+        df_reg_corr['Tipologia'] = df_reg_corr['macro_tipo'].map(macro_labels).fillna(df_reg_corr['macro_tipo'])
+
+        regioes = sorted(df_reg_corr['grupo'].unique())
+        sel_reg = st.selectbox("Selecione a Região:", regioes, index=0)
+
+        sub_reg = df_reg_corr[df_reg_corr['grupo'] == sel_reg]
+        fig_reg_bar = px.bar(
+            sub_reg,
+            x='Tipologia',
+            y='pearson_r',
+            color='lag_anos',
+            barmode='group',
+            labels={'pearson_r': 'Coeficiente de Pearson (r)', 'lag_anos': 'Lag (Anos)'},
+            title=f"Correlação entre Licenciamento e Desmatamento na Região {sel_reg}"
+        )
+        fig_reg_bar.update_layout(height=400, xaxis_tickangle=-25)
+        st.plotly_chart(fig_reg_bar, use_container_width=True)
+
+        st.dataframe(
+            sub_reg[['Tipologia', 'lag_anos', 'pearson_r', 'p_valor']].rename(columns={
+                'lag_anos': 'Defasagem (Anos)', 'pearson_r': 'Pearson (r)', 'p_valor': 'P-Valor'
+            }),
+            use_container_width=True
+        )
+
+    with m_tab3:
+        st.subheader("3. Análise Detalhada por Estado (UF)")
+        st.markdown("Investigação da dinâmica própria do órgão ambiental de cada unidade federativa.")
+
+        df_st_corr = df_corr[df_corr['escala'] == 'Estadual'].copy()
+        df_st_corr['Tipologia'] = df_st_corr['macro_tipo'].map(macro_labels).fillna(df_st_corr['macro_tipo'])
+
+        ufs_disp = sorted(df_st_corr['grupo'].unique())
+        sel_st = st.selectbox("Selecione o Estado:", ufs_disp, index=0)
+
+        col_st_chart, col_st_data = st.columns([1, 1])
+
+        with col_st_chart:
+            sub_st = df_st_corr[df_st_corr['grupo'] == sel_st]
+            fig_st_bar = px.bar(
+                sub_st,
+                x='Tipologia',
+                y='pearson_r',
+                color='lag_anos',
+                barmode='group',
+                labels={'pearson_r': 'Pearson (r)', 'lag_anos': 'Lag'},
+                title=f"Correlações por Modalidade de Licença - {sel_st}"
+            )
+            fig_st_bar.update_layout(height=420, xaxis_tickangle=-30)
+            st.plotly_chart(fig_st_bar, use_container_width=True)
+
+        with col_st_data:
+            # Dual-axis timeseries for this specific state
+            sub_panel = df_panel[df_panel['UF'] == sel_st].sort_values('ano')
+            
+            fig_dual = go.Figure()
+            fig_dual.add_trace(go.Scatter(
+                x=sub_panel['ano'], y=sub_panel['TOTAL_LICENCAS'],
+                name='Total de Licenças', mode='lines+markers', line=dict(color='#059669', width=2)
+            ))
+            fig_dual.add_trace(go.Scatter(
+                x=sub_panel['ano'], y=sub_panel['area_ha'],
+                name='Desmatamento (ha)', mode='lines+markers', line=dict(color='#DC2626', width=2, dash='dot'),
+                yaxis='y2'
+            ))
+            fig_dual.update_layout(
+                title=f"Série Histórica Conjunta: Licenças vs. Desmatamento - {sel_st}",
+                xaxis=dict(title='Ano'),
+                yaxis=dict(title='Licenças', titlefont=dict(color='#059669'), tickfont=dict(color='#059669')),
+                yaxis2=dict(title='Desmatamento (ha)', titlefont=dict(color='#DC2626'), tickfont=dict(color='#DC2626'), overlaying='y', side='right'),
+                height=420,
+                hovermode="x unified"
+            )
+            st.plotly_chart(fig_dual, use_container_width=True)
+
+    with m_tab4:
+        st.subheader("4. Estratégia Metodológica e Download da Base de Dados Integrada")
+        st.markdown("""
+        ### Abordagem Econométrica Adotada
+        1. **Harmonização em Macro-Tipologias:** Para superar a heterogeneidade nominal entre os 25 estados, todas as licenças foram padronizadas em 6 macro-categorias:
+           - *Rural & Supressão (ASV/CAR/LAR)*
+           - *Implantação de Obras (LP/LI)*
+           - *Operação Contínua (LO/Regularização)*
+           - *Procedimentos Simplificados (LAU/LAC)*
+           - *Manejo Sustentável (PMFS)*
+           - *Total Consolidado*
+        2. **Estrutura de Defasagem Temporal (Distributed Lags):** Análise do efeito contemporâneo ($t=0$) e de inércia/precedência de 1 ano ($t=1$), refletindo o tempo entre a licença e a supressão de campo.
+        3. **Níveis de Agregação:** Testes conduzidos no âmbito Nacional (Brasil), Regional (Norte, Nordeste, Centro-Oeste, Sudeste, Sul) e Estadual individual.
+        """)
+
+        st.markdown("### Download do Painel Integrado (UF x Ano x Tipologia x Desmatamento)")
+        c_pan_csv, c_pan_json = st.columns(2)
+        with c_pan_csv:
+            csv_pan = df_panel.to_csv(index=False).encode('utf-8')
+            st.download_button("📥 Baixar Painel Integrado (CSV)", data=csv_pan, file_name="painel_desmatamento_licenciamento.csv", mime="text/csv")
+        with c_pan_json:
+            json_pan = df_panel.to_json(orient='records', force_ascii=False, indent=2).encode('utf-8')
+            st.download_button("📥 Baixar Painel Integrado (JSON)", data=json_pan, file_name="painel_desmatamento_licenciamento.json", mime="application/json")
+
+        st.dataframe(df_panel, use_container_width=True)
+
+# ==============================================================================
+# MÓDULO 4: BENCHMARK FINANCEIRO & BNDES
 # ==============================================================================
 elif modulo == "📊 Benchmark Financeiro & BNDES":
     st.markdown('<div class="main-header">📊 Benchmark Financeiro de Licenciamento & Investimento BNDES</div>', unsafe_allow_html=True)
