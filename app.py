@@ -205,7 +205,10 @@ if modulo == "🌱 Licenciamento Ambiental Brasil":
         selected_chart = st.selectbox("Selecione o Gráfico para Ampliar:", list(chart_options.keys()))
         img_path = os.path.join(STATIC_DIR, chart_options[selected_chart])
         if os.path.exists(img_path):
-            st.image(img_path, use_container_width=True)
+            try:
+                st.image(img_path, use_container_width=True)
+            except TypeError:
+                st.image(img_path, use_column_width=True)
             with open(img_path, "rb") as img_f:
                 st.download_button(
                     label=f"📥 Baixar Gráfico em Alta Resolução ({chart_options[selected_chart]})",
@@ -533,8 +536,8 @@ elif modulo == "⚖️ Modelagem: Desmatamento X Licenciamento":
             fig_dual.update_layout(
                 title=f"Série Histórica Conjunta: Licenças vs. Desmatamento - {sel_st}",
                 xaxis=dict(title='Ano'),
-                yaxis=dict(title='Licenças', titlefont=dict(color='#059669'), tickfont=dict(color='#059669')),
-                yaxis2=dict(title='Desmatamento (ha)', titlefont=dict(color='#DC2626'), tickfont=dict(color='#DC2626'), overlaying='y', side='right'),
+                yaxis=dict(title='Licenças', title=dict(font=dict(color='#059669')), tickfont=dict(color='#059669')),
+                yaxis2=dict(title='Desmatamento (ha)', title=dict(font=dict(color='#DC2626')), tickfont=dict(color='#DC2626'), overlaying='y', side='right'),
                 height=420,
                 hovermode="x unified"
             )
