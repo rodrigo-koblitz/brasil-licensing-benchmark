@@ -8,7 +8,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 st.set_page_config(
-    page_title="Plataforma Nacional de Licenciamento Ambiental - Brasil",
+    page_title="Plataforma Integrada: Licenciamento Ambiental, Desmatamento & Benchmark - Brasil",
     page_icon="🇧🇷",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -29,7 +29,7 @@ PDF_DIR = os.path.join(BASE_DIR, "reports_pdf")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
 # ==========================================
-# SIDEBAR NAVIGATION (Two Main Modules)
+# SIDEBAR NAVIGATION (Three Main Modules)
 # ==========================================
 st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Flag_of_Brazil.svg/200px-Flag_of_Brazil.svg.png", width=80)
 st.sidebar.title("Navegação Principal")
@@ -37,6 +37,7 @@ modulo = st.sidebar.radio(
     "Selecione o Módulo:",
     options=[
         "🌱 Licenciamento Ambiental Brasil",
+        "🌳 Desmatamento (MapBiomas)",
         "📊 Benchmark Financeiro & BNDES"
     ],
     index=0
@@ -44,12 +45,12 @@ modulo = st.sidebar.radio(
 
 # State mapping helper
 state_names = {
-    "AC": "Acre", "AL": "Alagoas", "AM": "Amazonas", "BA": "Bahia", "CE": "Ceará",
+    "AC": "Acre", "AL": "Alagoas", "AM": "Amazonas", "AP": "Amapá", "BA": "Bahia", "CE": "Ceará",
     "DF": "Distrito Federal", "ES": "Espírito Santo", "GO": "Goiás", "IBAMA": "Âmbito Federal (IBAMA)",
     "MA": "Maranhão", "MG": "Minas Gerais", "MS": "Mato Grosso do Sul", "MT": "Mato Grosso",
     "PA": "Pará", "PB": "Paraíba", "PE": "Pernambuco", "PI": "Piauí", "PR": "Paraná",
-    "RJ": "Rio de Janeiro", "RO": "Rondônia", "RR": "Roraima", "RS": "Rio Grande do Sul",
-    "SC": "Santa Catarina", "SE": "Sergipe", "SP": "São Paulo"
+    "RJ": "Rio de Janeiro", "RN": "Rio Grande do Norte", "RO": "Rondônia", "RR": "Roraima",
+    "RS": "Rio Grande do Sul", "SC": "Santa Catarina", "SE": "Sergipe", "SP": "São Paulo", "TO": "Tocantins"
 }
 
 # ==============================================================================
@@ -59,7 +60,6 @@ if modulo == "🌱 Licenciamento Ambiental Brasil":
     st.markdown('<div class="main-header">🌱 Panorama e Processamento de Licenciamento Ambiental no Brasil</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-header">Acompanhamento consolidado do esforço de licenciamento ambiental, evolução temporal e acervo documental oficial de 25 estados brasileiros e do IBAMA.</div>', unsafe_allow_html=True)
 
-    # Load national dataset
     csv_file = os.path.join(DATA_DIR, "brasil_estados_consolidado.csv")
     ts_file = os.path.join(DATA_DIR, "serie_temporal_nacional.json")
 
@@ -82,7 +82,6 @@ if modulo == "🌱 Licenciamento Ambiental Brasil":
 
     st.markdown("---")
 
-    # Tabs inside Licenciamento Brasil
     tab_macro, tab_reports, tab_visuals, tab_export = st.tabs([
         "📈 Séries Temporais & Macro Ranking",
         "📄 Relatórios Estaduais Completos (PDF)",
@@ -188,7 +187,6 @@ if modulo == "🌱 Licenciamento Ambiental Brasil":
                     mime="application/pdf"
                 )
             
-            # Embedded PDF Viewer
             base64_pdf = base64.b64encode(pdf_bytes).decode('utf-8')
             pdf_embed = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="850" type="application/pdf" style="border: 1px solid #CBD5E1; border-radius: 8px;"></iframe>'
             st.markdown(pdf_embed, unsafe_allow_html=True)
@@ -235,7 +233,204 @@ if modulo == "🌱 Licenciamento Ambiental Brasil":
         }), use_container_width=True)
 
 # ==============================================================================
-# MÓDULO 2: BENCHMARK FINANCEIRO & BNDES
+# MÓDULO 2: DESMATAMENTO (MAPBIOMAS)
+# ==============================================================================
+elif modulo == "🌳 Desmatamento (MapBiomas)":
+    st.markdown('<div class="main-header">🌳 Desmatamento & Supressão de Vegetação Nativa (MapBiomas)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Monitoramento e estatísticas oficiais de desmatamento anual no Brasil por Estado e Bioma (Série Histórica MapBiomas Coleção 11 – Resolução Espacial 30m / Landsat).</div>', unsafe_allow_html=True)
+
+    # Load Deforestation Datasets
+    f_uf = os.path.join(DATA_DIR, "mapbiomas_desmatamento_estado_ano.csv")
+    f_bioma = os.path.join(DATA_DIR, "mapbiomas_desmatamento_bioma_ano.csv")
+    f_br = os.path.join(DATA_DIR, "mapbiomas_desmatamento_brasil_ano.csv")
+
+    try:
+        df_desm_uf = pd.read_csv(f_uf)
+        df_desm_bioma = pd.read_csv(f_bioma)
+        df_desm_br = pd.read_csv(f_br)
+    except Exception as e:
+        st.error(f"Erro ao carregar dados de desmatamento: {e}")
+        st.stop()
+
+    # KPIs (Year 2024 / Total Cumulative 2000-2025)
+    d1, d2, d3, d4 = st.columns(4)
+    total_acum_ha = df_desm_br['area_ha'].sum()
+    total_acum_km2 = df_desm_br['area_km2'].sum()
+    ultimo_ano = int(df_desm_br['ano'].max())
+    taxa_ultimo_ano_ha = df_desm_br[df_desm_br['ano'] == ultimo_ano]['area_ha'].values[0]
+
+    d1.metric("Desmatamento Acumulado (2000-2025)", f"{total_acum_km2:,.0f} km²")
+    d2.metric("Área Total Suprimida", f"{total_acum_ha/1e6:,.2f} Milhões ha")
+    d3.metric(f"Taxa Anual ({ultimo_ano})", f"{taxa_ultimo_ano_ha/1e3:,.1f} mil ha")
+    d4.metric("Resolução Espacial Satélite", "30 metros (Landsat)")
+
+    st.markdown("---")
+
+    d_tab1, d_tab2, d_tab3, d_tab4, d_tab5 = st.tabs([
+        "📈 Série Histórica por Estado & Bioma",
+        "🗺️ Ranking Anual de Desmatamento",
+        "⚖️ Cruzamento Licenciamento vs. Desmatamento",
+        "📥 Download das Séries Temporais (CSV/JSON)",
+        "📑 Relatório Metodológico MapBiomas"
+    ])
+
+    with d_tab1:
+        st.subheader("1. Evolução Histórica Anual do Desmatamento")
+        
+        # Metric Selector
+        unidade = st.radio("Unidade de Visualização:", ["Hectares (ha)", "Quilômetros Quadrados (km²)"], horizontal=True)
+        col_area = 'area_ha' if unidade == "Hectares (ha)" else 'area_km2'
+        
+        # State Filter
+        ufs_disponiveis = sorted(df_desm_uf['UF'].unique())
+        selected_ufs = st.multiselect(
+            "Selecione os Estados para comparar a curva de desmatamento:",
+            options=ufs_disponiveis,
+            default=['PA', 'MT', 'MA', 'RO', 'BA']
+        )
+        
+        if selected_ufs:
+            sub_uf = df_desm_uf[df_desm_uf['UF'].isin(selected_ufs)]
+            fig_d_uf = px.line(
+                sub_uf,
+                x='ano',
+                y=col_area,
+                color='UF',
+                markers=True,
+                labels={'ano': 'Ano', col_area: f'Área Suprimida ({unidade})', 'UF': 'Estado'},
+                title=f"Série Histórica de Desmatamento por Estado ({unidade})"
+            )
+            fig_d_uf.update_layout(height=450, hovermode="x unified")
+            st.plotly_chart(fig_d_uf, use_container_width=True)
+            
+        st.subheader("Evolução Histórica por Bioma")
+        fig_bioma = px.area(
+            df_desm_bioma,
+            x='ano',
+            y=col_area,
+            color='BIOME',
+            labels={'ano': 'Ano', col_area: f'Área Suprimida ({unidade})', 'BIOME': 'Bioma'},
+            title=f"Desmatamento Anual por Bioma Brasileiro ({unidade})"
+        )
+        fig_bioma.update_layout(height=450, hovermode="x unified")
+        st.plotly_chart(fig_bioma, use_container_width=True)
+
+    with d_tab2:
+        st.subheader("2. Ranking e Concentração do Desmatamento por Estado")
+        
+        ano_selecionado = st.slider("Selecione o Ano para Ranking:", min_value=2000, max_value=ultimo_ano, value=2024, step=1)
+        df_ano_uf = df_desm_uf[df_desm_uf['ano'] == ano_selecionado].sort_values(by='area_ha', ascending=False)
+        
+        col_rank_chart, col_rank_table = st.columns([2, 1])
+        with col_rank_chart:
+            fig_rank_bar = px.bar(
+                df_ano_uf.sort_values(by='area_ha', ascending=True),
+                x='area_ha',
+                y='UF',
+                orientation='h',
+                text='area_ha',
+                color='area_ha',
+                color_continuous_scale='Reds',
+                labels={'area_ha': 'Área Desmatada (ha)', 'UF': 'Estado'},
+                title=f"Ranking de Desmatamento por UF no Ano {ano_selecionado} (Hectares)"
+            )
+            fig_rank_bar.update_traces(texttemplate='%{text:,.0f} ha', textposition='outside')
+            fig_rank_bar.update_layout(height=650, coloraxis_showscale=False)
+            st.plotly_chart(fig_rank_bar, use_container_width=True)
+            
+        with col_rank_table:
+            st.markdown(f"### Tabela do Ano {ano_selecionado}")
+            st.dataframe(
+                df_ano_uf[['UF', 'area_ha', 'area_km2']].rename(columns={
+                    'UF': 'Estado',
+                    'area_ha': 'Área (ha)',
+                    'area_km2': 'Área (km²)'
+                }),
+                height=600,
+                use_container_width=True
+            )
+
+    with d_tab3:
+        st.subheader("3. Cruzamento: Licenciamento Ambiental vs. Curva de Desmatamento")
+        st.caption("Compara a dinâmica temporal entre o número de licenças emitidas pelos órgãos ambientais e o desmatamento registrado no mesmo estado.")
+        
+        ts_lic_file = os.path.join(DATA_DIR, "serie_temporal_nacional.json")
+        with open(ts_lic_file, 'r', encoding='utf-8') as f:
+            lic_ts_data = json.load(f)
+            
+        state_choices = sorted([s for s in lic_ts_data['states'] if s in df_desm_uf['UF'].unique()])
+        sel_cross_state = st.selectbox("Selecione o Estado para Cruzamento:", state_choices, index=0)
+        
+        # Prepare merged timeseries
+        lic_years = [str(y) for y in lic_ts_data['years']]
+        state_lics = lic_ts_data['state_year_licenses'].get(sel_cross_state, {})
+        lic_curve = [state_lics.get(y, 0) for y in lic_years]
+        
+        df_lic_st = pd.DataFrame({'ano': [int(y) for y in lic_years], 'licencas': lic_curve})
+        df_desm_st = df_desm_uf[df_desm_uf['UF'] == sel_cross_state][['ano', 'area_ha', 'area_km2']]
+        
+        df_cross = pd.merge(df_lic_st, df_desm_st, on='ano', how='inner')
+        
+        # Dual axis line chart
+        fig_cross = go.Figure()
+        fig_cross.add_trace(go.Scatter(
+            x=df_cross['ano'], y=df_cross['licencas'],
+            name='Licenças Emitidas',
+            mode='lines+markers',
+            line=dict(color='#059669', width=3),
+            yaxis='y1'
+        ))
+        fig_cross.add_trace(go.Scatter(
+            x=df_cross['ano'], y=df_cross['area_ha'],
+            name='Desmatamento MapBiomas (ha)',
+            mode='lines+markers',
+            line=dict(color='#DC2626', width=3, dash='dot'),
+            yaxis='y2'
+        ))
+        fig_cross.update_layout(
+            title=f"Cruzamento Temporal: Licenças Emitidas vs. Desmatamento - {sel_cross_state} ({state_names.get(sel_cross_state, sel_cross_state)})",
+            xaxis=dict(title='Ano'),
+            yaxis=dict(title='Volume de Licenças Emitidas', titlefont=dict(color='#059669'), tickfont=dict(color='#059669')),
+            yaxis2=dict(title='Área Desmatada (ha)', titlefont=dict(color='#DC2626'), tickfont=dict(color='#DC2626'), overlaying='y', side='right'),
+            hovermode="x unified",
+            height=480
+        )
+        st.plotly_chart(fig_cross, use_container_width=True)
+
+    with d_tab4:
+        st.subheader("4. Base de Dados Oficial de Desmatamento (Download)")
+        st.write("Baixe a base de dados tratada de desmatamento anual em formato aberto para análises espaciais e estatísticas.")
+        
+        dc1, dc2 = st.columns(2)
+        with dc1:
+            csv_d_uf = df_desm_uf.to_csv(index=False).encode('utf-8')
+            st.download_button("📥 Baixar Desmatamento por Estado e Ano (CSV)", data=csv_d_uf, file_name="mapbiomas_desmatamento_estado_ano.csv", mime="text/csv")
+        with dc2:
+            json_d_uf = df_desm_uf.to_json(orient='records', force_ascii=False, indent=2).encode('utf-8')
+            st.download_button("📥 Baixar Desmatamento por Estado e Ano (JSON)", data=json_d_uf, file_name="mapbiomas_desmatamento_estado_ano.json", mime="application/json")
+            
+        st.dataframe(df_desm_uf.rename(columns={'UF': 'Estado', 'ano': 'Ano', 'area_ha': 'Área (ha)', 'area_km2': 'Área (km²)'}), use_container_width=True)
+
+    with d_tab5:
+        st.subheader("5. Relatório Metodológico e Esclarecimento de Resolução Espacial")
+        st.markdown("""
+        ### Fonte e Curadoria dos Dados
+        - **Iniciativa:** Rede MapBiomas Brasil (Coleção 11 - Módulo Desmatamento / Perda de Vegetação Nativa).
+        - **Sensor / Satélite:** Constelação **Landsat** (Landsat 5, 7, 8 e 9 - NASA/USGS) com processamento pixel a pixel em nuvem no **Google Earth Engine (GEE)**.
+        - **Resolução Espacial Padronizada:** **30 metros** $\times$ **30 metros** ($900\,m^2$ por pixel no solo).
+        - **Série Histórica Contínua:** Mapeada anualmente de **1985 até o presente**.
+        
+        ### Diferenciação Crítica de Resoluções no Ecossistema MapBiomas:
+        1. **MapBiomas Desmatamento Anual (30 metros - Adotado Aqui):**
+           - Permite séries históricas homogêneas desde 1985 e consolidadas de 2000 em diante.
+           - Mantém a mesma resolução de 30m em todos os anos, sem quebras metodológicas ou alterações de escala.
+        2. **MapBiomas Alerta (3 metros - PlanetScope):**
+           - Voltado para alertas rápidos semanais e laudos de fiscalização territorial imediata.
+           - Não possui série histórica longa, estando disponível apenas a partir de **2019**.
+        """)
+
+# ==============================================================================
+# MÓDULO 3: BENCHMARK FINANCEIRO & BNDES
 # ==============================================================================
 elif modulo == "📊 Benchmark Financeiro & BNDES":
     st.markdown('<div class="main-header">📊 Benchmark Financeiro de Licenciamento & Investimento BNDES</div>', unsafe_allow_html=True)
@@ -354,7 +549,6 @@ elif modulo == "📊 Benchmark Financeiro & BNDES":
         (seja via **custo administrativo/taxa de análise estadual** ou via **escala de investimento/CAPEX pelo BNDES**) para estimar a dimensão econômica do licenciamento.
         """)
         
-        # Load feasibility matrices
         f_estados_path = os.path.join(DATA_DIR, "viabilidade_financeira_estados.json")
         f_licencas_path = os.path.join(DATA_DIR, "viabilidade_financeira_licencas.json")
         
