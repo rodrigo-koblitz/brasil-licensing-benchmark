@@ -1,0 +1,66 @@
+[
+  {
+    "tipo_licenca":"Autorização Ambiental",
+    "registros":78,
+    "empresas_unicas":9,
+    "mediana_investimento":60370963.950000003,
+    "media_investimento":251736042.9550000131,
+    "total_investimento":19635411350.4900016785
+  },
+  {
+    "tipo_licenca":"Cadastro Ambiental da Propriedade Rural",
+    "registros":6,
+    "empresas_unicas":5,
+    "mediana_investimento":1306121.1200000001,
+    "media_investimento":1950350.4133333333,
+    "total_investimento":11702102.4800000004
+  },
+  {
+    "tipo_licenca":"Licença Ambiental Rural - Simplificada",
+    "registros":3,
+    "empresas_unicas":3,
+    "mediana_investimento":1360242.24,
+    "media_investimento":2947286.7466666666,
+    "total_investimento":8841860.2400000002
+  },
+  {
+    "tipo_licenca":"Licença Ambiental Única",
+    "registros":1322,
+    "empresas_unicas":7,
+    "mediana_investimento":444146000.0,
+    "media_investimento":438705126.9700756073,
+    "total_investimento":579968177854.4399414062
+  },
+  {
+    "tipo_licenca":"Licença Prévia",
+    "registros":88,
+    "empresas_unicas":10,
+    "mediana_investimento":1212850.0,
+    "media_investimento":159627017.389318198,
+    "total_investimento":14047177530.2600002289
+  },
+  {
+    "tipo_licenca":"Licença de Instalação",
+    "registros":54,
+    "empresas_unicas":10,
+    "mediana_investimento":444146000.0,
+    "media_investimento":375465279.1825926304,
+    "total_investimento":20275125075.8600006104
+  },
+  {
+    "tipo_licenca":"Licença de Instalação e Operação",
+    "registros":1,
+    "empresas_unicas":1,
+    "mediana_investimento":855000.0,
+    "media_investimento":855000.0,
+    "total_investimento":855000.0
+  },
+  {
+    "tipo_licenca":"Licença de Operação",
+    "registros":114,
+    "empresas_unicas":13,
+    "mediana_investimento":444146000.0,
+    "media_investimento":436739889.4131578803,
+    "total_investimento":49788347393.0999984741
+  }
+]
