@@ -92,14 +92,17 @@ if modulo == "🌱 Licenciamento Ambiental Brasil":
 
     with tab_macro:
         st.subheader("1. Evolução Histórica Nacional (2000 – 2026)")
-        years = ts_data['years']
-        nat_lic = ts_data['national_total_licenses_by_year']
-        nat_emp = ts_data['national_total_enterprises_by_year']
+        years = [str(y) for y in ts_data['years']]
+        nat_lic_dict = ts_data['national_total_licenses_by_year']
+        nat_emp_dict = ts_data['national_total_enterprises_by_year']
+        
+        lic_vals = [nat_lic_dict.get(y, 0) for y in years]
+        emp_vals = [nat_emp_dict.get(y, 0) for y in years]
         
         df_ts = pd.DataFrame({
-            'Ano': years,
-            'Licenças Emitidas': nat_lic,
-            'Empreendimentos Ativos': nat_emp
+            'Ano': [int(y) for y in years],
+            'Licenças Emitidas': lic_vals,
+            'Empreendimentos Ativos': emp_vals
         })
         
         fig_ts = go.Figure()
