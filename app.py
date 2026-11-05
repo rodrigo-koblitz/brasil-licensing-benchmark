@@ -6,6 +6,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from map_module import render_map_module
 
 st.set_page_config(
     page_title="Plataforma Integrada: Licenciamento Ambiental, Desmatamento & Modelagem Estatística - Brasil",
@@ -39,7 +40,8 @@ modulo = st.sidebar.radio(
         "🌱 Licenciamento Ambiental Brasil",
         "🌳 Desmatamento (MapBiomas)",
         "⚖️ Modelagem: Desmatamento X Licenciamento",
-        "📊 Benchmark Financeiro & BNDES"
+        "📊 Benchmark Financeiro & BNDES",
+        "🗺️ Mapa Geoespacial: Desmatamento & Licenças"
     ],
     index=0
 )
@@ -536,8 +538,8 @@ elif modulo == "⚖️ Modelagem: Desmatamento X Licenciamento":
             fig_dual.update_layout(
                 title=f"Série Histórica Conjunta: Licenças vs. Desmatamento - {sel_st}",
                 xaxis=dict(title='Ano'),
-                yaxis=dict(title='Licenças', title=dict(font=dict(color='#059669')), tickfont=dict(color='#059669')),
-                yaxis2=dict(title='Desmatamento (ha)', title=dict(font=dict(color='#DC2626')), tickfont=dict(color='#DC2626'), overlaying='y', side='right'),
+                yaxis=dict(title=dict(text='Licenças', font=dict(color='#059669')), tickfont=dict(color='#059669')),
+                yaxis2=dict(title=dict(text='Desmatamento (ha)', font=dict(color='#DC2626')), tickfont=dict(color='#DC2626'), overlaying='y', side='right'),
                 height=420,
                 hovermode="x unified"
             )
@@ -739,3 +741,10 @@ elif modulo == "📊 Benchmark Financeiro & BNDES":
         - **Para Licenças Trifásicas (LP, LI, LO):** Os estados com sistemas analíticos maduros (**SP/CETESB, MG/COPAM, RJ/INEA, PR/IAT, RS/FEPAM e IBAMA**) permitem estimar tanto a **taxa administrativa de análise** (via fórmulas matemáticas paramétricas publicadas) quanto o **volume total de investimento das empresas** (via cruzamento por CNPJ com o BNDES).
         - **Para Licenças Simplificadas e Rurais (LAU, LAC, LARS, CAR):** A estimativa é parametrizada com alta precisão através do porte do imóvel (módulos fiscais) ou faixa de faturamento presumido das PMEs.
         """)
+
+
+# ==============================================================================
+# MÓDULO 5: MAPA GEOESPACIAL (LEAFLET / FOLIUM)
+# ==============================================================================
+elif modulo == "🗺️ Mapa Geoespacial: Desmatamento & Licenças":
+    render_map_module(DATA_DIR)
