@@ -45,32 +45,37 @@ def find_state_edit_files(data_dir):
 
 def render_map_module(data_dir):
     st.markdown('<div class="main-header">🗺️ Mapa Interativo: Desmatamento e Licenciamento Ambiental (Leaflet)</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sub-header">Visualização geoespacial integrada: Macrovisão Nacional (Coroplético e Estatístico) e Microvisão Pontual de Empreendimentos ([UF]_edit.csv).</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Visualização geoespacial integrada com suporte a visualização pontual dos empreendimentos ([UF]_edit.csv) e macrovisão estadual/nacional.</div>', unsafe_allow_html=True)
 
     # 1. Discover available [UF]_edit.csv files
     edit_files = find_state_edit_files(data_dir)
     available_edit_ufs = sorted(list(edit_files.keys()))
 
-    # Mode Selector: Visão Geral Nacional vs. Detalhamento Estadual de Empreendimentos
+    # Global Mode Selector
+    opcoes_modo = [
+        "📍 Empreendimentos Individuais no Mapa (Latitude/Longitude dos arquivos [UF]_edit.csv)",
+        "🇧🇷 Macrovisão Nacional & Estadual (Choropleth de Polígonos e Desmatamento MapBiomas)"
+    ]
     modo_mapa = st.radio(
-        "Selecione o Nível de Visualização Geoespacial:",
-        options=[
-            "🇧🇷 Macrovisão Nacional (Choropleth de Licenças e Desmatamento MapBiomas)",
-            f"📍 Microvisão Pontual de Empreendimentos por Estado ({', '.join(available_edit_ufs)})"
-        ],
-        index=1 if available_edit_ufs else 0,
+        "Selecione o Tipo de Mapa:",
+        options=opcoes_modo,
+        index=0,
         horizontal=True
     )
 
     # ==============================================================================
-    # MODO 2: MICROVISÃO PONTUAL DE EMPREENDIMENTOS ([UF]_edit.csv)
+    # MODO A: EMPREENDIMENTOS INDIVIDUAIS COM LATITUDE/LONGITUDE ([UF]_edit.csv)
     # ==============================================================================
-    if "Microvisão Pontual" in modo_mapa:
-        st.markdown("### 📍 Empreendimentos Licenciados com Coordenadas Reais (Latitude/Longitude)")
+    if "Empreendimentos Individuais" in modo_mapa:
+        st.markdown("### 📍 Empreendimentos Georreferenciados (Pontos e Clusters Reais)")
         
-        col_c1, col_c2, col_c3 = st.columns([1, 1, 2])
+        if not available_edit_ufs:
+            st.warning("Nenhum arquivo [UF]_edit.csv encontrado no diretório de dados.")
+            return
+
+        col_c1, col_c2, col_c3, col_c4 = st.columns([1, 1, 1, 1])
         with col_c1:
-            uf_sel = st.selectbox("Selecione o Estado:", available_edit_ufs, index=0)
+            uf_sel = st.selectbox("Selecione a Unidade Federativa (UF):", available_edit_ufs, index=0)
         
         file_path = edit_files[uf_sel]
         
@@ -80,54 +85,72 @@ def render_map_module(data_dir):
         except Exception:
             df_edit = pd.read_csv(file_path, sep=";", encoding="utf-8", low_memory=False)
             
-        # Clean coordinates
         df_edit['Latitude'] = pd.to_numeric(df_edit['Latitude'], errors='coerce')
         df_edit['Longitude'] = pd.to_numeric(df_edit['Longitude'], errors='coerce')
-        valid_points = df_edit.dropna(subset=['Latitude', 'Longitude'])
-        
+        valid_points = df_edit.dropna(subset=['Latitude', 'Longitude']).copy()
+
+        # Extract Year column
+        col_emiss = [c for c in valid_points.columns if 'emiss' in c.lower()]
+        if col_emiss:
+            valid_points['ano_ato'] = valid_points[col_emiss[0]].astype(str).str.extract(r'^(19\d\d|20\d\d)')[0].fillna('Não informado')
+        else:
+            valid_points['ano_ato'] = 'Não informado'
+
+        anos_disponiveis = ["Todos"] + sorted([str(a) for a in valid_points['ano_ato'].unique() if str(a) != 'Não informado'])
+
         with col_c2:
-            precisoes = sorted([str(p) for p in valid_points['geo_precision_level'].dropna().unique()])
-            sel_prec = st.multiselect("Nível de Precisão:", options=precisoes, default=precisoes)
-            
+            ano_filtro = st.selectbox("Ano de Emissão do Ato:", anos_disponiveis, index=0)
+
         with col_c3:
-            tipos = sorted([str(t) for t in valid_points['Tipo da licença'].dropna().unique() if str(t).strip()])
-            top_tipos = tipos[:5] if len(tipos) >= 5 else tipos
-            sel_tipos = st.multiselect("Tipologia de Licença:", options=tipos, default=top_tipos)
+            precisoes = ["Todas"] + sorted([str(p) for p in valid_points['geo_precision_level'].dropna().unique()])
+            sel_prec = st.selectbox("Nível de Precisão:", precisoes, index=0)
+            
+        with col_c4:
+            tipos = ["Todas as Tipologias"] + sorted([str(t) for t in valid_points['Tipo da licença'].dropna().unique() if str(t).strip()])
+            sel_tipo = st.selectbox("Tipologia de Licença:", tipos, index=0)
 
-        # Filter
-        df_filtered = valid_points[
-            valid_points['geo_precision_level'].isin(sel_prec) &
-            valid_points['Tipo da licença'].isin(sel_tipos)
-        ]
+        # Apply Filters
+        df_filtered = valid_points.copy()
+        if ano_filtro != "Todos":
+            df_filtered = df_filtered[df_filtered['ano_ato'] == ano_filtro]
+        if sel_prec != "Todas":
+            df_filtered = df_filtered[df_filtered['geo_precision_level'] == sel_prec]
+        if sel_tipo != "Todas as Tipologias":
+            df_filtered = df_filtered[df_filtered['Tipo da licença'] == sel_tipo]
 
-        st.caption(f"Exibindo **{len(df_filtered):,}** de **{len(valid_points):,}** empreendimentos georreferenciados para o estado de **{STATE_NAMES.get(uf_sel, uf_sel)}**.")
+        # Top Metric Cards
+        col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+        col_m1.metric("Empreendimentos Filtrados", f"{len(df_filtered):,}")
+        col_m2.metric("Total no Estado", f"{len(valid_points):,}")
+        col_m3.metric("Localizações Distintas", f"{len(df_filtered[['Latitude', 'Longitude']].drop_duplicates()):,}")
+        col_m4.metric("UF Selecionada", f"{uf_sel} - {STATE_NAMES.get(uf_sel, '')}")
 
         # Map Center
         center = STATE_COORDINATES.get(uf_sel, [-12.9714, -38.5014])
-        m_state = folium.Map(location=center, zoom_start=6, tiles="CartoDB positron")
+        m_state = folium.Map(location=center, zoom_start=7, tiles="CartoDB positron")
 
-        # Tile Layers
         folium.TileLayer('OpenStreetMap', name='OpenStreetMap (Ruas)').add_to(m_state)
         folium.TileLayer(
             tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
             attr='Esri Satellite',
-            name='Esri Satélite (Alta Resolução)'
+            name='Satélite (Esri World Imagery)'
         ).add_to(m_state)
 
-        # Marker Cluster for high performance
-        marker_cluster = plugins.FastMarkerCluster(
-            data=df_filtered[['Latitude', 'Longitude']].values.tolist(),
-            name=f"Cluster: {uf_sel} ({len(df_filtered):,} pontos)"
+        # FastMarkerCluster with all coordinates
+        coords_list = df_filtered[['Latitude', 'Longitude']].values.tolist()
+        plugins.FastMarkerCluster(
+            data=coords_list,
+            name=f"Clusters de Empreendimentos ({len(coords_list):,} atos)"
         ).add_to(m_state)
 
         folium.LayerControl(collapsed=False).add_to(m_state)
 
-        # Render Folium
+        # Render Map
         map_html = m_state._repr_html_()
-        st.components.v1.html(map_html, height=620, scrolling=False)
+        st.components.v1.html(map_html, height=640, scrolling=False)
 
-        # Detail Table below map
-        st.markdown("#### 📋 Amostra dos Empreendimentos Georreferenciados")
+        # Data Table Below Map
+        st.markdown("#### 📋 Base de Dados dos Empreendimentos Georreferenciados")
         cols_to_show = [
             c for c in [
                 df_edit.columns[0], 'Tipo da licença', 'Nome do empreendimento',
@@ -135,11 +158,11 @@ def render_map_module(data_dir):
                 'Latitude', 'Longitude', 'geo_precision_level', 'geo_source'
             ] if c in df_edit.columns
         ]
-        st.dataframe(df_filtered[cols_to_show].head(500), use_container_width=True)
+        st.dataframe(df_filtered[cols_to_show].head(1000), use_container_width=True)
         return
 
     # ==============================================================================
-    # MODO 1: MACROVISÃO NACIONAL (Choropleth & Estatísticas)
+    # MODO B: MACROVISÃO NACIONAL (Choropleth de Polígonos)
     # ==============================================================================
     lic_file = os.path.join(data_dir, "licencas_estado_ano_macrotipos.csv")
     desm_file = os.path.join(data_dir, "mapbiomas_desmatamento_estado_ano.csv")
@@ -160,19 +183,21 @@ def render_map_module(data_dir):
     col_f1, col_f2, col_f3 = st.columns([1, 1, 2])
 
     with col_f1:
-        ano_sel = st.selectbox("Selecione o Ano de Análise:", anos_comuns, index=len(anos_comuns)-1)
+        # Permitir selecionar 'Todos os Anos (Acumulado Histórico)' ou um ano específico
+        opcoes_ano = ["Todos os Anos (Acumulado Histórico)"] + [str(a) for a in reversed(anos_comuns)]
+        ano_macro_sel = st.selectbox("Selecione o Ano de Análise:", opcoes_ano, index=0)
     
     with col_f2:
-        tema_mapa = st.selectbox(
-            "Camada de Fundo (Choropleth Polígonos):",
-            [
-                "Licenças Totais Emitidas",
-                "Desmatamento Anual (Hectares)",
-                "Licenças Rurais e Supressão (ASV/CAR/LAR)",
-                "Licenças de Obras e Implantação (LP/LI)",
-                "Licenças de Operação Contínua (LO)"
-            ]
-        )
+        # Opções de tema incluindo 'Sem Camada Coroplética' para ver apenas o mapa limpo
+        opcoes_tema = [
+            "Desmatamento Anual (Hectares)",
+            "Licenças Totais Emitidas",
+            "Licenças Rurais e Supressão (ASV/CAR/LAR)",
+            "Licenças de Obras e Implantação (LP/LI)",
+            "Licenças de Operação Contínua (LO)",
+            "Nenhuma (Apenas Mapa Base e Marcadores)"
+        ]
+        tema_mapa = st.selectbox("Camada de Fundo (Choropleth Polígonos):", opcoes_tema, index=0)
 
     with col_f3:
         all_ufs = sorted(list(set(df_lic['UF'].unique().tolist()).union(set(df_desm['UF'].unique().tolist()))))
@@ -182,12 +207,19 @@ def render_map_module(data_dir):
             default=all_ufs
         )
 
-    # Filter by Year
-    df_lic_ano = df_lic[df_lic['ano'] == ano_sel].copy()
-    df_desm_ano = df_desm[df_desm['ano'] == ano_sel].copy()
+    # Filter Data by Year or Accumulate
+    if ano_macro_sel == "Todos os Anos (Acumulado Histórico)":
+        df_lic_agg = df_lic.groupby('UF')[['TOTAL_LICENCAS', 'INFRA_CONSTR', 'INFRA_OP', 'RURAL_VEG']].sum().reset_index()
+        df_desm_agg = df_desm.groupby('UF')[['area_ha', 'area_km2']].sum().reset_index()
+        df_map = pd.merge(df_lic_agg, df_desm_agg, on='UF', how='outer').fillna(0)
+        label_ano = "Histórico Acumulado (2000-2025)"
+    else:
+        ano_int = int(ano_macro_sel)
+        df_lic_agg = df_lic[df_lic['ano'] == ano_int].copy()
+        df_desm_agg = df_desm[df_desm['ano'] == ano_int][['UF', 'area_ha', 'area_km2']].copy()
+        df_map = pd.merge(df_lic_agg, df_desm_agg, on='UF', how='outer').fillna(0)
+        label_ano = f"Ano {ano_int}"
 
-    df_map = pd.merge(df_lic_ano, df_desm_ano[['UF', 'area_ha', 'area_km2']], on='UF', how='outer')
-    df_map = df_map.fillna(0)
     df_map['DESMATAMENTO_HA'] = df_map['area_ha']
     df_map['DESMATAMENTO_KM2'] = df_map['area_km2']
     df_map['Nome'] = df_map['UF'].map(STATE_NAMES).fillna(df_map['UF'])
@@ -195,15 +227,13 @@ def render_map_module(data_dir):
     df_map['lon'] = df_map['UF'].map(lambda u: STATE_COORDINATES.get(u, [None, None])[1])
     df_map = df_map[df_map['UF'].isin(ufs_sel)]
 
-    # Choropleth Metric
-    metric_cols = {
-        "Licenças Totais Emitidas": "TOTAL_LICENCAS",
-        "Desmatamento Anual (Hectares)": "DESMATAMENTO_HA",
-        "Licenças Rurais e Supressão (ASV/CAR/LAR)": "RURAL_VEG",
-        "Licenças de Obras e Implantação (LP/LI)": "INFRA_CONSTR",
-        "Licenças de Operação Contínua (LO)": "INFRA_OP"
-    }
-    target_metric = metric_cols[tema_mapa]
+    # Metrics Summary Cards
+    col_t1, col_t2, col_t3, col_t4 = st.columns(4)
+    col_t1.metric(f"Total de Licenças ({label_ano})", f"{df_map['TOTAL_LICENCAS'].sum():,.0f}")
+    col_t2.metric(f"Desmatamento ({label_ano})", f"{df_map['DESMATAMENTO_HA'].sum():,.0f} ha")
+    ibama_count = df_map[df_map['UF']=='IBAMA']['TOTAL_LICENCAS'].sum() if 'IBAMA' in df_map['UF'].values else 0
+    col_t3.metric("Atos IBAMA Federal", f"{ibama_count:,.0f}")
+    col_t4.metric("Estados Selecionados", f"{len(df_map)} UFs")
 
     # Initialize Base Leaflet Map
     m = folium.Map(location=[-14.235, -51.9253], zoom_start=4, tiles="CartoDB positron")
@@ -211,29 +241,37 @@ def render_map_module(data_dir):
     folium.TileLayer(
         tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         attr='Esri Satellite',
-        name='Esri Satélite (Alta Resolução)'
+        name='Satélite (Esri World Imagery)'
     ).add_to(m)
 
     # Choropleth polygon layer
-    if os.path.exists(geojson_file):
+    if tema_mapa != "Nenhuma (Apenas Mapa Base e Marcadores)" and os.path.exists(geojson_file):
+        metric_cols = {
+            "Licenças Totais Emitidas": "TOTAL_LICENCAS",
+            "Desmatamento Anual (Hectares)": "DESMATAMENTO_HA",
+            "Licenças Rurais e Supressão (ASV/CAR/LAR)": "RURAL_VEG",
+            "Licenças de Obras e Implantação (LP/LI)": "INFRA_CONSTR",
+            "Licenças de Operação Contínua (LO)": "INFRA_OP"
+        }
+        target_metric = metric_cols[tema_mapa]
         with open(geojson_file, 'r', encoding='utf-8') as gf:
             br_geo = json.load(gf)
 
         fill_color_scheme = 'YlOrRd' if 'Desmatamento' in tema_mapa else 'YlGnBu'
         folium.Choropleth(
             geo_data=br_geo,
-            name=f"Choropleth: {tema_mapa} ({ano_sel})",
+            name=f"Camada Temática: {tema_mapa}",
             data=df_map[df_map['UF'] != 'IBAMA'],
             columns=['UF', target_metric],
             key_on='properties.UF_05',
             fill_color=fill_color_scheme,
             fill_opacity=0.7,
             line_opacity=0.3,
-            legend_name=f"{tema_mapa} - Ano {ano_sel}"
+            legend_name=f"{tema_mapa} ({label_ano})"
         ).add_to(m)
 
-    marker_group_states = folium.FeatureGroup(name="Círculos Estaduais de Resumo").add_to(m)
-    marker_group_ibama = folium.FeatureGroup(name="Destaque Federal: IBAMA").add_to(m)
+    marker_group_states = folium.FeatureGroup(name="Marcadores Interativos (Estados)").add_to(m)
+    marker_group_ibama = folium.FeatureGroup(name="Órgão Federal (IBAMA)").add_to(m)
 
     for _, row in df_map.iterrows():
         uf = row['UF']
@@ -246,14 +284,14 @@ def render_map_module(data_dir):
                 {'🏛️ ' + row['Nome'] if is_fed else '📍 ' + row['Nome'] + ' (' + uf + ')'}
             </div>
             <div style="padding: 8px 4px;">
-                <b>Ano de Referência:</b> {ano_sel}<br>
+                <b>Período:</b> {label_ano}<br>
                 <hr style="margin: 4px 0; border: 0; border-top: 1px solid #E2E8F0;">
                 <b>Total de Licenças:</b> <span style="color: #059669; font-weight: bold;">{row['TOTAL_LICENCAS']:,.0f}</span><br>
                 <b>• Obras/Implantação (LP/LI):</b> {row['INFRA_CONSTR']:,.0f}<br>
                 <b>• Operação (LO):</b> {row['INFRA_OP']:,.0f}<br>
                 <b>• Rural/Supressão (CAR/ASV):</b> {row['RURAL_VEG']:,.0f}<br>
                 <hr style="margin: 4px 0; border: 0; border-top: 1px solid #E2E8F0;">
-                <b>Desmatamento Anual (MapBiomas):</b><br>
+                <b>Desmatamento (MapBiomas):</b><br>
                 <span style="color: #DC2626; font-weight: bold;">{row['DESMATAMENTO_HA']:,.0f} ha</span> ({row['DESMATAMENTO_KM2']:,.1f} km²)<br>
             </div>
         </div>
@@ -265,7 +303,7 @@ def render_map_module(data_dir):
             folium.Marker(
                 location=[row['lat'], row['lon']],
                 popup=popup,
-                tooltip=f"🏢 IBAMA: {row['TOTAL_LICENCAS']:,.0f} Licenças Federais ({ano_sel})",
+                tooltip=f"🏢 IBAMA: {row['TOTAL_LICENCAS']:,.0f} Licenças Federais",
                 icon=folium.Icon(color='red', icon='certificate', prefix='glyphicon')
             ).add_to(marker_group_ibama)
         else:
@@ -280,4 +318,4 @@ def render_map_module(data_dir):
 
     folium.LayerControl(collapsed=False).add_to(m)
     map_html = m._repr_html_()
-    st.components.v1.html(map_html, height=620, scrolling=False)
+    st.components.v1.html(map_html, height=640, scrolling=False)
