@@ -1,3 +1,4 @@
+from tab_bahia_experimental import render_bahia_experimental_tab
 import os
 import json
 import base64
@@ -608,11 +609,12 @@ elif modulo == "📊 Benchmark Financeiro & BNDES":
 
     st.markdown("---")
 
-    b_tab1, b_tab2, b_tab3, b_tab4 = st.tabs([
+    b_tab1, b_tab2, b_tab3, b_tab4, b_tab5 = st.tabs([
         "📊 Mediana e Média por Tipo de Licença",
         "🏢 Distribuição por Porte e Subsetor",
         "🔎 Explorador de Empresas & CNPJ",
-        "🗺️ Viabilidade de Estimativa Financeira por Estado & Tipo"
+        "🗺️ Viabilidade de Estimativa Financeira por Estado & Tipo",
+        "🔬 Experimento Bahia: Licenciamento vs BNDES vs PAC"
     ])
 
     with b_tab1:
@@ -750,6 +752,10 @@ elif modulo == "📊 Benchmark Financeiro & BNDES":
         - **Para Licenças Trifásicas (LP, LI, LO):** Os estados com sistemas analíticos maduros (**SP/CETESB, MG/COPAM, RJ/INEA, PR/IAT, RS/FEPAM e IBAMA**) permitem estimar tanto a **taxa administrativa de análise** (via fórmulas matemáticas paramétricas publicadas) quanto o **volume total de investimento das empresas** (via cruzamento por CNPJ com o BNDES).
         - **Para Licenças Simplificadas e Rurais (LAU, LAC, LARS, CAR):** A estimativa é parametrizada com alta precisão através do porte do imóvel (módulos fiscais) ou faixa de faturamento presumido das PMEs.
         """)
+
+
+    with b_tab5:
+        render_bahia_experimental_tab()
 
 
 # ==============================================================================
