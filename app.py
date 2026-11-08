@@ -585,13 +585,24 @@ elif modulo == "📊 Benchmark Financeiro & BNDES":
         st.error(f"Erro ao carregar benchmark financeiro: {e}")
         st.stop()
 
+    # Map column names flexibly
+    col_cnpj = 'cnpj' if 'cnpj' in df_bench.columns else 'doc_num'
+    col_val = 'valor_contratado_bndes' if 'valor_contratado_bndes' in df_bench.columns else ('bndes_total_contratado' if 'bndes_total_contratado' in df_bench.columns else df_bench.columns[0])
+    col_porte = 'porte_cliente_bndes' if 'porte_cliente_bndes' in df_bench.columns else ('porte_imac' if 'porte_imac' in df_bench.columns else 'porte')
+    col_subsetor = 'subsetor_bndes' if 'subsetor_bndes' in df_bench.columns else 'bndes_subsetor'
+    col_cliente = 'cliente_bndes' if 'cliente_bndes' in df_bench.columns else 'bndes_cliente'
+    col_emp = 'nome_empreendimento' if 'nome_empreendimento' in df_bench.columns else df_bench.columns[0]
+    col_tipo = 'tipo_licenca' if 'tipo_licenca' in df_bench.columns else df_bench.columns[0]
+    col_ano = 'ano_protocolo' if 'ano_protocolo' in df_bench.columns else ('ano' if 'ano' in df_bench.columns else df_bench.columns[0])
+
     # Benchmark KPIs
     b1, b2, b3, b4 = st.columns(4)
-    tot_val = df_bench.drop_duplicates(subset=['doc_num'])['bndes_total_contratado'].sum()
-    med_val = df_bench.drop_duplicates(subset=['doc_num'])['bndes_total_contratado'].median()
+    df_unique = df_bench.drop_duplicates(subset=[col_cnpj])
+    tot_val = df_unique[col_val].sum()
+    med_val = df_unique[col_val].median()
     
     b1.metric("Licenças Cruzadas com BNDES", f"{len(df_bench):,}")
-    b2.metric("Empresas Únicas Financiadas", f"{df_bench['doc_num'].nunique():,}")
+    b2.metric("Empresas Únicas Financiadas", f"{df_bench[col_cnpj].nunique():,}")
     b3.metric("Volume Financiado (BNDES)", f"R$ {tot_val/1e9:.2f} Bilhões")
     b4.metric("Mediana Financiada / Empresa", f"R$ {med_val/1e6:.2f} Mi")
 
@@ -608,21 +619,21 @@ elif modulo == "📊 Benchmark Financeiro & BNDES":
         st.subheader("1. Mediana do Investimento por Modalidade de Licença")
         st.caption("A mediana é o indicador mais robusto para representar o valor financeiro típico associado a cada tipo de licença.")
         
-        bench_grp = df_bench.groupby('tipo_licenca').agg(
-            licencas=('doc_num', 'count'),
-            empresas=('doc_num', 'nunique'),
-            mediana=('bndes_total_contratado', 'median'),
-            media=('bndes_total_contratado', 'mean'),
-            total=('bndes_total_contratado', 'sum')
+        bench_grp = df_bench.groupby(col_tipo).agg(
+            licencas=(col_cnpj, 'count'),
+            empresas=(col_cnpj, 'nunique'),
+            mediana=(col_val, 'median'),
+            media=(col_val, 'mean'),
+            total=(col_val, 'sum')
         ).reset_index().sort_values(by='mediana', ascending=False)
         
         fig_b_bar = px.bar(
             bench_grp,
-            x='tipo_licenca',
+            x=col_tipo,
             y='mediana',
-            color='tipo_licenca',
+            color=col_tipo,
             text='mediana',
-            labels={'tipo_licenca': 'Tipo de Licença', 'mediana': 'Mediana Financiada (R$)'},
+            labels={col_tipo: 'Tipo de Licença', 'mediana': 'Mediana Financiada (R$)'},
             title="Mediana de Valor Financiado por Tipo de Licença (R$)"
         )
         fig_b_bar.update_traces(texttemplate='R$ %{text:,.0f}', textposition='outside')
@@ -634,7 +645,7 @@ elif modulo == "📊 Benchmark Financeiro & BNDES":
         t_display['Mediana (R$)'] = t_display['mediana'].apply(lambda x: f"R$ {x:,.2f}")
         t_display['Média (R$)'] = t_display['media'].apply(lambda x: f"R$ {x:,.2f}")
         t_display['Total (R$)'] = t_display['total'].apply(lambda x: f"R$ {x:,.2f}")
-        st.dataframe(t_display[['tipo_licenca', 'licencas', 'empresas', 'Mediana (R$)', 'Média (R$)', 'Total (R$)']], use_container_width=True)
+        st.dataframe(t_display[[col_tipo, 'licencas', 'empresas', 'Mediana (R$)', 'Média (R$)', 'Total (R$)']], use_container_width=True)
 
     with b_tab2:
         st.subheader("2. Distribuição por Porte do Empreendimento e Setor Econômico")
@@ -642,16 +653,16 @@ elif modulo == "📊 Benchmark Financeiro & BNDES":
         with c1:
             fig_bx = px.box(
                 df_bench,
-                x='porte',
-                y='bndes_total_contratado',
-                color='porte',
+                x=col_porte,
+                y=col_val,
+                color=col_porte,
                 log_y=True,
-                labels={'porte': 'Porte Declarado', 'bndes_total_contratado': 'Valor Financiado (R$ escala log)'},
+                labels={col_porte: 'Porte Declarado', col_val: 'Valor Financiado (R$ escala log)'},
                 title="Dispersão do Investimento por Porte Declarado"
             )
             st.plotly_chart(fig_bx, use_container_width=True)
         with c2:
-            top_subs = df_bench['bndes_subsetor'].value_counts().head(8).reset_index()
+            top_subs = df_bench[col_subsetor].value_counts().head(8).reset_index()
             top_subs.columns = ['subsetor', 'contagem']
             fig_p = px.pie(top_subs, names='subsetor', values='contagem', title="Principais Subsetores Financiados com Licença")
             st.plotly_chart(fig_p, use_container_width=True)
@@ -662,24 +673,22 @@ elif modulo == "📊 Benchmark Financeiro & BNDES":
         df_view = df_bench.copy()
         if q:
             df_view = df_view[
-                df_view['nome_empreendimento'].astype(str).str.contains(q, case=False, na=False) |
-                df_view['bndes_cliente'].astype(str).str.contains(q, case=False, na=False) |
-                df_view['doc_num'].astype(str).str.contains(q, case=False, na=False)
+                df_view[col_emp].astype(str).str.contains(q, case=False, na=False) |
+                df_view[col_cliente].astype(str).str.contains(q, case=False, na=False) |
+                df_view[col_cnpj].astype(str).str.contains(q, case=False, na=False)
             ]
         st.write(f"Mostrando **{len(df_view):,}** registros encontrados.")
+        show_cols = [c for c in [col_cnpj, col_cliente, col_emp, col_tipo, col_porte, col_ano, col_val, col_subsetor] if c in df_view.columns]
         st.dataframe(
-            df_view[[
-                'doc_num', 'bndes_cliente', 'nome_empreendimento', 'tipo_licenca',
-                'porte', 'ano', 'bndes_total_contratado', 'bndes_subsetor'
-            ]].rename(columns={
-                'doc_num': 'CNPJ',
-                'bndes_cliente': 'Cliente (BNDES)',
-                'nome_empreendimento': 'Nome Empreendimento',
-                'tipo_licenca': 'Tipo de Licença',
-                'porte': 'Porte',
-                'ano': 'Ano',
-                'bndes_total_contratado': 'Total Financiado (R$)',
-                'bndes_subsetor': 'Subsetor'
+            df_view[show_cols].rename(columns={
+                col_cnpj: 'CNPJ',
+                col_cliente: 'Cliente (BNDES)',
+                col_emp: 'Nome Empreendimento',
+                col_tipo: 'Tipo de Licença',
+                col_porte: 'Porte',
+                col_ano: 'Ano',
+                col_val: 'Total Financiado (R$)',
+                col_subsetor: 'Subsetor'
             }),
             use_container_width=True
         )
