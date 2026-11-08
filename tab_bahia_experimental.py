@@ -132,13 +132,11 @@ def render_bahia_experimental_tab():
             title="Bahia: Licenciamentos Abertos (INEMA) vs. Obras do PAC vs. Operações BNDES (2008-2026)",
             xaxis=dict(title="Ano", tickmode="linear", dtick=1),
             yaxis=dict(
-                title="Qtd. Licenciamentos & Obras PAC",
-                titlefont=dict(color="#10B981"),
+                title=dict(text="Qtd. Licenciamentos & Obras PAC", font=dict(color="#10B981")),
                 tickfont=dict(color="#10B981")
             ),
             yaxis2=dict(
-                title="Qtd. Operações BNDES",
-                titlefont=dict(color="#F59E0B"),
+                title=dict(text="Qtd. Operações BNDES", font=dict(color="#F59E0B")),
                 tickfont=dict(color="#F59E0B"),
                 overlaying="y",
                 side="right"
