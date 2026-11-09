@@ -38,8 +38,21 @@ def render_bahia_experimental_tab():
 
     with st.spinner("Carregando e integrando as 4 séries temporais da Bahia..."):
         # 1. Licenciamento BA (INEMA - Data de emissão)
-        df_ba = pd.read_csv(path_ba_lic, sep=';', encoding='latin1', low_memory=False)
-        dt_emis = pd.to_datetime(df_ba['Data de emissão'], errors='coerce')
+        try:
+            df_ba = pd.read_csv(path_ba_lic, sep=';', encoding='utf-8', low_memory=False)
+        except Exception:
+            df_ba = pd.read_csv(path_ba_lic, sep=';', encoding='latin1', low_memory=False)
+        
+        # Localização dinâmica da coluna de emissão (independente de codificação utf-8/latin1)
+        col_emis = None
+        for col in df_ba.columns:
+            if 'emiss' in col.lower():
+                col_emis = col
+                break
+        if col_emis is None:
+            col_emis = df_ba.columns[6]  # fallback posicional para a 7ª coluna
+            
+        dt_emis = pd.to_datetime(df_ba[col_emis], errors='coerce')
         lic_by_year = dt_emis.dt.year.value_counts()
 
         # 2. BNDES Operações Diretas BA
