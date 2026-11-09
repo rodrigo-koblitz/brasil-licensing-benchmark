@@ -6,7 +6,10 @@ Integrates:
 """
 
 import os
-import duckdb
+try:
+    import duckdb
+except ImportError:
+    duckdb = None
 import pandas as pd
 import streamlit as st
 import plotly.express as px
@@ -282,17 +285,26 @@ def render_agro_module():
         muni_year = st.selectbox("Ano de Referência Municipal:", options=list(range(2024, 1999, -1)), index=0)
         
         if os.path.exists(MUNI_PARQUET):
-            con = duckdb.connect()
-            df_top_mun = con.execute(f"""
-                SELECT 
-                    municipio_nome,
-                    valor_producao_mil_reais / 1e3 AS valor_producao_mi_reais
-                FROM '{MUNI_PARQUET.replace(chr(92), '/')}'
-                WHERE ano = {muni_year}
-                ORDER BY valor_producao_mil_reais DESC
-                LIMIT 20
-            """).df()
-            con.close()
+            if duckdb is not None:
+                con = duckdb.connect()
+                muni_pq_clean = MUNI_PARQUET.replace(chr(92), '/')
+                df_top_mun = con.execute(f"""
+                    SELECT 
+                        municipio_nome,
+                        valor_producao_mil_reais / 1e3 AS valor_producao_mi_reais
+                    FROM '{muni_pq_clean}'
+                    WHERE ano = {muni_year}
+                    ORDER BY valor_producao_mil_reais DESC
+                    LIMIT 20
+                """).df()
+                con.close()
+            else:
+                df_m_all = pd.read_parquet(MUNI_PARQUET, columns=['municipio_nome', 'valor_producao_mil_reais', 'ano'])
+                df_sub = df_m_all[df_m_all['ano'] == muni_year].sort_values(by='valor_producao_mil_reais', ascending=False).head(20)
+                df_top_mun = pd.DataFrame({
+                    'municipio_nome': df_sub['municipio_nome'],
+                    'valor_producao_mi_reais': df_sub['valor_producao_mil_reais'] / 1e3
+                })
 
             fig_top_mun = px.bar(
                 df_top_mun,
