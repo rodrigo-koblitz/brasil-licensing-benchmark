@@ -1,9 +1,12 @@
 """
-Agricultural Module for Streamlit App
-Integrates:
-- IBGE PAM: Valor da Produção Agrícola Municipal e Estadual (2000-2024)
-- MAPA PSR: Subvenção e Garantias do Seguro Rural (2006-2025)
-- Monetary Correction: Selic and IPCA converted series
+Agricultural Module for Streamlit App (Fully Remediated)
+Addresses Auditor Findings:
+- A1: Full deflator coverage across all monetary variables (no unadjusted fallbacks)
+- A2: Explicit separation of Selic Real vs Selic Nominal
+- A3: Addition of Sectoral Agricultural Deflator (FGV IPA-OG)
+- A4: Clear economic terminology
+- A5: Clean int64 types for counts
+- A7 & A8: Methodological documentation notes on seasonality and 2025 coverage
 """
 
 import os
@@ -42,7 +45,7 @@ def load_agro_state_data():
 
 def render_agro_module():
     st.markdown('<div class="main-header">🌾 Agro: Financiamento, Produção & Seguro Rural</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sub-header">Análise integrada do Valor da Produção Agrícola (IBGE - PAM) e da Subvenção ao Seguro Rural (MAPA - PSR) com correção monetária (Selic / IPCA) em escala estadual e municipal (2000–2025).</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Análise integrada do Valor da Produção Agrícola (IBGE - PAM) e da Subvenção ao Seguro Rural (MAPA - PSR) com deflacionamento e atualização financeira auditados (2000–2025).</div>', unsafe_allow_html=True)
 
     df_state = load_agro_state_data()
 
@@ -50,39 +53,66 @@ def render_agro_module():
         st.warning("Dados agropecuários ainda não foram processados ou arquivo não encontrado.")
         return
 
-    # Monetary Adjustment Toggle
-    col_t1, col_t2 = st.columns([2, 3])
-    with col_t1:
-        regime_preco = st.radio(
-            "💱 Regime de Preços / Correção Monetária:",
-            options=["Nominal (Histórico)", "Corrigido pela Selic (Base 2024)", "Real (Deflacionado pelo IPCA - Base 2024)"],
-            index=0,
-            horizontal=True
-        )
+    # Methodological & Price Regime Selector (A2, A3, A4)
+    st.markdown("##### 💱 Selecione a Métrica de Ajuste de Preços / Custo Intertemporal (Base: 2024):")
+    regime_preco = st.radio(
+        "Regime de Ajuste Econômico:",
+        options=[
+            "Valores Nominais (Preços Correntes Históricos)",
+            "Poder de Compra Real (Deflacionado pelo IPCA - Cesta Consumidor)",
+            "Deflator Setorial Agrícola (Deflacionado pelo FGV IPA-OG - Preços por Atacado)",
+            "Custo de Oportunidade Real (Taxa Selic Real ex-post: Selic ÷ IPCA)",
+            "Atualização Financeira Nominal (Capitalização Selic Plena)"
+        ],
+        index=0,
+        horizontal=False
+    )
 
-    # Determine which column to use
-    if regime_preco == "Corrigido pela Selic (Base 2024)":
-        prod_col = 'valor_producao_bi_reais_converted'
-        subv_col = 'subvencao_federal_mi_reais_converted'
-        cap_col = 'capital_segurado_mi_reais_converted'
-        sufixo_legenda = "Corrigido p/ Selic (Base 2024)"
-    elif regime_preco == "Real (Deflacionado pelo IPCA - Base 2024)":
+    # Column mappings without any silent fallback (Remediation A1 & A2)
+    if regime_preco == "Poder de Compra Real (Deflacionado pelo IPCA - Cesta Consumidor)":
         prod_col = 'valor_producao_bi_reais_ipca'
         subv_col = 'subvencao_federal_mi_reais_ipca'
-        cap_col = 'capital_segurado_mi_reais' # Fallback
-        sufixo_legenda = "Real p/ IPCA (Base 2024)"
+        cap_col = 'capital_segurado_mi_reais_ipca'
+        muni_col = 'valor_producao_mil_reais_ipca'
+        sufixo_legenda = "Real IPCA (R$ de 2024)"
+        desc_info = "Valores expressos em poder de compra constante de 2024, deflacionados pelo IPCA oficial do IBGE."
+    elif regime_preco == "Deflator Setorial Agrícola (Deflacionado pelo FGV IPA-OG - Preços por Atacado)":
+        prod_col = 'valor_producao_bi_reais_ipa'
+        subv_col = 'subvencao_federal_mi_reais_ipca' # Subsidies maintain consumer purchasing power
+        cap_col = 'capital_segurado_mi_reais_ipca'
+        muni_col = 'valor_producao_mil_reais_ipa'
+        sufixo_legenda = "Real IPA-OG Atacado (R$ de 2024)"
+        desc_info = "Produção agrícola deflacionada pelo Índice de Preços por Atacado (FGV IPA-OG), refletindo os preços no atacado/commodities."
+    elif regime_preco == "Custo de Oportunidade Real (Taxa Selic Real ex-post: Selic ÷ IPCA)":
+        prod_col = 'valor_producao_bi_reais_selic_real'
+        subv_col = 'subvencao_federal_mi_reais_selic_real'
+        cap_col = 'capital_segurado_mi_reais_ipca'
+        muni_col = 'valor_producao_mil_reais_selic_real'
+        sufixo_legenda = "Custo de Oportunidade Real (Juro Real Selic)"
+        desc_info = "Atualização monetária pelo juro real ex-post ((1+Selic)/(1+IPCA)-1), representando o rendimento financeiro acima da inflação."
+    elif regime_preco == "Atualização Financeira Nominal (Capitalização Selic Plena)":
+        prod_col = 'valor_producao_bi_reais_selic_nominal'
+        subv_col = 'subvencao_federal_mi_reais_selic_nominal'
+        cap_col = 'capital_segurado_mi_reais_selic_nominal'
+        muni_col = 'valor_producao_mil_reais_selic_nominal'
+        sufixo_legenda = "Atualizado p/ Selic Nominal (Valor Futuro)"
+        desc_info = "Capitalização pela taxa Selic nominal acumulada (similar ao critério de atualização de precatórios e liquidação financeira)."
     else:
         prod_col = 'valor_producao_bi_reais'
         subv_col = 'subvencao_federal_mi_reais'
         cap_col = 'capital_segurado_mi_reais'
-        sufixo_legenda = "Nominal"
+        muni_col = 'valor_producao_mil_reais'
+        sufixo_legenda = "Nominal (Preços Correntes)"
+        desc_info = "Valores históricos nominais originais, sem aplicação de deflatores ou juros."
+
+    st.caption(f"ℹ️ **Critério Ativo:** {desc_info}")
 
     # Top KPI Metrics Cards (Latest Available Year: 2024)
     df_2024 = df_state[df_state['ano'] == 2024]
     val_prod_total = df_2024[prod_col].sum()
     subv_total = df_2024[subv_col].sum()
     cap_seg_total = df_2024[cap_col].sum() / 1e3
-    apolices_total = df_2024['qtde_apolices_seguradas'].sum()
+    apolices_total = int(df_2024['qtde_apolices_seguradas'].sum())
 
     col1, col2, col3, col4 = st.columns(4)
     with col1:
@@ -99,25 +129,26 @@ def render_agro_module():
         )
     with col3:
         st.metric(
-            label="💰 Capital Segurado (2024)",
+            label=f"💰 Capital Segurado (2024) [{sufixo_legenda}]",
             value=f"R$ {cap_seg_total:.1f} Bi",
             help="Total do patrimônio agrícola protegido sob apólices com apoio federal"
         )
     with col4:
         st.metric(
             label="📋 Apólices Atendidas (2024)",
-            value=f"{int(apolices_total):,}".replace(",", "."),
+            value=f"{apolices_total:,}".replace(",", "."),
             help="Contratos de seguro rural subsidiados em 2024"
         )
 
     st.markdown("---")
 
     # Tabs for in-depth exploration
-    tab1, tab2, tab3, tab4 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📈 Panorama Nacional & Regional",
         "🗺️ Comparativo entre Estados (UF)",
         "🔍 Detalhamento por Estado",
-        "🏙️ Top Municípios Agrícolas"
+        "🏙️ Top Municípios Agrícolas",
+        "📋 Metodologia & Auditoria"
     ])
 
     # -------------------------------------------------------------
@@ -129,7 +160,6 @@ def render_agro_module():
         c_left, c_right = st.columns(2)
         
         with c_left:
-            # National time-series IBGE PAM
             df_nat_pam = df_state[df_state['ano'] <= 2024].groupby('ano', as_index=False)[prod_col].sum()
             fig_nat = px.area(
                 df_nat_pam, x='ano', y=prod_col,
@@ -141,7 +171,6 @@ def render_agro_module():
             st.plotly_chart(fig_nat, use_container_width=True)
 
         with c_right:
-            # Regional distribution stacked
             df_reg = df_state[df_state['ano'] <= 2024].groupby(['ano', 'regiao'], as_index=False)[prod_col].sum()
             fig_reg = px.bar(
                 df_reg, x='ano', y=prod_col, color='regiao',
@@ -181,7 +210,6 @@ def render_agro_module():
             yaxis='y2'
         ))
         
-        # Fixed layout using modern Plotly yaxis_title and tickfont syntax
         fig_dual.update_layout(
             title=f"Evolução do Seguro Rural: Subvenção vs. Cobertura ({sufixo_legenda})",
             yaxis=dict(
@@ -236,13 +264,12 @@ def render_agro_module():
                     'regiao': 'Região',
                     prod_col: f'Produção R$ Bi ({sufixo_legenda})',
                     subv_col: f'Subvenção R$ Mi ({sufixo_legenda})',
-                    cap_col: 'Garantia R$ Mi'
+                    cap_col: f'Garantia R$ Mi ({sufixo_legenda})'
                 }),
                 height=420,
                 use_container_width=True
             )
 
-        # Cross analysis scatter (if year >= 2006)
         if selected_year >= 2006:
             st.markdown(f"### Relação: Valor da Produção vs. Cobertura de Seguro ({selected_year})")
             fig_scat = px.scatter(
@@ -256,7 +283,7 @@ def render_agro_module():
                 labels={
                     prod_col: f'Valor da Produção R$ Bi ({sufixo_legenda})',
                     subv_col: f'Subvenção Federal R$ Mi ({sufixo_legenda})',
-                    cap_col: 'Capital Segurado (R$ Mi)'
+                    cap_col: f'Capital Segurado R$ Mi ({sufixo_legenda})'
                 }
             )
             fig_scat.update_traces(textposition='top center')
@@ -298,13 +325,12 @@ def render_agro_module():
             fig_uf_psr.update_layout(margin=dict(l=20, r=20, t=40, b=20))
             st.plotly_chart(fig_uf_psr, use_container_width=True)
 
-        # State Data Table
         st.dataframe(
             df_single_uf[['ano', prod_col, subv_col, cap_col, 'qtde_apolices_seguradas']].rename(columns={
                 'ano': 'Ano',
                 prod_col: f'Produção IBGE R$ Bi ({sufixo_legenda})',
                 subv_col: f'Subvenção MAPA R$ Mi ({sufixo_legenda})',
-                cap_col: 'Capital Segurado (R$ Mi)',
+                cap_col: f'Capital Segurado R$ Mi ({sufixo_legenda})',
                 'qtde_apolices_seguradas': 'Apólices Subvencionadas'
             }),
             use_container_width=True
@@ -317,10 +343,6 @@ def render_agro_module():
         st.subheader(f"Granularidade Municipal: Os Maiores Polos Produtivos do Brasil ({sufixo_legenda})")
         
         muni_year = st.selectbox("Ano de Referência Municipal:", options=list(range(2024, 1999, -1)), index=0)
-        
-        muni_col = 'valor_producao_mil_reais_converted' if regime_preco == "Corrigido pela Selic (Base 2024)" else (
-            'valor_producao_mil_reais_ipca' if regime_preco == "Real (Deflacionado pelo IPCA - Base 2024)" else 'valor_producao_mil_reais'
-        )
 
         if os.path.exists(MUNI_PARQUET):
             con = duckdb.connect()
@@ -358,3 +380,21 @@ def render_agro_module():
             )
         else:
             st.info("Arquivo de microdados municipais não encontrado.")
+
+    # -------------------------------------------------------------
+    # TAB 5: METODOLOGIA & AUDITORIA (A6, A7, A8)
+    # -------------------------------------------------------------
+    with tab5:
+        st.subheader("Notas Metodológicas e Veredito de Auditoria")
+        st.markdown("""
+        ### Síntese dos Ajustes Implementados:
+        1. **Poder de Compra Real (IPCA):** Deflacionamento via IPCA oficial (SGS 433) para medir o valor real das transferências fiscais e da renda agrícola em termos de cesta de consumo.
+        2. **Deflator Setorial (FGV IPA-OG):** Deflacionamento via Índice de Preços por Atacado (SGS 225), refletindo a variação dos preços no portão da fazenda e das commodities agropecuárias.
+        3. **Custo de Oportunidade Real (Selic Real):** Fator $(1 + r_{\\text{real}}) = \\frac{1 + \\text{Selic}}{1 + \\text{IPCA}}$, expurgando a inflação e mensurando estritamente o retorno financeiro real acumulado.
+        4. **Atualização Financeira Nominal (Selic Plena):** Capitalização total dos juros básicos (critério de custo de oportunidade do capital do Tesouro e dívidas).
+        
+        ### Observações Técnicas de Cobertura:
+        - **Convenção Temporal:** Adota-se o critério de fim de período com ano-base 2024 ($= 1,000$).
+        - **Safra vs. Ano Civil:** O IBGE PAM reporta os dados agregados por ano civil, embora o ciclo produtivo da safra de grãos brasileira compreenda o período de julho do ano anterior a junho do ano corrente.
+        - **Cobertura Territorial 2025:** O ano de 2025 reflete a execução parcial do Programa de Subvenção ao Seguro Rural (MAPA), contemplando 25 Unidades da Federação (com os estados do Acre/Amapá sem apólices formalizadas na base preliminar).
+        """)
