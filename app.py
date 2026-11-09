@@ -258,16 +258,34 @@ elif modulo == "🌳 Desmatamento (MapBiomas)":
         st.error(f"Erro ao carregar dados de desmatamento: {e}")
         st.stop()
 
+    # Areas territoriais oficiais IBGE (em hectares) para calculo proporcional
+    ibge_areas_ha = {
+        'AC': 16412370.0, 'AL': 2784330.0, 'AM': 155914690.0, 'AP': 14282850.0,
+        'BA': 56476040.0, 'CE': 14889440.0, 'DF': 576080.0, 'ES': 4607440.0,
+        'GO': 34024290.0, 'MA': 32965150.0, 'MG': 58651390.0, 'MS': 35714550.0,
+        'MT': 90320700.0, 'PA': 124587070.0, 'PB': 5646720.0, 'PE': 9806790.0,
+        'PI': 25175550.0, 'PR': 19929890.0, 'RJ': 4375040.0, 'RN': 5280960.0,
+        'RO': 23776530.0, 'RR': 22364450.0, 'RS': 28170720.0, 'SC': 9573070.0,
+        'SE': 2192540.0, 'SP': 24821950.0, 'TO': 27742360.0
+    }
+    area_brasil_ha = 851062960.0
+
+    # Injetar colunas de percentual territorial
+    df_desm_uf['area_estado_ha'] = df_desm_uf['UF'].map(ibge_areas_ha)
+    df_desm_uf['pct_desmatamento'] = (df_desm_uf['area_ha'] / df_desm_uf['area_estado_ha']) * 100.0
+    df_desm_bioma['pct_desmatamento'] = (df_desm_bioma['area_ha'] / area_brasil_ha) * 100.0
+
     # KPIs
     d1, d2, d3, d4 = st.columns(4)
     total_acum_ha = df_desm_br['area_ha'].sum()
-    total_acum_km2 = df_desm_br['area_km2'].sum()
     ultimo_ano = int(df_desm_br['ano'].max())
     taxa_ultimo_ano_ha = df_desm_br[df_desm_br['ano'] == ultimo_ano]['area_ha'].values[0]
+    pct_acum_brasil = (total_acum_ha / area_brasil_ha) * 100.0
+    pct_anual_brasil = (taxa_ultimo_ano_ha / area_brasil_ha) * 100.0
 
-    d1.metric("Desmatamento Acumulado (2000-2025)", f"{total_acum_km2:,.0f} km²")
+    d1.metric("Desmatamento Acumulado (2000-2025)", f"{pct_acum_brasil:.2f}% do Território")
     d2.metric("Área Total Suprimida", f"{total_acum_ha/1e6:,.2f} Milhões ha")
-    d3.metric(f"Taxa Anual ({ultimo_ano})", f"{taxa_ultimo_ano_ha/1e3:,.1f} mil ha")
+    d3.metric(f"Taxa Anual ({ultimo_ano})", f"{taxa_ultimo_ano_ha/1e3:,.1f} mil ha ({pct_anual_brasil:.3f}%)")
     d4.metric("Resolução Espacial Satélite", "30 metros (Landsat)")
 
     st.markdown("---")
@@ -282,8 +300,9 @@ elif modulo == "🌳 Desmatamento (MapBiomas)":
     with d_tab1:
         st.subheader("1. Evolução Histórica Anual do Desmatamento")
         
-        unidade = st.radio("Unidade de Visualização:", ["Hectares (ha)", "Quilômetros Quadrados (km²)"], horizontal=True)
-        col_area = 'area_ha' if unidade == "Hectares (ha)" else 'area_km2'
+        unidade = st.radio("Unidade de Visualização:", ["Hectares (ha)", "Percentual do Estado (%)"], horizontal=True)
+        col_area = 'area_ha' if unidade == "Hectares (ha)" else 'pct_desmatamento'
+        rotulo_unidade = "ha" if unidade == "Hectares (ha)" else "% do Estado"
         
         ufs_disponiveis = sorted(df_desm_uf['UF'].unique())
         selected_ufs = st.multiselect(
@@ -300,9 +319,11 @@ elif modulo == "🌳 Desmatamento (MapBiomas)":
                 y=col_area,
                 color='UF',
                 markers=True,
-                labels={'ano': 'Ano', col_area: f'Área Suprimida ({unidade})', 'UF': 'Estado'},
+                labels={'ano': 'Ano', col_area: f'Desmatamento ({rotulo_unidade})', 'UF': 'Estado'},
                 title=f"Série Histórica de Desmatamento por Estado ({unidade})"
             )
+            if col_area == 'pct_desmatamento':
+                fig_d_uf.update_traces(hovertemplate='%{y:.3f}%')
             fig_d_uf.update_layout(height=450, hovermode="x unified")
             st.plotly_chart(fig_d_uf, use_container_width=True)
             
@@ -310,10 +331,10 @@ elif modulo == "🌳 Desmatamento (MapBiomas)":
         fig_bioma = px.area(
             df_desm_bioma,
             x='ano',
-            y=col_area,
+            y='area_ha',
             color='BIOME',
-            labels={'ano': 'Ano', col_area: f'Área Suprimida ({unidade})', 'BIOME': 'Bioma'},
-            title=f"Desmatamento Anual por Bioma Brasileiro ({unidade})"
+            labels={'ano': 'Ano', 'area_ha': 'Área Suprimida (ha)', 'BIOME': 'Bioma'},
+            title="Desmatamento Anual por Bioma Brasileiro (Hectares)"
         )
         fig_bioma.update_layout(height=450, hovermode="x unified")
         st.plotly_chart(fig_bioma, use_container_width=True)
@@ -343,11 +364,13 @@ elif modulo == "🌳 Desmatamento (MapBiomas)":
             
         with col_rank_table:
             st.markdown(f"### Tabela do Ano {ano_selecionado}")
+            df_display = df_ano_uf[['UF', 'area_ha', 'pct_desmatamento']].copy()
+            df_display['pct_desmatamento'] = df_display['pct_desmatamento'].apply(lambda x: f"{x:.3f}%")
             st.dataframe(
-                df_ano_uf[['UF', 'area_ha', 'area_km2']].rename(columns={
+                df_display.rename(columns={
                     'UF': 'Estado',
                     'area_ha': 'Área (ha)',
-                    'area_km2': 'Área (km²)'
+                    'pct_desmatamento': '% do Estado'
                 }),
                 height=600,
                 use_container_width=True
