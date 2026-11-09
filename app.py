@@ -8,6 +8,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from map_module import render_map_module
+from agro_module import render_agro_module
 
 st.set_page_config(
     page_title="Plataforma Integrada: Licenciamento Ambiental, Desmatamento & Modelagem Estatística - Brasil",
@@ -42,6 +43,7 @@ modulo = st.sidebar.radio(
         "🌳 Desmatamento (MapBiomas)",
         "⚖️ Modelagem: Desmatamento X Licenciamento",
         "📊 Benchmark Financeiro & BNDES",
+        "🌾 Financiamento & Seguro Agropecuário",
         "🗺️ Mapa Geoespacial: Desmatamento & Licenças"
     ],
     index=0
@@ -784,5 +786,8 @@ elif modulo == "📊 Benchmark Financeiro & BNDES":
 # ==============================================================================
 # MÓDULO 5: MAPA GEOESPACIAL (LEAFLET / FOLIUM)
 # ==============================================================================
+elif modulo == "🌾 Financiamento & Seguro Agropecuário":
+    render_agro_module()
+
 elif modulo == "🗺️ Mapa Geoespacial: Desmatamento & Licenças":
     render_map_module(DATA_DIR)
