@@ -118,7 +118,7 @@ def render_bahia_experimental_tab():
         df_ts = pd.DataFrame(data)
 
     # Métricas Resumo
-    m1, m2, m3, m4, m5, m6 = st.columns(6)
+    m1, m2, m3, m4, m5, m6, m7 = st.columns(7)
     with m1:
         st.metric("Total Licenças (INEMA)", f"{df_ts['Licenças Emitidas (Total INEMA)'].sum():,}")
     with m2:
@@ -130,6 +130,8 @@ def render_bahia_experimental_tab():
     with m5:
         st.metric("Total Obras PAC (BA)", f"{df_ts['Obras PAC'].sum():,}")
     with m6:
+        st.metric("Propostas SICONV (BA)", f"{df_ts['Propostas SICONV'].sum():,}")
+    with m7:
         st.metric("Contratos BNDES", f"{df_ts['Operações BNDES'].sum():,}")
 
     st.markdown("---")
@@ -191,7 +193,17 @@ def render_bahia_experimental_tab():
             yaxis="y1"
         ))
 
-        # Linha 5: Desmatamento MapBiomas (% do Território da Bahia - Eixo Direito)
+        # Linha 5: Propostas SICONV / Transferegov
+        fig.add_trace(go.Scatter(
+            x=df_ts["Ano"],
+            y=df_ts["Propostas SICONV"],
+            mode="lines+markers",
+            name="🏛️ Propostas SICONV (Transferegov)",
+            line=dict(color="#8B5CF6", width=2, dash="dash"),
+            yaxis="y1"
+        ))
+
+        # Linha 6: Desmatamento MapBiomas (% do Território da Bahia - Eixo Direito)
         fig.add_trace(go.Scatter(
             x=df_ts["Ano"],
             y=df_ts["Desmatamento (% Território BA)"],
@@ -201,12 +213,12 @@ def render_bahia_experimental_tab():
             yaxis="y2"
         ))
 
-        # Linha 6: Operações BNDES (Eixo Direito)
+        # Linha 7: Operações BNDES (Eixo Direito Adicional)
         fig.add_trace(go.Scatter(
             x=df_ts["Ano"],
             y=df_ts["Operações BNDES"],
             mode="lines+markers",
-            name="🏛️ BNDES Operações Diretas",
+            name="🏦 BNDES Operações Diretas",
             line=dict(color="#F59E0B", width=2, dash="dashdot"),
             yaxis="y3"
         ))
@@ -215,7 +227,7 @@ def render_bahia_experimental_tab():
             title="Bahia: Licenciamento Ambiental (Total, LAC, ASV) vs. Desmatamento vs. Investimentos (2008-2026)",
             xaxis=dict(title="Ano", tickmode="linear", dtick=1, domain=[0.05, 0.90]),
             yaxis=dict(
-                title=dict(text="Qtd. Licenças Emitidas & Obras PAC", font=dict(color="#10B981")),
+                title=dict(text="Qtd. Atos INEMA, Obras PAC & SICONV", font=dict(color="#10B981")),
                 tickfont=dict(color="#10B981"),
                 side="left"
             ),
@@ -294,6 +306,7 @@ def render_bahia_experimental_tab():
         base_lic = df_ts.loc[df_ts["Ano"] == 2008, "Licenças Emitidas (Total INEMA)"].values[0] or 1
         base_bndes = df_ts.loc[df_ts["Ano"] == 2008, "Operações BNDES"].values[0] or 1
         base_pac = df_ts.loc[df_ts["Ano"] == 2008, "Obras PAC"].values[0] or 1
+        base_sic = df_ts.loc[df_ts["Ano"] == 2008, "Propostas SICONV"].values[0] or 1
         base_desm = df_ts.loc[df_ts["Ano"] == 2008, "Desmatamento (ha)"].values[0] or 1
 
         fig.add_trace(go.Scatter(
@@ -312,9 +325,16 @@ def render_bahia_experimental_tab():
         ))
         fig.add_trace(go.Scatter(
             x=df_ts["Ano"],
+            y=(df_ts["Propostas SICONV"] / base_sic) * 100,
+            mode="lines+markers",
+            name="🏛️ Propostas SICONV (Base 100)",
+            line=dict(color="#8B5CF6", width=2.5, dash="dash")
+        ))
+        fig.add_trace(go.Scatter(
+            x=df_ts["Ano"],
             y=(df_ts["Operações BNDES"] / base_bndes) * 100,
             mode="lines+markers",
-            name="🏛️ Operações BNDES (Base 100)",
+            name="🏦 Operações BNDES (Base 100)",
             line=dict(color="#F59E0B", width=2.5)
         ))
         fig.add_trace(go.Scatter(
