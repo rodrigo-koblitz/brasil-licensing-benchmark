@@ -354,60 +354,77 @@ def render_bahia_experimental_tab():
             help="3.820 propostas e convênios municipais/estaduais aprovados no SICONV com proponentes formalmente licenciados."
         )
 
-    # Tabela de Distribuição do Capital por Modalidade de Licenciamento
-    st.markdown("#### 🔬 Distribuição do Capital por Tipologia de Licença Ambiental")
-    df_modalidades = pd.DataFrame([
-        {
-            "Modalidade da Licença": "LU - Licença Unificada",
-            "Licenças Vinculadas": 475,
-            "Total Rastreado (R$)": "R$ 43,18 Bilhões",
-            "Valor Médio / Licença": "R$ 90,9 Mi",
-            "Perfil Típico do Empreendimento": "Grandes parques eólicos, solares, mineração e complexos industriais"
-        },
-        {
-            "Modalidade da Licença": "LO - Licença de Operação",
-            "Licenças Vinculadas": 283,
-            "Total Rastreado (R$)": "R$ 21,45 Bilhões",
-            "Valor Médio / Licença": "R$ 75,8 Mi",
-            "Perfil Típico do Empreendimento": "Infraestrutura rodoviária, plantas químicas, papel e celulose, saneamento"
-        },
-        {
-            "Modalidade da Licença": "RLO - Renovação de LO",
-            "Licenças Vinculadas": 261,
-            "Total Rastreado (R$)": "R$ 14,20 Bilhões",
-            "Valor Médio / Licença": "R$ 54,4 Mi",
-            "Perfil Típico do Empreendimento": "Manutenção operacional de linhas de transmissão, portos e refinarias"
-        },
-        {
-            "Modalidade da Licença": "LA - Licença de Alteração",
-            "Licenças Vinculadas": 230,
-            "Total Rastreado (R$)": "R$ 8,62 Bilhões",
-            "Valor Médio / Licença": "R$ 37,5 Mi",
-            "Perfil Típico do Empreendimento": "Ampliação de capacidade instalada e expansão de infraestrutura industrial"
-        },
-        {
-            "Modalidade da Licença": "LI - Licença de Instalação",
-            "Licenças Vinculadas": 215,
-            "Total Rastreado (R$)": "R$ 5,87 Bilhões",
-            "Valor Médio / Licença": "R$ 27,3 Mi",
-            "Perfil Típico do Empreendimento": "Canteiros de obras ativas, barragens, adutoras e implantação fabril"
-        },
-        {
-            "Modalidade da Licença": "LP - Licença Prévia",
-            "Licenças Vinculadas": 134,
-            "Total Rastreado (R$)": "R$ 2,11 Bilhões",
-            "Valor Médio / Licença": "R$ 15,7 Mi",
-            "Perfil Típico do Empreendimento": "Viabilidade socioambiental de projetos de transporte e logística"
-        },
-        {
-            "Modalidade da Licença": "LAC / DLA / LS (Declaratórias e Simplificadas)",
-            "Licenças Vinculadas": 486,
-            "Total Rastreado (R$)": "R$ 1,33 Bilhão",
-            "Valor Médio / Licença": "R$ 2,7 Mi",
-            "Perfil Típico do Empreendimento": "Postos de combustíveis, infraestrutura urbana, ERBs e obras municipais SICONV"
-        }
-    ])
-    st.dataframe(df_modalidades, use_container_width=True, hide_index=True)
+    # Botão para abrir o modal de diálogo detalhado
+    @st.dialog("🔬 Distribuição do Capital por Modalidade de Licença Ambiental", width="large")
+    def modal_distribuicao_licencas():
+        st.markdown("""
+        Demonstrativo detalhado do capital financeiro público e de crédito (**BNDES, PAC e SICONV**) 
+        capturado pelas diferentes modalidades de licenças e atos autorizativos na Bahia:
+        """)
+        
+        df_dialog = pd.DataFrame([
+            {
+                "Modalidade da Licença": "LU - Licença Unificada",
+                "Licenças Vinculadas": 475,
+                "Total Rastreado (R$)": "R$ 43,18 Bilhões",
+                "Valor Médio / Licença": "R$ 90,9 Mi",
+                "Perfil Típico do Empreendimento": "Grandes parques eólicos, solares, mineração e complexos industriais"
+            },
+            {
+                "Modalidade da Licença": "LO - Licença de Operação",
+                "Licenças Vinculadas": 283,
+                "Total Rastreado (R$)": "R$ 21,45 Bilhões",
+                "Valor Médio / Licença": "R$ 75,8 Mi",
+                "Perfil Típico do Empreendimento": "Infraestrutura rodoviária, plantas químicas, papel e celulose, saneamento"
+            },
+            {
+                "Modalidade da Licença": "RLO - Renovação de LO",
+                "Licenças Vinculadas": 261,
+                "Total Rastreado (R$)": "R$ 14,20 Bilhões",
+                "Valor Médio / Licença": "R$ 54,4 Mi",
+                "Perfil Típico do Empreendimento": "Manutenção operacional de linhas de transmissão, portos e refinarias"
+            },
+            {
+                "Modalidade da Licença": "LA - Licença de Alteração",
+                "Licenças Vinculadas": 230,
+                "Total Rastreado (R$)": "R$ 8,62 Bilhões",
+                "Valor Médio / Licença": "R$ 37,5 Mi",
+                "Perfil Típico do Empreendimento": "Ampliação de capacidade instalada e expansão de infraestrutura industrial"
+            },
+            {
+                "Modalidade da Licença": "LI - Licença de Instalação",
+                "Licenças Vinculadas": 215,
+                "Total Rastreado (R$)": "R$ 5,87 Bilhões",
+                "Valor Médio / Licença": "R$ 27,3 Mi",
+                "Perfil Típico do Empreendimento": "Canteiros de obras ativas, barragens, adutoras e implantação fabril"
+            },
+            {
+                "Modalidade da Licença": "LP - Licença Prévia",
+                "Licenças Vinculadas": 134,
+                "Total Rastreado (R$)": "R$ 2,11 Bilhões",
+                "Valor Médio / Licença": "R$ 15,7 Mi",
+                "Perfil Típico do Empreendimento": "Viabilidade socioambiental de projetos de transporte e logística"
+            },
+            {
+                "Modalidade da Licença": "LAC / DLA / LS (Declaratórias e Simplificadas)",
+                "Licenças Vinculadas": 486,
+                "Total Rastreado (R$)": "R$ 1,33 Bilhão",
+                "Valor Médio / Licença": "R$ 2,7 Mi",
+                "Perfil Típico do Empreendimento": "Postos de combustíveis, infraestrutura urbana, ERBs e obras municipais SICONV"
+            }
+        ])
+        st.dataframe(df_dialog, use_container_width=True, hide_index=True)
+        
+        st.markdown("""
+        > **Destaques Metodológicos:**
+        > - **Macroprojetos (LU / LO / LI / IBAMA):** Concentram **R$ 83,46 Bilhões** em investimentos de alto impacto e crédito BNDES.
+        > - **Obras Locais e Urbanas (LAC / DLA / LS):** Representam **486 atos** vinculados a convênios do SICONV e pequenas intervenções de infraestrutura urbana.
+        """)
+
+    col_btn, _ = st.columns([2, 3])
+    with col_btn:
+        if st.button("🔍 Ver Detalhes: Distribuição por Modalidade de Licença", use_container_width=True, type="primary"):
+            modal_distribuicao_licencas()
 
     with st.expander("📌 Síntese da Relação Econômica entre Licenciamento e Fontes de Recursos", expanded=False):
         st.markdown("""
