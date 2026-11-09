@@ -27,7 +27,9 @@ def render_bahia_experimental_tab():
         return primary
 
     path_ba_lic = resolve_path(r"G:\Meu Drive\UFMG\BA_edit.csv", "BA_edit.csv")
-    path_ibama = resolve_path(r"G:\Meu Drive\UFMG\auxiliary\app\data\licencas_ibama.parquet", "licencas_ibama.parquet")
+    path_ibama = resolve_path(r"G:\Meu Drive\UFMG\auxiliary\app\data\ibama_licencas_BA.parquet", "ibama_licencas_BA.parquet")
+    if not os.path.exists(path_ibama):
+        path_ibama = resolve_path(r"G:\Meu Drive\UFMG\auxiliary\app\data\licencas_ibama.parquet", "licencas_ibama.parquet")
     path_bndes = resolve_path(r"G:\Meu Drive\UFMG\data_bndes\bndes_operacoes_BA_diretas.parquet", "bndes_operacoes_BA_diretas.parquet")
     path_pac = resolve_path(r"G:\Meu Drive\UFMG\data_pac\pac_obras_BA_completo_2008_2026.parquet", "pac_obras_BA_completo_2008_2026.parquet")
     path_siconv = resolve_path(r"G:\Meu Drive\UFMG\data_pac\siconv_obras\siconv_propostas_BA_2008_2026_consolidado.parquet", "siconv_propostas_BA_2008_2026_consolidado.parquet")
@@ -71,17 +73,22 @@ def render_bahia_experimental_tab():
         df_asv = df_ba[df_ba[col_tipo].astype(str).str.contains(r'\bASV\b|Supress', case=False, regex=True)]
         asv_by_year = df_asv['ano_emis'].value_counts()
 
-        # 1.1 IBAMA na Bahia
+        # 1.1 IBAMA na Bahia (Licenciamento Federal)
         ibama_by_year = {}
         if os.path.exists(path_ibama):
             df_ib = pd.read_parquet(path_ibama)
-            # Filtrar Bahia
-            uf_col = [c for c in df_ib.columns if 'uf' in c.lower()]
-            dt_col = [c for c in df_ib.columns if any(k in c.lower() for k in ['emiss', 'data', 'inicio'])]
-            if uf_col and dt_col:
-                df_ib_ba = df_ib[df_ib[uf_col[0]].astype(str).str.upper().str.contains('BA')]
-                dt_ib = pd.to_datetime(df_ib_ba[dt_col[0]], errors='coerce')
-                ibama_by_year = dt_ib.dt.year.value_counts().to_dict()
+            # Normalizar nomes de colunas
+            df_ib.columns = [c.lower().replace(' ', '_').replace('﻿', '') for c in df_ib.columns]
+            
+            # Identificar coluna temporal de emissão (fallback para data_do_protocolo)
+            col_dt_ib = 'data_de_emissao' if 'data_de_emissao' in df_ib.columns else [c for c in df_ib.columns if 'emiss' in c or 'data' in c][0]
+            
+            # Filtrar empreendimentos localizados na Bahia (uf_do_empreendimento == 'BA')
+            col_uf_ib = 'uf_do_empreendimento' if 'uf_do_empreendimento' in df_ib.columns else [c for c in df_ib.columns if 'uf' in c][0]
+            df_ib_ba = df_ib[df_ib[col_uf_ib].astype(str).str.upper().str.contains('BA')]
+            
+            dt_ib = pd.to_datetime(df_ib_ba[col_dt_ib], errors='coerce')
+            ibama_by_year = dt_ib.dt.year.value_counts().to_dict()
 
         # 2. BNDES Operações Diretas BA
         df_bndes = pd.read_parquet(path_bndes)
@@ -344,4 +351,8 @@ def render_bahia_experimental_tab():
     > 1. **Divergência entre LAC e Licenciamento Complexo:** As Licenças por Adesão e Compromisso (**LAC**) representam uma fatia expressiva das emissões do INEMA a partir de 2012 (chegando a quase 900 licenças/ano no auge), agilizando empreendimentos de baixo/médio potencial poluidor.
     > 2. **Relação entre Autorizações ASV e Desmatamento Real:** A série de Autorizações de Supressão de Vegetação (**ASV**) cresce a partir de 2015, acompanhando o aumento do desmatamento detectado pelo MapBiomas no Cerrado e Caatinga baianos (com picos de supressão entre 2021 e 2023 ultrapassando 500 mil ha/ano, ou ~1,01% do território baiano anualmente).
     > 3. **Dinâmica Econômica e Mercado de Trabalho Completo (2000–2026):** O ciclo de 2004–2013 combinou aceleração do PAC, expansão de crédito BNDES e recordes no saldo de empregos com carteira do CAGED (mais de 133 mil vagas em 2010), acompanhado por queda estrutural na taxa de informalidade (de >60% para ~54%). A partir de 2015/2016 e com o choque de 2020, o **MEI** consolida-se como o grande amortecedor econômico da Bahia (saltando para mais de 839 mil optantes ativos).
+    > 4. **Notas Metodológicas sobre Coberturas Temporais:**
+    >    - **PAC (2017–2020):** A ausência de registros neste quadriênio reflete a descontinuidade institucional federal e o hiato entre o PAC 2 e o Novo PAC (PAC 3).
+    >    - **MapBiomas:** A série anual consolidada da Coleção 11 encerra-se em 2025; o ano de 2026 encontra-se em consolidação por satélite (valor não apurado/pendente de fechamento do ano civil).
+    >    - **IBAMA:** O total de 811 processos na Bahia compreende 414 licenças efetivamente emitidas (com data de emissão formal); os demais 397 registros correspondem a processos em fase preliminar, competências estaduais ou arquivados sem ato emitido.
     """)
