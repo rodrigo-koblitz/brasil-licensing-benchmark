@@ -32,6 +32,7 @@ def render_bahia_experimental_tab():
     path_siconv = resolve_path(r"G:\Meu Drive\UFMG\data_pac\siconv_obras\siconv_propostas_BA_2008_2026_consolidado.parquet", "siconv_propostas_BA_2008_2026_consolidado.parquet")
     path_desm = resolve_path(r"G:\Meu Drive\UFMG\auxiliary\app\data\mapbiomas_desmatamento_estado_ano.csv", "mapbiomas_desmatamento_estado_ano.csv")
     path_socio = resolve_path(r"G:\Meu Drive\UFMG\auxiliary\app\data\bahia_trabalho_caged_pnad_mei.csv", "bahia_trabalho_caged_pnad_mei.csv")
+    path_ibama = resolve_path(r"G:\Meu Drive\UFMG\data_pac\ibama_licencas_BA.parquet", "ibama_licencas_BA.parquet")
 
     # Verificar existência dos arquivos
     missing = [p for p in [path_ba_lic, path_bndes, path_pac, path_siconv] if not os.path.exists(p)]
@@ -72,6 +73,19 @@ def render_bahia_experimental_tab():
         # Linha Específica 2: Apenas ASV (Autorização de Supressão de Vegetação)
         df_asv = df_ba[df_ba[col_tipo].astype(str).str.contains(r'\bASV\b|Supress', case=False, regex=True)]
         asv_by_year = df_asv['ano_emis'].value_counts()
+
+        # 1.1 Licenciamento Federal BA (IBAMA - Data de emissão)
+        ibama_by_year = {}
+        if os.path.exists(path_ibama):
+            df_ib = pd.read_parquet(path_ibama)
+            c_emis_ib = None
+            for c in df_ib.columns:
+                if 'emiss' in c.lower():
+                    c_emis_ib = c
+                    break
+            if c_emis_ib:
+                dt_ib = pd.to_datetime(df_ib[c_emis_ib], errors='coerce')
+                ibama_by_year = dt_ib.dt.year.value_counts().to_dict()
 
         # 2. BNDES Operações Diretas BA
         df_bndes = pd.read_parquet(path_bndes)
@@ -133,6 +147,7 @@ def render_bahia_experimental_tab():
             data.append({
                 "Ano": y,
                 "Licenças Emitidas (Total INEMA)": int(lic_by_year.get(y, 0)),
+                "Licenças Federais (IBAMA)": int(ibama_by_year.get(y, 0)),
                 "Licenças LAC": int(lac_by_year.get(y, 0)),
                 "Autorizações ASV (Supressão)": int(asv_by_year.get(y, 0)),
                 "Desmatamento (ha)": float(desm_ha_by_year.get(y, 0.0)),
@@ -150,9 +165,11 @@ def render_bahia_experimental_tab():
         df_ts = pd.DataFrame(data)
 
     # Métricas Resumo Gerais
-    m1, m2, m3, m4, m5, m6, m7 = st.columns(7)
+    m1, m_ib, m2, m3, m4, m5, m6, m7 = st.columns(8)
     with m1:
-        st.metric("Total Licenças (INEMA)", f"{df_ts['Licenças Emitidas (Total INEMA)'].sum():,}")
+        st.metric("Licenças INEMA (Estadual)", f"{df_ts['Licenças Emitidas (Total INEMA)'].sum():,}")
+    with m_ib:
+        st.metric("Licenças IBAMA (Federal)", f"{df_ts['Licenças Federais (IBAMA)'].sum():,}")
     with m2:
         st.metric("Total Licenças LAC", f"{df_ts['Licenças LAC'].sum():,}")
     with m3:
@@ -186,13 +203,23 @@ def render_bahia_experimental_tab():
     fig = go.Figure()
 
     if view_mode == "Série Completa Integrada (Licenças + Desmatamento + Investimentos)":
-        # Linha 1: Licenças Emitidas Total (INEMA)
+        # Linha 1: Licenças Emitidas Total (INEMA - Estadual)
         fig.add_trace(go.Scatter(
             x=df_ts["Ano"],
             y=df_ts["Licenças Emitidas (Total INEMA)"],
             mode="lines+markers",
-            name="🌱 Total Licenças INEMA",
+            name="🌱 Licenças INEMA (Estadual)",
             line=dict(color="#10B981", width=3),
+            yaxis="y1"
+        ))
+
+        # Linha 1.1: Licenças Federais (IBAMA na Bahia) - Linha Separada
+        fig.add_trace(go.Scatter(
+            x=df_ts["Ano"],
+            y=df_ts["Licenças Federais (IBAMA)"],
+            mode="lines+markers",
+            name="🏛️ Licenças IBAMA (Federal BA)",
+            line=dict(color="#047857", width=2.5, dash="dashdot"),
             yaxis="y1"
         ))
 
@@ -383,8 +410,15 @@ def render_bahia_experimental_tab():
             x=df_ts["Ano"],
             y=df_ts["Licenças Emitidas (Total INEMA)"],
             mode="lines+markers",
-            name="🌱 Total de Licenças Emitidas",
+            name="🌱 Total Licenças INEMA (Estadual)",
             line=dict(color="#10B981", width=3.5)
+        ))
+        fig.add_trace(go.Scatter(
+            x=df_ts["Ano"],
+            y=df_ts["Licenças Federais (IBAMA)"],
+            mode="lines+markers",
+            name="🏛️ Licenças IBAMA (Federal na BA)",
+            line=dict(color="#047857", width=2.5, dash="dashdot")
         ))
         fig.add_trace(go.Scatter(
             x=df_ts["Ano"],
@@ -430,6 +464,7 @@ def render_bahia_experimental_tab():
     else:
         # Normalização percentual em relação ao ano base 2008
         base_lic = df_ts.loc[df_ts["Ano"] == 2008, "Licenças Emitidas (Total INEMA)"].values[0] or 1
+        base_ibama = df_ts.loc[df_ts["Ano"] == 2008, "Licenças Federais (IBAMA)"].values[0] or 1
         base_bndes = df_ts.loc[df_ts["Ano"] == 2008, "Operações BNDES"].values[0] or 1
         base_pac = df_ts.loc[df_ts["Ano"] == 2008, "Obras PAC"].values[0] or 1
         base_sic = df_ts.loc[df_ts["Ano"] == 2008, "Propostas SICONV"].values[0] or 1
@@ -439,8 +474,15 @@ def render_bahia_experimental_tab():
             x=df_ts["Ano"],
             y=(df_ts["Licenças Emitidas (Total INEMA)"] / base_lic) * 100,
             mode="lines+markers",
-            name="🌱 Total Licenças INEMA (Base 100)",
+            name="🌱 Licenças INEMA (Base 100)",
             line=dict(color="#10B981", width=3)
+        ))
+        fig.add_trace(go.Scatter(
+            x=df_ts["Ano"],
+            y=(df_ts["Licenças Federais (IBAMA)"] / base_ibama) * 100,
+            mode="lines+markers",
+            name="🏛️ Licenças IBAMA (Base 100)",
+            line=dict(color="#047857", width=2.5, dash="dashdot")
         ))
         fig.add_trace(go.Scatter(
             x=df_ts["Ano"],
