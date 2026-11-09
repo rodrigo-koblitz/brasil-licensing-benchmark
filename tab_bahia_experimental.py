@@ -310,6 +310,115 @@ def render_bahia_experimental_tab():
     fig.update_layout(**layout_yaxes)
     st.plotly_chart(fig, use_container_width=True)
 
+    # ---------------------------------------------------------
+    # NOVA SEÇÃO: RELAÇÃO E LASTRO FINANCEIRO DAS LICENÇAS
+    # ---------------------------------------------------------
+    st.markdown("### 💰 Relação e Lastro Financeiro das Licenças (BNDES, PAC e SICONV)")
+    st.markdown("""
+    Esta seção apresenta o **cruzamento determinístico por CNPJ de 14 dígitos** entre as licenças ambientais emitidas 
+    na Bahia (**INEMA estadual + IBAMA federal**) e os bancos de dados oficiais de aporte financeiro federal (**BNDES Direto**, **PAC Intervenções** e **SICONV Propostas/Convênios**).
+    """)
+
+    m1, m2, m3, m4, m5 = st.columns(5)
+    with m1:
+        st.metric(
+            label="Capital Total Rastreado",
+            value="R$ 96,76 Bi",
+            help="Soma total do capital público/crédito vinculado a CNPJs detentores de licenças ambientais na Bahia."
+        )
+    with m2:
+        st.metric(
+            label="Licenças com Lastro Direto",
+            value="2.084 licenças",
+            help="Total de licenças ambientais emitidas (INEMA/IBAMA) vinculadas a contratos ou intervenções financeiras concretas."
+        )
+    with m3:
+        st.metric(
+            label="BNDES Direto Vinculado",
+            value="R$ 48,92 Bi",
+            delta="75,6% do BNDES BA",
+            help="673 operações diretas do BNDES na Bahia (61,0% dos contratos) vinculadas a empreendimentos licenciados."
+        )
+    with m4:
+        st.metric(
+            label="PAC Obras Vinculado",
+            value="R$ 34,54 Bi",
+            delta="25,1% do PAC BA",
+            help="2.270 obras e intervenções estruturantes do PAC vinculadas a proponentes/executores com licença ambiental."
+        )
+    with m5:
+        st.metric(
+            label="SICONV Repasses",
+            value="R$ 13,31 Bi",
+            delta="12,9% do SICONV BA",
+            help="3.820 propostas e convênios municipais/estaduais aprovados no SICONV com proponentes formalmente licenciados."
+        )
+
+    # Tabela de Distribuição do Capital por Modalidade de Licenciamento
+    st.markdown("#### 🔬 Distribuição do Capital por Tipologia de Licença Ambiental")
+    df_modalidades = pd.DataFrame([
+        {
+            "Modalidade da Licença": "LU - Licença Unificada",
+            "Licenças Vinculadas": 475,
+            "Total Rastreado (R$)": "R$ 43,18 Bilhões",
+            "Valor Médio / Licença": "R$ 90,9 Mi",
+            "Perfil Típico do Empreendimento": "Grandes parques eólicos, solares, mineração e complexos industriais"
+        },
+        {
+            "Modalidade da Licença": "LO - Licença de Operação",
+            "Licenças Vinculadas": 283,
+            "Total Rastreado (R$)": "R$ 21,45 Bilhões",
+            "Valor Médio / Licença": "R$ 75,8 Mi",
+            "Perfil Típico do Empreendimento": "Infraestrutura rodoviária, plantas químicas, papel e celulose, saneamento"
+        },
+        {
+            "Modalidade da Licença": "RLO - Renovação de LO",
+            "Licenças Vinculadas": 261,
+            "Total Rastreado (R$)": "R$ 14,20 Bilhões",
+            "Valor Médio / Licença": "R$ 54,4 Mi",
+            "Perfil Típico do Empreendimento": "Manutenção operacional de linhas de transmissão, portos e refinarias"
+        },
+        {
+            "Modalidade da Licença": "LA - Licença de Alteração",
+            "Licenças Vinculadas": 230,
+            "Total Rastreado (R$)": "R$ 8,62 Bilhões",
+            "Valor Médio / Licença": "R$ 37,5 Mi",
+            "Perfil Típico do Empreendimento": "Ampliação de capacidade instalada e expansão de infraestrutura industrial"
+        },
+        {
+            "Modalidade da Licença": "LI - Licença de Instalação",
+            "Licenças Vinculadas": 215,
+            "Total Rastreado (R$)": "R$ 5,87 Bilhões",
+            "Valor Médio / Licença": "R$ 27,3 Mi",
+            "Perfil Típico do Empreendimento": "Canteiros de obras ativas, barragens, adutoras e implantação fabril"
+        },
+        {
+            "Modalidade da Licença": "LP - Licença Prévia",
+            "Licenças Vinculadas": 134,
+            "Total Rastreado (R$)": "R$ 2,11 Bilhões",
+            "Valor Médio / Licença": "R$ 15,7 Mi",
+            "Perfil Típico do Empreendimento": "Viabilidade socioambiental de projetos de transporte e logística"
+        },
+        {
+            "Modalidade da Licença": "LAC / DLA / LS (Declaratórias e Simplificadas)",
+            "Licenças Vinculadas": 486,
+            "Total Rastreado (R$)": "R$ 1,33 Bilhão",
+            "Valor Médio / Licença": "R$ 2,7 Mi",
+            "Perfil Típico do Empreendimento": "Postos de combustíveis, infraestrutura urbana, ERBs e obras municipais SICONV"
+        }
+    ])
+    st.dataframe(df_modalidades, use_container_width=True, hide_index=True)
+
+    with st.expander("📌 Síntese da Relação Econômica entre Licenciamento e Fontes de Recursos", expanded=False):
+        st.markdown("""
+        1. **Camada Estruturante (Macroprojetos - BNDES e PAC):**
+           - A maior fatia do valor concentrado (**R$ 83,46 Bi** entre BNDES e PAC) ancora-se em licenças de rito trifásico ou integrado (**LU, LO, LI e Licenças Federais IBAMA**). 
+           - Empreendimentos como parques eólicos no semiárido, a Ferrovia de Integração Oeste-Leste (FIOL), expansões portuárias e saneamento básico respondem por mais de **75% de todo o crédito direto do BNDES** concedido à Bahia.
+        2. **Camada Municipal e Capilarizada (Microintervenções - SICONV):**
+           - As licenças declaratórias e simplificadas (**LAC, DLA e LS**) possuem valor financeiro unitário menor, mas aderência direta a obras civis urbanas.
+           - No SICONV, **72,7% das propostas baianas possuem valor inferior a R$ 1 milhão**, correspondendo a intervenções locais executadas via rito de menor fricção burocrática sem perda de enquadramento legal.
+        """)
+
     # Bloco Informativo de Mercado de Trabalho e Metodologia
     st.markdown("### 💼 Painel Histórico: Emprego Formal, Informalidade e MEI na Bahia (2000–2026)")
     c1, c2, c3 = st.columns(3)
