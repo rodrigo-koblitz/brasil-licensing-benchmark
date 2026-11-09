@@ -3,13 +3,11 @@ Agricultural Module for Streamlit App
 Integrates:
 - IBGE PAM: Valor da Produção Agrícola Municipal e Estadual (2000-2024)
 - MAPA PSR: Subvenção e Garantias do Seguro Rural (2006-2025)
+- Monetary Correction: Selic and IPCA converted series
 """
 
 import os
-try:
-    import duckdb
-except ImportError:
-    duckdb = None
+import duckdb
 import pandas as pd
 import streamlit as st
 import plotly.express as px
@@ -19,7 +17,6 @@ APP_DIR = os.path.dirname(os.path.abspath(__file__))
 APP_DATA_DIR = os.path.join(APP_DIR, "data")
 DATA_AGRO_DIR = r"G:\Meu Drive\UFMG\data_agro"
 
-# Prioritize local app/data for Streamlit Cloud deployment, fallback to G: drive
 if os.path.exists(os.path.join(APP_DATA_DIR, "agro_state_series_2000_2025.parquet")):
     STATE_PARQUET = os.path.join(APP_DATA_DIR, "agro_state_series_2000_2025.parquet")
 else:
@@ -45,7 +42,7 @@ def load_agro_state_data():
 
 def render_agro_module():
     st.markdown('<div class="main-header">🌾 Agro: Financiamento, Produção & Seguro Rural</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sub-header">Análise integrada do Valor da Produção Agrícola (IBGE - PAM) e da Subvenção ao Seguro Rural (MAPA - PSR) em escala estadual e municipal (2000–2025).</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Análise integrada do Valor da Produção Agrícola (IBGE - PAM) e da Subvenção ao Seguro Rural (MAPA - PSR) com correção monetária (Selic / IPCA) em escala estadual e municipal (2000–2025).</div>', unsafe_allow_html=True)
 
     df_state = load_agro_state_data()
 
@@ -53,23 +50,50 @@ def render_agro_module():
         st.warning("Dados agropecuários ainda não foram processados ou arquivo não encontrado.")
         return
 
+    # Monetary Adjustment Toggle
+    col_t1, col_t2 = st.columns([2, 3])
+    with col_t1:
+        regime_preco = st.radio(
+            "💱 Regime de Preços / Correção Monetária:",
+            options=["Nominal (Histórico)", "Corrigido pela Selic (Base 2024)", "Real (Deflacionado pelo IPCA - Base 2024)"],
+            index=0,
+            horizontal=True
+        )
+
+    # Determine which column to use
+    if regime_preco == "Corrigido pela Selic (Base 2024)":
+        prod_col = 'valor_producao_bi_reais_converted'
+        subv_col = 'subvencao_federal_mi_reais_converted'
+        cap_col = 'capital_segurado_mi_reais_converted'
+        sufixo_legenda = "Corrigido p/ Selic (Base 2024)"
+    elif regime_preco == "Real (Deflacionado pelo IPCA - Base 2024)":
+        prod_col = 'valor_producao_bi_reais_ipca'
+        subv_col = 'subvencao_federal_mi_reais_ipca'
+        cap_col = 'capital_segurado_mi_reais' # Fallback
+        sufixo_legenda = "Real p/ IPCA (Base 2024)"
+    else:
+        prod_col = 'valor_producao_bi_reais'
+        subv_col = 'subvencao_federal_mi_reais'
+        cap_col = 'capital_segurado_mi_reais'
+        sufixo_legenda = "Nominal"
+
     # Top KPI Metrics Cards (Latest Available Year: 2024)
     df_2024 = df_state[df_state['ano'] == 2024]
-    val_prod_total = df_2024['valor_producao_bi_reais'].sum()
-    subv_total = df_2024['subvencao_federal_mi_reais'].sum()
-    cap_seg_total = df_2024['capital_segurado_mi_reais'].sum() / 1e3
+    val_prod_total = df_2024[prod_col].sum()
+    subv_total = df_2024[subv_col].sum()
+    cap_seg_total = df_2024[cap_col].sum() / 1e3
     apolices_total = df_2024['qtde_apolices_seguradas'].sum()
 
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric(
-            label="🌾 Valor da Produção (2024)",
+            label=f"🌾 Valor da Produção (2024) [{sufixo_legenda}]",
             value=f"R$ {val_prod_total:.1f} Bi",
             help="Valor da Produção Agrícola total medido pelo IBGE PAM em 2024"
         )
     with col2:
         st.metric(
-            label="🛡️ Subvenção Federal PSR (2024)",
+            label=f"🛡️ Subvenção Federal PSR (2024) [{sufixo_legenda}]",
             value=f"R$ {subv_total:.1f} Mi",
             help="Recursos federais pagos pelo MAPA para subvencionar apólices de seguro rural"
         )
@@ -100,28 +124,28 @@ def render_agro_module():
     # TAB 1: PANORAMA NACIONAL & REGIONAL
     # -------------------------------------------------------------
     with tab1:
-        st.subheader("Evolução Histórica da Agropecuária Nacional (2000–2024)")
+        st.subheader(f"Evolução Histórica da Agropecuária Nacional ({sufixo_legenda})")
         
         c_left, c_right = st.columns(2)
         
         with c_left:
             # National time-series IBGE PAM
-            df_nat_pam = df_state[df_state['ano'] <= 2024].groupby('ano', as_index=False)['valor_producao_bi_reais'].sum()
+            df_nat_pam = df_state[df_state['ano'] <= 2024].groupby('ano', as_index=False)[prod_col].sum()
             fig_nat = px.area(
-                df_nat_pam, x='ano', y='valor_producao_bi_reais',
-                title="Valor da Produção Agrícola Nacional (R$ Bilhões)",
+                df_nat_pam, x='ano', y=prod_col,
+                title=f"Valor da Produção Agrícola Nacional - R$ Bi ({sufixo_legenda})",
                 color_discrete_sequence=['#2e7d32'],
-                labels={'ano': 'Ano', 'valor_producao_bi_reais': 'R$ Bilhões'}
+                labels={'ano': 'Ano', prod_col: 'R$ Bilhões'}
             )
             fig_nat.update_layout(hovermode="x unified", margin=dict(l=20, r=20, t=40, b=20))
             st.plotly_chart(fig_nat, use_container_width=True)
 
         with c_right:
             # Regional distribution stacked
-            df_reg = df_state[df_state['ano'] <= 2024].groupby(['ano', 'regiao'], as_index=False)['valor_producao_bi_reais'].sum()
+            df_reg = df_state[df_state['ano'] <= 2024].groupby(['ano', 'regiao'], as_index=False)[prod_col].sum()
             fig_reg = px.bar(
-                df_reg, x='ano', y='valor_producao_bi_reais', color='regiao',
-                title="Composição por Região Geográfica (R$ Bilhões)",
+                df_reg, x='ano', y=prod_col, color='regiao',
+                title=f"Composição por Região Geográfica - R$ Bi ({sufixo_legenda})",
                 color_discrete_map={
                     'Centro-Oeste': '#ff9800',
                     'Sul': '#2196f3',
@@ -129,37 +153,47 @@ def render_agro_module():
                     'Nordeste': '#e91e63',
                     'Norte': '#9c27b0'
                 },
-                labels={'ano': 'Ano', 'valor_producao_bi_reais': 'R$ Bilhões', 'regiao': 'Região'}
+                labels={'ano': 'Ano', prod_col: 'R$ Bilhões', 'regiao': 'Região'}
             )
             fig_reg.update_layout(barmode='stack', hovermode="x unified", margin=dict(l=20, r=20, t=40, b=20))
             st.plotly_chart(fig_reg, use_container_width=True)
 
-        st.markdown("### Apoio ao Seguro Rural Federal (MAPA - PSR)")
+        st.markdown(f"### Apoio ao Seguro Rural Federal (MAPA - PSR) [{sufixo_legenda}]")
         df_nat_psr = df_state[(df_state['ano'] >= 2006) & (df_state['ano'] <= 2024)].groupby('ano', as_index=False).agg({
-            'subvencao_federal_mi_reais': 'sum',
-            'capital_segurado_mi_reais': 'sum'
+            subv_col: 'sum',
+            cap_col: 'sum'
         })
         
         fig_dual = go.Figure()
         fig_dual.add_trace(go.Bar(
             x=df_nat_psr['ano'],
-            y=df_nat_psr['subvencao_federal_mi_reais'],
-            name="Subvenção Federal (R$ Mi)",
+            y=df_nat_psr[subv_col],
+            name=f"Subvenção Federal (R$ Mi)",
             marker_color='#1976d2',
             yaxis='y1'
         ))
         fig_dual.add_trace(go.Scatter(
             x=df_nat_psr['ano'],
-            y=df_nat_psr['capital_segurado_mi_reais'] / 1e3,
+            y=df_nat_psr[cap_col] / 1e3,
             name="Capital Protegido (R$ Bi)",
             mode='lines+markers',
             line=dict(color='#d32f2f', width=3),
             yaxis='y2'
         ))
+        
+        # Fixed layout using modern Plotly yaxis_title and tickfont syntax
         fig_dual.update_layout(
-            title="Evolução do Apoio Financeiro ao Seguro Rural: Subvenção vs. Cobertura",
-            yaxis=dict(title="Subvenção Federal (R$ Milhões)", titlefont=dict(color="#1976d2"), tickfont=dict(color="#1976d2")),
-            yaxis2=dict(title="Capital Segurado (R$ Bilhões)", titlefont=dict(color="#d32f2f"), tickfont=dict(color="#d32f2f"), overlaying='y', side='right'),
+            title=f"Evolução do Seguro Rural: Subvenção vs. Cobertura ({sufixo_legenda})",
+            yaxis=dict(
+                title=dict(text="Subvenção Federal (R$ Milhões)", font=dict(color="#1976d2")),
+                tickfont=dict(color="#1976d2")
+            ),
+            yaxis2=dict(
+                title=dict(text="Capital Segurado (R$ Bilhões)", font=dict(color="#d32f2f")),
+                tickfont=dict(color="#d32f2f"),
+                overlaying='y',
+                side='right'
+            ),
             legend=dict(x=0.01, y=0.98),
             margin=dict(l=20, r=20, t=40, b=20)
         )
@@ -169,21 +203,21 @@ def render_agro_module():
     # TAB 2: COMPARATIVO ENTRE ESTADOS (UF)
     # -------------------------------------------------------------
     with tab2:
-        st.subheader("Ranking e Distribuição Estadual")
+        st.subheader(f"Ranking e Distribuição Estadual ({sufixo_legenda})")
         selected_year = st.slider("Selecione o Ano de Análise:", min_value=2000, max_value=2024, value=2024)
 
-        df_yr = df_state[df_state['ano'] == selected_year].sort_values('valor_producao_bi_reais', ascending=False)
+        df_yr = df_state[df_state['ano'] == selected_year].sort_values(prod_col, ascending=False)
 
         col_a, col_b = st.columns([3, 2])
         with col_a:
             fig_bar = px.bar(
                 df_yr.head(15),
-                x='valor_producao_bi_reais',
+                x=prod_col,
                 y='uf_nome',
                 orientation='h',
                 color='regiao',
-                title=f"Top 15 Estados em Valor da Produção ({selected_year})",
-                labels={'valor_producao_bi_reais': 'R$ Bilhões', 'uf_nome': 'Estado'},
+                title=f"Top 15 Estados em Valor da Produção ({selected_year}) - {sufixo_legenda}",
+                labels={prod_col: 'R$ Bilhões', 'uf_nome': 'Estado'},
                 category_orders={'uf_nome': df_yr.head(15)['uf_nome'].tolist()[::-1]}
             )
             fig_bar.update_layout(margin=dict(l=20, r=20, t=40, b=20))
@@ -191,18 +225,18 @@ def render_agro_module():
 
         with col_b:
             st.markdown(f"**Tabela Consolidada ({selected_year})**")
-            cols_show = ['sigla_uf', 'uf_nome', 'regiao', 'valor_producao_bi_reais']
+            cols_show = ['sigla_uf', 'uf_nome', 'regiao', prod_col]
             if selected_year >= 2006:
-                cols_show += ['subvencao_federal_mi_reais', 'capital_segurado_mi_reais']
+                cols_show += [subv_col, cap_col]
             
             st.dataframe(
                 df_yr[cols_show].rename(columns={
                     'sigla_uf': 'UF',
                     'uf_nome': 'Estado',
                     'regiao': 'Região',
-                    'valor_producao_bi_reais': 'Produção (R$ Bi)',
-                    'subvencao_federal_mi_reais': 'Subvenção (R$ Mi)',
-                    'capital_segurado_mi_reais': 'Garantia (R$ Mi)'
+                    prod_col: f'Produção R$ Bi ({sufixo_legenda})',
+                    subv_col: f'Subvenção R$ Mi ({sufixo_legenda})',
+                    cap_col: 'Garantia R$ Mi'
                 }),
                 height=420,
                 use_container_width=True
@@ -212,17 +246,17 @@ def render_agro_module():
         if selected_year >= 2006:
             st.markdown(f"### Relação: Valor da Produção vs. Cobertura de Seguro ({selected_year})")
             fig_scat = px.scatter(
-                df_yr[df_yr['valor_producao_bi_reais'] > 0.5],
-                x='valor_producao_bi_reais',
-                y='subvencao_federal_mi_reais',
-                size='capital_segurado_mi_reais',
+                df_yr[df_yr[prod_col] > 0.5],
+                x=prod_col,
+                y=subv_col,
+                size=cap_col,
                 color='regiao',
                 text='sigla_uf',
-                title="Produção Agrícola (Eixo X) vs. Subvenção ao Seguro Rural (Eixo Y)",
+                title=f"Produção Agrícola vs. Subvenção ao Seguro Rural ({selected_year}) - {sufixo_legenda}",
                 labels={
-                    'valor_producao_bi_reais': 'Valor da Produção (R$ Bilhões)',
-                    'subvencao_federal_mi_reais': 'Subvenção Federal (R$ Milhões)',
-                    'capital_segurado_mi_reais': 'Capital Segurado (R$ Mi)'
+                    prod_col: f'Valor da Produção R$ Bi ({sufixo_legenda})',
+                    subv_col: f'Subvenção Federal R$ Mi ({sufixo_legenda})',
+                    cap_col: 'Capital Segurado (R$ Mi)'
                 }
             )
             fig_scat.update_traces(textposition='top center')
@@ -246,9 +280,9 @@ def render_agro_module():
         with c_u1:
             fig_uf_pam = px.line(
                 df_single_uf[df_single_uf['ano'] <= 2024],
-                x='ano', y='valor_producao_bi_reais',
+                x='ano', y=prod_col,
                 markers=True,
-                title=f"Valor da Produção Agrícola - {selected_uf} (R$ Bi)",
+                title=f"Valor da Produção Agrícola - {selected_uf} (R$ Bi - {sufixo_legenda})",
                 color_discrete_sequence=['#2e7d32']
             )
             fig_uf_pam.update_layout(margin=dict(l=20, r=20, t=40, b=20))
@@ -257,8 +291,8 @@ def render_agro_module():
         with c_u2:
             fig_uf_psr = px.bar(
                 df_single_uf[(df_single_uf['ano'] >= 2006) & (df_single_uf['ano'] <= 2024)],
-                x='ano', y='subvencao_federal_mi_reais',
-                title=f"Subvenção ao Seguro Rural - {selected_uf} (R$ Mi)",
+                x='ano', y=subv_col,
+                title=f"Subvenção ao Seguro Rural - {selected_uf} (R$ Mi - {sufixo_legenda})",
                 color_discrete_sequence=['#1565c0']
             )
             fig_uf_psr.update_layout(margin=dict(l=20, r=20, t=40, b=20))
@@ -266,11 +300,11 @@ def render_agro_module():
 
         # State Data Table
         st.dataframe(
-            df_single_uf[['ano', 'valor_producao_bi_reais', 'subvencao_federal_mi_reais', 'capital_segurado_mi_reais', 'qtde_apolices_seguradas']].rename(columns={
+            df_single_uf[['ano', prod_col, subv_col, cap_col, 'qtde_apolices_seguradas']].rename(columns={
                 'ano': 'Ano',
-                'valor_producao_bi_reais': 'Produção IBGE (R$ Bi)',
-                'subvencao_federal_mi_reais': 'Subvenção MAPA (R$ Mi)',
-                'capital_segurado_mi_reais': 'Capital Segurado (R$ Mi)',
+                prod_col: f'Produção IBGE R$ Bi ({sufixo_legenda})',
+                subv_col: f'Subvenção MAPA R$ Mi ({sufixo_legenda})',
+                cap_col: 'Capital Segurado (R$ Mi)',
                 'qtde_apolices_seguradas': 'Apólices Subvencionadas'
             }),
             use_container_width=True
@@ -280,38 +314,33 @@ def render_agro_module():
     # TAB 4: TOP MUNICÍPIOS AGRÍCOLAS
     # -------------------------------------------------------------
     with tab4:
-        st.subheader("Granularidade Municipal: Os Maiores Polos Produtivos do Brasil")
+        st.subheader(f"Granularidade Municipal: Os Maiores Polos Produtivos do Brasil ({sufixo_legenda})")
         
         muni_year = st.selectbox("Ano de Referência Municipal:", options=list(range(2024, 1999, -1)), index=0)
         
+        muni_col = 'valor_producao_mil_reais_converted' if regime_preco == "Corrigido pela Selic (Base 2024)" else (
+            'valor_producao_mil_reais_ipca' if regime_preco == "Real (Deflacionado pelo IPCA - Base 2024)" else 'valor_producao_mil_reais'
+        )
+
         if os.path.exists(MUNI_PARQUET):
-            if duckdb is not None:
-                con = duckdb.connect()
-                muni_pq_clean = MUNI_PARQUET.replace(chr(92), '/')
-                df_top_mun = con.execute(f"""
-                    SELECT 
-                        municipio_nome,
-                        valor_producao_mil_reais / 1e3 AS valor_producao_mi_reais
-                    FROM '{muni_pq_clean}'
-                    WHERE ano = {muni_year}
-                    ORDER BY valor_producao_mil_reais DESC
-                    LIMIT 20
-                """).df()
-                con.close()
-            else:
-                df_m_all = pd.read_parquet(MUNI_PARQUET, columns=['municipio_nome', 'valor_producao_mil_reais', 'ano'])
-                df_sub = df_m_all[df_m_all['ano'] == muni_year].sort_values(by='valor_producao_mil_reais', ascending=False).head(20)
-                df_top_mun = pd.DataFrame({
-                    'municipio_nome': df_sub['municipio_nome'],
-                    'valor_producao_mi_reais': df_sub['valor_producao_mil_reais'] / 1e3
-                })
+            con = duckdb.connect()
+            df_top_mun = con.execute(f"""
+                SELECT 
+                    municipio_nome,
+                    {muni_col} / 1e3 AS valor_producao_mi_reais
+                FROM '{MUNI_PARQUET.replace(chr(92), '/')}'
+                WHERE ano = {muni_year}
+                ORDER BY {muni_col} DESC
+                LIMIT 20
+            """).df()
+            con.close()
 
             fig_top_mun = px.bar(
                 df_top_mun,
                 x='valor_producao_mi_reais',
                 y='municipio_nome',
                 orientation='h',
-                title=f"Top 20 Municípios em Valor da Produção ({muni_year})",
+                title=f"Top 20 Municípios em Valor da Produção ({muni_year}) - {sufixo_legenda}",
                 labels={'valor_producao_mi_reais': 'R$ Milhões', 'municipio_nome': 'Município'},
                 color='valor_producao_mi_reais',
                 color_continuous_scale='Greens',
@@ -323,7 +352,7 @@ def render_agro_module():
             st.dataframe(
                 df_top_mun.rename(columns={
                     'municipio_nome': 'Município',
-                    'valor_producao_mi_reais': 'Valor da Produção (R$ Milhões)'
+                    'valor_producao_mi_reais': f'Valor da Produção R$ Milhões ({sufixo_legenda})'
                 }),
                 use_container_width=True
             )
