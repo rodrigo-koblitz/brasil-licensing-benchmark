@@ -1,12 +1,10 @@
 """
 Agricultural Module for Streamlit App (Fully Remediated)
 Addresses Auditor Findings:
-- A1: Full deflator coverage across all monetary variables (no unadjusted fallbacks)
-- A2: Explicit separation of Selic Real vs Selic Nominal
-- A3: Addition of Sectoral Agricultural Deflator (FGV IPA-OG)
-- A4: Clear economic terminology
-- A5: Clean int64 types for counts
-- A7 & A8: Methodological documentation notes on seasonality and 2025 coverage
+- Issue 1: Complete Selic Real coverage for capital_segurado and premio_liquido (no price base mismatch)
+- Issue 2: Centralized ETL in remediate_audit_findings.py (calculate_conversions.py deprecated)
+- Minor 1: Precise formula labeling: (1+Selic)/(1+IPCA) - 1
+- Minor 2: Accurate series naming: "IPA Agropecuário (FGV - SGS 225)"
 """
 
 import os
@@ -53,22 +51,22 @@ def render_agro_module():
         st.warning("Dados agropecuários ainda não foram processados ou arquivo não encontrado.")
         return
 
-    # Methodological & Price Regime Selector (A2, A3, A4)
+    # Methodological & Price Regime Selector
     st.markdown("##### 💱 Selecione a Métrica de Ajuste de Preços / Custo Intertemporal (Base: 2024):")
     regime_preco = st.radio(
         "Regime de Ajuste Econômico:",
         options=[
             "Valores Nominais (Preços Correntes Históricos)",
             "Poder de Compra Real (Deflacionado pelo IPCA - Cesta Consumidor)",
-            "Deflator Setorial Agrícola (Deflacionado pelo FGV IPA-OG - Preços por Atacado)",
-            "Custo de Oportunidade Real (Taxa Selic Real ex-post: Selic ÷ IPCA)",
+            "Deflator Setorial Agrícola (Deflacionado pelo IPA Agropecuário FGV - SGS 225)",
+            "Custo de Oportunidade Real [Taxa Selic Real ex-post: (1+Selic)/(1+IPCA) - 1]",
             "Atualização Financeira Nominal (Capitalização Selic Plena)"
         ],
         index=0,
         horizontal=False
     )
 
-    # Column mappings without any silent fallback (Remediation A1 & A2)
+    # Column mappings without any silent fallback or mismatched bases
     if regime_preco == "Poder de Compra Real (Deflacionado pelo IPCA - Cesta Consumidor)":
         prod_col = 'valor_producao_bi_reais_ipca'
         subv_col = 'subvencao_federal_mi_reais_ipca'
@@ -76,17 +74,17 @@ def render_agro_module():
         muni_col = 'valor_producao_mil_reais_ipca'
         sufixo_legenda = "Real IPCA (R$ de 2024)"
         desc_info = "Valores expressos em poder de compra constante de 2024, deflacionados pelo IPCA oficial do IBGE."
-    elif regime_preco == "Deflator Setorial Agrícola (Deflacionado pelo FGV IPA-OG - Preços por Atacado)":
+    elif regime_preco == "Deflator Setorial Agrícola (Deflacionado pelo IPA Agropecuário FGV - SGS 225)":
         prod_col = 'valor_producao_bi_reais_ipa'
-        subv_col = 'subvencao_federal_mi_reais_ipca' # Subsidies maintain consumer purchasing power
+        subv_col = 'subvencao_federal_mi_reais_ipca' # Fiscal budget subsidies evaluated by purchasing power
         cap_col = 'capital_segurado_mi_reais_ipca'
         muni_col = 'valor_producao_mil_reais_ipa'
-        sufixo_legenda = "Real IPA-OG Atacado (R$ de 2024)"
-        desc_info = "Produção agrícola deflacionada pelo Índice de Preços por Atacado (FGV IPA-OG), refletindo os preços no atacado/commodities."
-    elif regime_preco == "Custo de Oportunidade Real (Taxa Selic Real ex-post: Selic ÷ IPCA)":
+        sufixo_legenda = "Real IPA Agropecuário (R$ de 2024)"
+        desc_info = "Produção agrícola deflacionada pelo Índice de Preços por Atacado - Produtos Agropecuários (FGV SGS 225), refletindo preços no atacado/commodities."
+    elif regime_preco == "Custo de Oportunidade Real [Taxa Selic Real ex-post: (1+Selic)/(1+IPCA) - 1]":
         prod_col = 'valor_producao_bi_reais_selic_real'
         subv_col = 'subvencao_federal_mi_reais_selic_real'
-        cap_col = 'capital_segurado_mi_reais_ipca'
+        cap_col = 'capital_segurado_mi_reais_selic_real' # Issue 1: Now mapped cleanly to selic_real!
         muni_col = 'valor_producao_mil_reais_selic_real'
         sufixo_legenda = "Custo de Oportunidade Real (Juro Real Selic)"
         desc_info = "Atualização monetária pelo juro real ex-post ((1+Selic)/(1+IPCA)-1), representando o rendimento financeiro acima da inflação."
@@ -382,16 +380,16 @@ def render_agro_module():
             st.info("Arquivo de microdados municipais não encontrado.")
 
     # -------------------------------------------------------------
-    # TAB 5: METODOLOGIA & AUDITORIA (A6, A7, A8)
+    # TAB 5: METODOLOGIA & AUDITORIA
     # -------------------------------------------------------------
     with tab5:
         st.subheader("Notas Metodológicas e Veredito de Auditoria")
         st.markdown("""
         ### Síntese dos Ajustes Implementados:
         1. **Poder de Compra Real (IPCA):** Deflacionamento via IPCA oficial (SGS 433) para medir o valor real das transferências fiscais e da renda agrícola em termos de cesta de consumo.
-        2. **Deflator Setorial (FGV IPA-OG):** Deflacionamento via Índice de Preços por Atacado (SGS 225), refletindo a variação dos preços no portão da fazenda e das commodities agropecuárias.
-        3. **Custo de Oportunidade Real (Selic Real):** Fator $(1 + r_{\\text{real}}) = \\frac{1 + \\text{Selic}}{1 + \\text{IPCA}}$, expurgando a inflação e mensurando estritamente o retorno financeiro real acumulado.
-        4. **Atualização Financeira Nominal (Selic Plena):** Capitalização total dos juros básicos (critério de custo de oportunidade do capital do Tesouro e dívidas).
+        2. **Deflator Setorial (IPA Agropecuário FGV - SGS 225):** Deflacionamento via Índice de Preços por Atacado - Produtos Agropecuários (SGS 225), refletindo a variação real dos preços de commodities agrícolas no atacado.
+        3. **Custo de Oportunidade Real (Taxa Selic Real):** Fator ex-post $(1 + r_{\\text{real}}) = \\frac{1 + \\text{Selic}}{1 + \\text{IPCA}}$, expurgando a inflação e mensurando estritamente o retorno financeiro real acumulado. Todas as variáveis monetárias (incluindo capital segurado) seguem a mesma base monetária sem descompasso.
+        4. **Atualização Financeira Nominal (Selic Plena):** Capitalização total dos juros básicos nominais.
         
         ### Observações Técnicas de Cobertura:
         - **Convenção Temporal:** Adota-se o critério de fim de período com ano-base 2024 ($= 1,000$).
