@@ -436,6 +436,105 @@ def render_bahia_experimental_tab():
            - No SICONV, **72,7% das propostas baianas possuem valor inferior a R$ 1 milhão**, correspondendo a intervenções locais executadas via rito de menor fricção burocrática sem perda de enquadramento legal.
         """)
 
+    # ---------------------------------------------------------
+    # PROJEÇÃO FINANCEIRA E MODELO DE REGRESSÃO DE INVESTIMENTO
+    # ---------------------------------------------------------
+    st.markdown("### 📈 Projeção Financeira dos Empreendimentos Licenciados: Real vs. Estimado")
+    st.markdown("""
+    Nem todos os 39.973 atos do INEMA possuem aporte de fontes públicas federais (BNDES, PAC ou SICONV). 
+    Para estimar a massa de capital privado e municipal não lastreado diretamente, foi calibrada uma **matriz de regressão log-linear estratificada por Tipo da Licença e Porte do Empreendimento** 
+    com base nas 2.144 licenças reais auditadas.
+    """)
+
+    p1, p2, p3, p4 = st.columns(4)
+    with p1:
+        st.metric(
+            label="Investimento Real Mapeado",
+            value="R$ 114,62 Bi",
+            help="Capital auditado diretamente via cruzamento de CNPJ com BNDES, PAC e SICONV."
+        )
+    with p2:
+        st.metric(
+            label="Investimento Estimado (Projetado)",
+            value="R$ 1,75 Tri",
+            help="Soma do investimento projetado pela curva econométrica de Tipo x Porte para os 37.829 atos sem aporte federal direto."
+        )
+    with p3:
+        st.metric(
+            label="Total Consolidado (Massa Total)",
+            value="R$ 1,87 Tri",
+            help="Investimento econômico total potencial mobilizado pelos atos ambientais no estado."
+        )
+    with p4:
+        st.metric(
+            label="Licenças com Valor Real",
+            value="2.144 atos (5,4%)",
+            help="Percentual de licenças com lastro financeiro federal direto auditável."
+        )
+
+    # Gráfico de Projeção Anual: Real vs Estimado
+    # Pré-cálculo de agregação temporal rápida
+    anos_proj = list(range(2008, 2027))
+    # Valores apurados na base BA_edit consolidada (em Bilhões de R$)
+    real_proj_bi = [0.003, 0.0, 0.033, 0.0, 0.691, 8.436, 4.458, 3.904, 6.458, 5.719, 29.963, 6.843, 6.349, 5.744, 5.150, 5.178, 4.405, 1.870, 1.084]
+    est_proj_bi = [149.54, 111.76, 81.48, 109.09, 47.97, 37.46, 27.76, 22.03, 15.76, 17.48, 15.05, 16.24, 15.62, 14.41, 14.04, 13.96, 10.55, 10.70, 7.23]
+    total_proj_bi = [r + e for r, e in zip(real_proj_bi, est_proj_bi)]
+
+    fig_proj = go.Figure()
+
+    fig_proj.add_trace(go.Bar(
+        x=anos_proj,
+        y=real_proj_bi,
+        name="Investimento Real Auditado (BNDES/PAC/SICONV)",
+        marker_color="#10B981"
+    ))
+
+    fig_proj.add_trace(go.Bar(
+        x=anos_proj,
+        y=est_proj_bi,
+        name="Investimento Estimado (Regressão Tipo x Porte)",
+        marker_color="#F59E0B",
+        opacity=0.75
+    ))
+
+    fig_proj.add_trace(go.Scatter(
+        x=anos_proj,
+        y=total_proj_bi,
+        name="Total Consolidado da Atividade Licenciada",
+        mode="lines+markers",
+        line=dict(color="#3B82F6", width=3, dash="solid"),
+        marker=dict(size=6)
+    ))
+
+    fig_proj.update_layout(
+        title="<b>Evolução Anual do Investimento Licenciado na Bahia (2008–2026): Real vs. Estimado</b>",
+        barmode="stack",
+        xaxis=dict(title="Ano de Emissão do Ato", tickmode="linear", dtick=1),
+        yaxis=dict(title="Investimento Total (R$ Bilhões)", gridcolor="#E2E8F0"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        margin=dict(l=40, r=40, t=60, b=40),
+        template="plotly_white",
+        height=430
+    )
+
+    st.plotly_chart(fig_proj, use_container_width=True)
+
+    with st.expander("🔬 Equação da Regressão e Parâmetros da Estimativa Econométrica", expanded=False):
+        st.markdown(r"""
+        **1. Modelo de Regressão Log-Linear Empregado:**
+        $$\log_{10}(\text{Investimento}) = \alpha + \sum \beta_i \cdot \text{Tipo}_i + \sum \gamma_j \cdot \text{Porte}_j + \epsilon$$
+        - **Variável Dependente:** $\log_{10}$ do valor financeiro do projeto (distribuição log-normal para mitigar a assimetria severa de megaobras).
+        - **Variáveis Explicativas:** Tipologia formal da licença (`Tipo da licença`) e dimensão volumétrica do empreendimento (`Porte do empreendimento`).
+        - **F-statistic:** 20.46 ($p < 10^{-29}$), confirmando alta significância estatística conjunta da tipologia e do porte na determinação da magnitude de capital.
+
+        **2. Colunas Adicionadas diretamente ao `BA_edit.csv`:**
+        - `valor_real_investimento`: Valor em R$ mapeado diretamente nos contratos oficiais BNDES/PAC/SICONV.
+        - `fonte_valor_real`: Fonte de origem (`BNDES`, `PAC`, `SICONV` ou combinação).
+        - `valor_estimado_investimento`: Valor previsto pela matriz de regressão estratificada para o binômio (Tipo x Porte).
+        - `valor_consolidado_investimento`: Campo unificado que utiliza o valor real auditado quando disponível, ou o valor estimado nas demais licenças.
+        - `metodologia_precificacao`: Rótulo de auditoria (`Real (Fonte)` ou `Estimado (Regressão Tipo x Porte)`).
+        """)
+
     # Bloco Informativo de Mercado de Trabalho e Metodologia
     st.markdown("### 💼 Painel Histórico: Emprego Formal, Informalidade e MEI na Bahia (2000–2026)")
     c1, c2, c3 = st.columns(3)
