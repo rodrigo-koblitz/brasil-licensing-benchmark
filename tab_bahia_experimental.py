@@ -256,16 +256,49 @@ def render_bahia_experimental_tab():
             yaxis="y3"
         ))
 
+        # Linha 8: Saldo Novo CAGED (CLT Líquido)
+        df_c = df_ts[df_ts["CAGED Saldo"].notna()]
+        fig.add_trace(go.Scatter(
+            x=df_c["Ano"],
+            y=df_c["CAGED Saldo"],
+            mode="lines+markers",
+            name="💼 Saldo Novo CAGED (CLT)",
+            line=dict(color="#0284C7", width=2.5, dash="longdash"),
+            yaxis="y4"
+        ))
+
+        # Linha 9: Taxa de Informalidade PNAD Contínua (%)
+        df_p = df_ts[df_ts["Taxa Informalidade (%)"].notna()]
+        fig.add_trace(go.Scatter(
+            x=df_p["Ano"],
+            y=df_p["Taxa Informalidade (%)"],
+            mode="lines+markers",
+            name="📊 Taxa de Informalidade IBGE (%)",
+            line=dict(color="#D97706", width=2.5, dash="dot"),
+            yaxis="y2"
+        ))
+
+        # Linha 10: MEI Ativos (Estoque / 1.000)
+        df_m = df_ts[df_ts["MEI Ativos"].notna()]
+        fig.add_trace(go.Scatter(
+            x=df_m["Ano"],
+            y=df_m["MEI Ativos"] / 1e3,
+            mode="lines+markers",
+            name="🏪 MEI Ativos (mil empresas)",
+            line=dict(color="#6366F1", width=2.5),
+            yaxis="y4"
+        ))
+
         fig.update_layout(
-            title="Bahia: Licenciamento Ambiental (Total, LAC, ASV) vs. Desmatamento vs. Investimentos (2008-2026)",
-            xaxis=dict(title="Ano", tickmode="linear", dtick=1, domain=[0.05, 0.90]),
+            title="Bahia: Licenciamento Ambiental (Total, LAC, ASV) vs. Desmatamento vs. Investimentos vs. Mercado de Trabalho",
+            xaxis=dict(title="Ano", tickmode="linear", dtick=1, domain=[0.05, 0.85]),
             yaxis=dict(
                 title=dict(text="Qtd. Atos INEMA, Obras PAC & SICONV", font=dict(color="#10B981")),
                 tickfont=dict(color="#10B981"),
                 side="left"
             ),
             yaxis2=dict(
-                title=dict(text="Desmatamento Anual (% do Território)", font=dict(color="#B91C1C")),
+                title=dict(text="Desmatamento (% Território) & Informalidade (%)", font=dict(color="#B91C1C")),
                 tickfont=dict(color="#B91C1C"),
                 overlaying="y",
                 side="right",
@@ -274,6 +307,13 @@ def render_bahia_experimental_tab():
             yaxis3=dict(
                 title=dict(text="Operações BNDES", font=dict(color="#F59E0B")),
                 tickfont=dict(color="#F59E0B"),
+                overlaying="y",
+                side="right",
+                position=0.91
+            ),
+            yaxis4=dict(
+                title=dict(text="Saldo CAGED / MEI Ativos (mil)", font=dict(color="#0284C7")),
+                tickfont=dict(color="#0284C7"),
                 overlaying="y",
                 side="right",
                 position=0.97
