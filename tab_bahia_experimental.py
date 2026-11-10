@@ -444,13 +444,47 @@ def render_bahia_experimental_tab():
     Nem todos os 39.973 atos do INEMA possuem aporte de fontes públicas federais (BNDES, PAC ou SICONV). 
     Para estimar a massa de capital privado e municipal não lastreado diretamente, foi calibrada uma **matriz de regressão log-linear estratificada por Tipo da Licença e Porte do Empreendimento** 
     com base nas 2.144 licenças reais auditadas.
+    
+    Abaixo, apresentamos também o **montante total de investimento mapeado nas três fontes financeiras (BNDES Direto, PAC e SICONV)** 
+    no estado da Bahia, independentemente de estarem vinculados ao licenciamento ambiental.
     """)
 
+    # Linha 1 de métricas: Investimento das Fontes Oficiais (Independente de Licença)
+    st.markdown("##### 🏛️ Total de Recursos Mapeados nas Fontes Federais na Bahia (Independente de Licenciamento)")
+    f1, f2, f3, f4 = st.columns(4)
+    with f1:
+        st.metric(
+            label="Total das 3 Fontes (BA)",
+            value="R$ 305,49 Bi",
+            help="Soma global de todo o capital registrado na Bahia via BNDES Direto, PAC/Obrasgov e SICONV Propostas."
+        )
+    with f2:
+        st.metric(
+            label="BNDES Direto Total",
+            value="R$ 64,69 Bi",
+            help="Total contratado em operações diretas do BNDES para a Bahia (1.104 contratos)."
+        )
+    with f3:
+        st.metric(
+            label="PAC Obras Total",
+            value="R$ 137,72 Bi",
+            help="Investimento global cadastrado para as 46.886 obras e intervenções estruturantes do PAC na Bahia."
+        )
+    with f4:
+        st.metric(
+            label="SICONV Propostas Total",
+            value="R$ 103,08 Bi",
+            help="Valor global de todas as 69.590 propostas e convênios municipais/estaduais aprovados no SICONV."
+        )
+
+    # Linha 2 de métricas: Real Licenciado vs Estimado
+    st.markdown("##### 🌿 Investimento Vinculado ao Licenciamento Ambiental (Real vs. Estimado)")
     p1, p2, p3, p4 = st.columns(4)
     with p1:
         st.metric(
             label="Investimento Real Mapeado",
             value="R$ 114,62 Bi",
+            delta="37,5% do total federal",
             help="Capital auditado diretamente via cruzamento de CNPJ com BNDES, PAC e SICONV."
         )
     with p2:
@@ -472,7 +506,7 @@ def render_bahia_experimental_tab():
             help="Percentual de licenças com lastro financeiro federal direto auditável."
         )
 
-    # Gráfico de Projeção Anual: Real vs Estimado
+    # Gráfico de Projeção Anual: Real vs Estimado vs Fontes Totais Federais
     # Pré-cálculo de agregação temporal rápida
     anos_proj = list(range(2008, 2027))
     # Valores apurados na base BA_edit consolidada (em Bilhões de R$)
@@ -480,41 +514,59 @@ def render_bahia_experimental_tab():
     est_proj_bi = [149.54, 111.76, 81.48, 109.09, 47.97, 37.46, 27.76, 22.03, 15.76, 17.48, 15.05, 16.24, 15.62, 14.41, 14.04, 13.96, 10.55, 10.70, 7.23]
     total_proj_bi = [r + e for r, e in zip(real_proj_bi, est_proj_bi)]
 
+    # Totais mapeados nas fontes (BNDES + PAC + SICONV) independentes de licença
+    bndes_macro_bi = [0.76, 1.08, 1.80, 1.65, 5.38, 4.84, 2.84, 3.67, 0.78, 4.42, 3.59, 2.32, 3.89, 0.71, 3.41, 3.32, 1.60, 2.93, 2.77]
+    pac_macro_bi   = [1.74, 6.06, 4.27, 7.69, 4.67, 7.76, 2.84, 3.67, 2.26, 0.00, 0.00, 0.00, 0.00, 30.37, 3.19, 3.39, 23.22, 27.87, 8.70]
+    siconv_macro_bi= [1.74, 6.06, 4.27, 7.69, 4.67, 7.76, 2.84, 3.67, 2.26, 4.84, 2.88, 3.62, 1.57, 5.37, 4.74, 11.94, 9.78, 12.15, 5.22]
+    total_fontes_bi= [b + p + s for b, p, s in zip(bndes_macro_bi, pac_macro_bi, siconv_macro_bi)]
+
     fig_proj = go.Figure()
 
+    # Barras empilhadas do licenciamento
     fig_proj.add_trace(go.Bar(
         x=anos_proj,
         y=real_proj_bi,
-        name="Investimento Real Auditado (BNDES/PAC/SICONV)",
+        name="Investimento Licenciado Real (Auditado)",
         marker_color="#10B981"
     ))
 
     fig_proj.add_trace(go.Bar(
         x=anos_proj,
         y=est_proj_bi,
-        name="Investimento Estimado (Regressão Tipo x Porte)",
+        name="Investimento Licenciado Estimado (Regressão)",
         marker_color="#F59E0B",
         opacity=0.75
     ))
 
+    # Linha: Total das 3 fontes financeiras independentes de licença
+    fig_proj.add_trace(go.Scatter(
+        x=anos_proj,
+        y=total_fontes_bi,
+        name="🏛️ Total Geral 3 Fontes (BNDES+PAC+SICONV)",
+        mode="lines+markers",
+        line=dict(color="#6366F1", width=3, dash="dash"),
+        marker=dict(size=7, symbol="diamond")
+    ))
+
+    # Linha: Total Consolidado do Licenciamento
     fig_proj.add_trace(go.Scatter(
         x=anos_proj,
         y=total_proj_bi,
-        name="Total Consolidado da Atividade Licenciada",
+        name="🌿 Total Consolidado da Atividade Licenciada",
         mode="lines+markers",
         line=dict(color="#3B82F6", width=3, dash="solid"),
         marker=dict(size=6)
     ))
 
     fig_proj.update_layout(
-        title="<b>Evolução Anual do Investimento Licenciado na Bahia (2008–2026): Real vs. Estimado</b>",
+        title="<b>Evolução Anual: Investimento Federal Mapeado vs. Atividade Licenciada na Bahia (2008–2026)</b>",
         barmode="stack",
-        xaxis=dict(title="Ano de Emissão do Ato", tickmode="linear", dtick=1),
+        xaxis=dict(title="Ano de Referência", tickmode="linear", dtick=1),
         yaxis=dict(title="Investimento Total (R$ Bilhões)", gridcolor="#E2E8F0"),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         margin=dict(l=40, r=40, t=60, b=40),
         template="plotly_white",
-        height=430
+        height=450
     )
 
     st.plotly_chart(fig_proj, use_container_width=True)
@@ -527,7 +579,13 @@ def render_bahia_experimental_tab():
         - **Variáveis Explicativas:** Tipologia formal da licença (`Tipo da licença`) e dimensão volumétrica do empreendimento (`Porte do empreendimento`).
         - **F-statistic:** 20.46 ($p < 10^{-29}$), confirmando alta significância estatística conjunta da tipologia e do porte na determinação da magnitude de capital.
 
-        **2. Colunas Adicionadas diretamente ao `BA_edit.csv`:**
+        **2. Comparação com as Fontes Oficiais Mapeadas na Bahia (Independente de Licença):**
+        - **BNDES Direto:** R$ 64,69 Bilhões (1.104 contratos; R$ 51,76 Bi entre 2008–2026).
+        - **PAC Intervenções:** R$ 137,72 Bilhões (46.886 obras e intervenções públicas cadastradas).
+        - **SICONV Repasses:** R$ 103,08 Bilhões (69.590 propostas e termos de convênio).
+        - **Total Global das 3 Fontes:** **R$ 305,49 Bilhões**. Deste volume total, **R$ 114,62 Bilhões (37,5%)** estão diretamente atrelados a pessoas jurídicas formalmente licenciadas pelo INEMA/IBAMA.
+
+        **3. Colunas Adicionadas diretamente ao `BA_edit.csv`:**
         - `valor_real_investimento`: Valor em R$ mapeado diretamente nos contratos oficiais BNDES/PAC/SICONV.
         - `fonte_valor_real`: Fonte de origem (`BNDES`, `PAC`, `SICONV` ou combinação).
         - `valor_estimado_investimento`: Valor previsto pela matriz de regressão estratificada para o binômio (Tipo x Porte).
