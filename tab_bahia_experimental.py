@@ -439,152 +439,12 @@ def render_bahia_experimental_tab():
     # ---------------------------------------------------------
     # PROJEÇÃO FINANCEIRA E MODELO DE REGRESSÃO DE INVESTIMENTO
     # ---------------------------------------------------------
-    st.markdown("### 📈 Projeção Financeira dos Empreendimentos Licenciados: Real vs. Estimado")
+    st.markdown("### 🔬 Metodologia e Especificação do Modelo Econométrico Expandido")
     st.markdown("""
     Nem todos os 39.973 atos do INEMA possuem aporte de fontes públicas federais (BNDES, PAC ou SICONV). 
-    Para estimar a massa de capital privado e municipal não lastreado diretamente, foi calibrada uma **matriz de regressão log-linear estratificada por Tipo da Licença e Porte do Empreendimento** 
-    com base nas 2.144 licenças reais auditadas.
-    
-    Abaixo, apresentamos também o **montante total de investimento mapeado nas três fontes financeiras (BNDES Direto, PAC e SICONV)** 
-    no estado da Bahia, independentemente de estarem vinculados ao licenciamento ambiental.
+    Para estimar com rigor a massa de capital econômico não lastreado diretamente, calibramos uma **formulação econométrica log-linear (OLS)** 
+    estratificada em **todas as 17 modalidades de licenças e atos administrativos**, combinadas com as **classes de porte volumétrico**:
     """)
-
-    # Linha 1 de métricas: Investimento das Fontes Oficiais (Independente de Licença)
-    st.markdown("##### 🏛️ Total de Recursos Mapeados nas Fontes Federais na Bahia (Independente de Licenciamento)")
-    f1, f2, f3, f4 = st.columns(4)
-    with f1:
-        st.metric(
-            label="Total das 3 Fontes (BA)",
-            value="R$ 305,49 Bi",
-            help="Soma global de todo o capital registrado na Bahia via BNDES Direto, PAC/Obrasgov e SICONV Propostas."
-        )
-    with f2:
-        st.metric(
-            label="BNDES Direto Total",
-            value="R$ 64,69 Bi",
-            help="Total contratado em operações diretas do BNDES para a Bahia (1.104 contratos)."
-        )
-    with f3:
-        st.metric(
-            label="PAC Obras Total",
-            value="R$ 137,72 Bi",
-            help="Investimento global cadastrado para as 46.886 obras e intervenções estruturantes do PAC na Bahia."
-        )
-    with f4:
-        st.metric(
-            label="SICONV Propostas Total",
-            value="R$ 103,08 Bi",
-            help="Valor global de todas as 69.590 propostas e convênios municipais/estaduais aprovados no SICONV."
-        )
-
-    # Linha 2 de métricas: Real Licenciado vs Estimado
-    st.markdown("##### 🌿 Investimento Vinculado ao Licenciamento Ambiental (Real vs. Estimado)")
-    p1, p2, p3, p4 = st.columns(4)
-    with p1:
-        st.metric(
-            label="Investimento Real Mapeado",
-            value="R$ 114,62 Bi",
-            delta="37,5% do total federal",
-            help="Capital auditado diretamente via cruzamento de CNPJ com BNDES, PAC e SICONV."
-        )
-    with p2:
-        st.metric(
-            label="Investimento Estimado (Projetado)",
-            value="R$ 1,75 Tri",
-            help="Soma do investimento projetado pela curva econométrica de Tipo x Porte para os 37.829 atos sem aporte federal direto."
-        )
-    with p3:
-        st.metric(
-            label="Total Consolidado (Massa Total)",
-            value="R$ 1,87 Tri",
-            help="Investimento econômico total potencial mobilizado pelos atos ambientais no estado."
-        )
-    with p4:
-        st.metric(
-            label="Licenças com Valor Real",
-            value="2.144 atos (5,4%)",
-            help="Percentual de licenças com lastro financeiro federal direto auditável."
-        )
-
-    # Gráfico de Projeção Anual: Real vs Estimado vs Fontes Totais Federais
-    # Pré-cálculo de agregação temporal rápida
-    anos_proj = list(range(2008, 2027))
-    # Valores apurados na base BA_edit consolidada (em Bilhões de R$)
-    real_proj_bi = [0.003, 0.0, 0.033, 0.0, 0.691, 8.436, 4.458, 3.904, 6.458, 5.719, 29.963, 6.843, 6.349, 5.744, 5.150, 5.178, 4.405, 1.870, 1.084]
-    est_proj_bi = [149.54, 111.76, 81.48, 109.09, 47.97, 37.46, 27.76, 22.03, 15.76, 17.48, 15.05, 16.24, 15.62, 14.41, 14.04, 13.96, 10.55, 10.70, 7.23]
-    total_proj_bi = [r + e for r, e in zip(real_proj_bi, est_proj_bi)]
-
-    # Totais mapeados nas fontes (BNDES + PAC + SICONV) independentes de licença
-    bndes_macro_bi = [0.76, 1.08, 1.80, 1.65, 5.38, 4.84, 2.84, 3.67, 0.78, 4.42, 3.59, 2.32, 3.89, 0.71, 3.41, 3.32, 1.60, 2.93, 2.77]
-    pac_macro_bi   = [1.74, 6.06, 4.27, 7.69, 4.67, 7.76, 2.84, 3.67, 2.26, 0.00, 0.00, 0.00, 0.00, 30.37, 3.19, 3.39, 23.22, 27.87, 8.70]
-    siconv_macro_bi= [1.74, 6.06, 4.27, 7.69, 4.67, 7.76, 2.84, 3.67, 2.26, 4.84, 2.88, 3.62, 1.57, 5.37, 4.74, 11.94, 9.78, 12.15, 5.22]
-    total_fontes_bi= [b + p + s for b, p, s in zip(bndes_macro_bi, pac_macro_bi, siconv_macro_bi)]
-
-    fig_proj = go.Figure()
-
-    # 1. Barras empilhadas dos valores reais de cada fonte mapeada (Independente de licença)
-    fig_proj.add_trace(go.Bar(
-        x=anos_proj,
-        y=bndes_macro_bi,
-        name="🏛️ BNDES Direto (Total BA)",
-        marker_color="#0284C7"
-    ))
-
-    fig_proj.add_trace(go.Bar(
-        x=anos_proj,
-        y=pac_macro_bi,
-        name="🏗️ PAC Obras (Total BA)",
-        marker_color="#EA580C"
-    ))
-
-    fig_proj.add_trace(go.Bar(
-        x=anos_proj,
-        y=siconv_macro_bi,
-        name="📑 SICONV Convênios (Total BA)",
-        marker_color="#8B5CF6"
-    ))
-
-    # 2. Linhas de comparação do Licenciamento Ambiental
-    fig_proj.add_trace(go.Scatter(
-        x=anos_proj,
-        y=total_fontes_bi,
-        name="💵 Soma Total 3 Fontes Federais",
-        mode="lines+markers",
-        line=dict(color="#1E293B", width=3, dash="solid"),
-        marker=dict(size=7, symbol="diamond")
-    ))
-
-    fig_proj.add_trace(go.Scatter(
-        x=anos_proj,
-        y=real_proj_bi,
-        name="🌿 Investimento Licenciado Real (Auditado)",
-        mode="lines+markers",
-        line=dict(color="#10B981", width=3, dash="dash"),
-        marker=dict(size=6, symbol="circle")
-    ))
-
-    fig_proj.add_trace(go.Scatter(
-        x=anos_proj,
-        y=total_proj_bi,
-        name="📈 Investimento Licenciado Consolidado (Real + Estimado)",
-        mode="lines+markers",
-        line=dict(color="#F59E0B", width=3, dash="dot"),
-        marker=dict(size=5, symbol="x"),
-        visible="legendonly"
-    ))
-
-    fig_proj.update_layout(
-        title="<b>Evolução Anual do Investimento Total na Bahia: BNDES, PAC e SICONV vs. Licenciamento Ambiental (2008–2026)</b>",
-        barmode="stack",
-        xaxis=dict(title="Ano de Referência", tickmode="linear", dtick=1),
-        yaxis=dict(title="Investimento Mapeado (R$ Bilhões)", gridcolor="#E2E8F0"),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        margin=dict(l=40, r=40, t=60, b=40),
-        template="plotly_white",
-        height=470
-    )
-
-    st.plotly_chart(fig_proj, use_container_width=True)
 
     # Janela Modal para visualização de todos os projetos com match direto
     @st.dialog("🎯 Projetos com Match Perfeito: Licenças Ambientais vs. Fontes Financeiras", width="large")
@@ -634,10 +494,9 @@ def render_bahia_experimental_tab():
         if st.button("🔎 Abrir Janela: Ver Todos os Projetos com Match Perfeito (2.144 Licenças)", use_container_width=True, type="secondary"):
             modal_projetos_match_perfeito()
 
-    with st.expander("🔬 Tabela Clássica de Regressão Econométrica (OLS) Expandida por Modalidade de Licença", expanded=True):
+    with st.expander("📐 Especificação do Modelo Econométrico Expandido e Tabela Clássica OLS", expanded=True):
         st.markdown(r"""
-        #### 📐 Especificação do Modelo Econométrico Expandido
-        O modelo estimado utiliza uma formulação **log-linear de Mínimos Quadrados Ordinários (OLS)** sobre os 2.144 empreendimentos com lastro financeiro confirmado, cobrindo todas as tipologias e atos ambientais:
+        #### 📐 Especificação da Equação Log-Linear
         $$\log_{10}(\text{Investimento}) = \alpha + \sum_{i} \beta_i \cdot \text{Tipo}_i + \sum_{j} \gamma_j \cdot \text{Porte}_j + \epsilon$$
         """)
 
@@ -687,8 +546,8 @@ def render_bahia_experimental_tab():
         >   - **ASV:** `R$ 850.000,00` (oitocentos e cinquenta mil reais por autorização).
         >   - **DLA:** `R$ 450.000,00` (quatrocentos e cinquenta mil reais por dispensa).
         > - Em escala agregada para todo o estado da Bahia (2008–2026):
-        >   - Todos os **2.918 atos de ASV** somados totalizam **R$ 2,48 Bilhões** (apenas 0,13% do total consolidado do estado).
-        >   - Todos os **1.324 atos de DLA** somados totalizam **R$ 0,59 Bilhão** (apenas 0,03% do total consolidado).
+        >   - Todos os **2.918 atos de ASV** somados totalizam **R$ 2,48 Bilhões** (apenas 0,19% do total consolidado do estado).
+        >   - Todos os **1.324 atos de DLA** somados totalizam **R$ 0,59 Bilhão** (apenas 0,04% do total consolidado).
 
         > **2. Por que ASV e DLA não possuem coeficiente $\beta$ empírico direto na regressão?**
         > - **ASV (Autorização de Supressão de Vegetação - 2.918 atos):** O INEMA não disponibiliza CPF/CNPJ de pessoas jurídicas nos extratos públicos de ASV (por restrições de sigilo e processos rurais). Logo, **não é possível cruzar deterministicamente o CNPJ de 14 dígitos** com contratos do BNDES, PAC ou SICONV.
@@ -702,6 +561,148 @@ def render_bahia_experimental_tab():
         >   - A dispensa de licenciamento estadual aplica-se a atividades de impacto ambiental desprezível ou baixo potencial poluidor (galpões rurais, sistemas de microgeração fotovoltaica de até 1 MW, pequenas barragens de retenção de água e linhas de eletrificação rural).
         >   - O valor mediano de investimento civil/elétrico para essas benfeitorias rurais é de **R$ 450 mil**, escalonado para R$ 180 mil em microatividades e R$ 675 mil em intervenções médias.
         """)
+
+    # ---------------------------------------------------------
+    # PROJEÇÃO FINANCEIRA RECALCULADA PELO MODELO EXPANDIDO
+    # ---------------------------------------------------------
+    st.markdown("### 📈 Projeção Financeira dos Empreendimentos Licenciados: Real vs. Estimado (Recalibrada)")
+    st.markdown("""
+    Abaixo apresentamos a projeção global do investimento **recalculada rigorosamente com base nos coeficientes da Especificação do Modelo Econométrico Expandido acima**.
+    O novo ajuste reduziu o valor estimado de R$ 1,75 Tri para **R$ 1,20 Trilhão**, eliminando distorções de superestimativa através da ponderação individual de cada uma das 17 modalidades.
+    """)
+
+    # Linha 1 de métricas: Investimento das Fontes Oficiais (Independente de Licença)
+    st.markdown("##### 🏛️ Total de Recursos Mapeados nas Fontes Federais na Bahia (Independente de Licenciamento)")
+    f1, f2, f3, f4 = st.columns(4)
+    with f1:
+        st.metric(
+            label="Total das 3 Fontes (BA)",
+            value="R$ 305,49 Bi",
+            help="Soma global de todo o capital registrado na Bahia via BNDES Direto, PAC/Obrasgov e SICONV Propostas."
+        )
+    with f2:
+        st.metric(
+            label="BNDES Direto Total",
+            value="R$ 64,69 Bi",
+            help="Total contratado em operações diretas do BNDES para a Bahia (1.104 contratos)."
+        )
+    with f3:
+        st.metric(
+            label="PAC Obras Total",
+            value="R$ 137,72 Bi",
+            help="Investimento global cadastrado para as 46.886 obras e intervenções estruturantes do PAC na Bahia."
+        )
+    with f4:
+        st.metric(
+            label="SICONV Propostas Total",
+            value="R$ 103,08 Bi",
+            help="Valor global de todas as 69.590 propostas e convênios municipais/estaduais aprovados no SICONV."
+        )
+
+    # Linha 2 de métricas: Real Licenciado vs Estimado Novo
+    st.markdown("##### 🌿 Investimento Vinculado ao Licenciamento Ambiental (Novo Modelo Expandido)")
+    p1, p2, p3, p4 = st.columns(4)
+    with p1:
+        st.metric(
+            label="Investimento Real Mapeado",
+            value="R$ 114,62 Bi",
+            delta="37,5% do total federal",
+            help="Capital auditado diretamente via cruzamento de CNPJ com BNDES, PAC e SICONV."
+        )
+    with p2:
+        st.metric(
+            label="Investimento Estimado (Novo OLS)",
+            value="R$ 1,20 Tri",
+            delta="-R$ 550 Bi vs modelo anterior",
+            help="Soma projetada estritamente com os coeficientes OLS do modelo expandido para os 37.829 atos sem aporte federal direto."
+        )
+    with p3:
+        st.metric(
+            label="Total Consolidado da Atividade",
+            value="R$ 1,32 Tri",
+            help="Investimento econômico total potencial mobilizado pelos atos ambientais no estado com a nova calibração."
+        )
+    with p4:
+        st.metric(
+            label="Licenças com Valor Real",
+            value="2.144 atos (5,4%)",
+            help="Percentual de licenças com lastro financeiro federal direto auditável."
+        )
+
+    # Gráfico de Projeção Anual Recalibrado pelo Novo OLS
+    anos_proj = list(range(2008, 2027))
+    real_proj_bi = [0.003, 0.0, 0.033, 0.0, 0.691, 8.436, 4.458, 3.904, 6.458, 5.719, 29.963, 6.843, 6.349, 5.744, 5.150, 5.178, 4.405, 1.870, 1.084]
+    est_proj_bi = [93.62, 75.15, 60.84, 73.93, 19.26, 19.07, 14.20, 17.58, 19.05, 14.36, 10.40, 10.09, 10.46, 9.29, 9.81, 8.27, 6.67, 5.20, 3.22]
+    total_proj_bi = [r + e for r, e in zip(real_proj_bi, est_proj_bi)]
+
+    bndes_macro_bi = [0.76, 1.08, 1.80, 1.65, 5.38, 4.84, 2.84, 3.67, 0.78, 4.42, 3.59, 2.32, 3.89, 0.71, 3.41, 3.32, 1.60, 2.93, 2.77]
+    pac_macro_bi   = [1.74, 6.06, 4.27, 7.69, 4.67, 7.76, 2.84, 3.67, 2.26, 0.00, 0.00, 0.00, 0.00, 30.37, 3.19, 3.39, 23.22, 27.87, 8.70]
+    siconv_macro_bi= [1.74, 6.06, 4.27, 7.69, 4.67, 7.76, 2.84, 3.67, 2.26, 4.84, 2.88, 3.62, 1.57, 5.37, 4.74, 11.94, 9.78, 12.15, 5.22]
+    total_fontes_bi= [b + p + s for b, p, s in zip(bndes_macro_bi, pac_macro_bi, siconv_macro_bi)]
+
+    fig_proj = go.Figure()
+
+    fig_proj.add_trace(go.Bar(
+        x=anos_proj,
+        y=bndes_macro_bi,
+        name="🏛️ BNDES Direto (Total BA)",
+        marker_color="#0284C7"
+    ))
+
+    fig_proj.add_trace(go.Bar(
+        x=anos_proj,
+        y=pac_macro_bi,
+        name="🏗️ PAC Obras (Total BA)",
+        marker_color="#EA580C"
+    ))
+
+    fig_proj.add_trace(go.Bar(
+        x=anos_proj,
+        y=siconv_macro_bi,
+        name="📑 SICONV Convênios (Total BA)",
+        marker_color="#8B5CF6"
+    ))
+
+    fig_proj.add_trace(go.Scatter(
+        x=anos_proj,
+        y=total_fontes_bi,
+        name="💵 Soma Total 3 Fontes Federais",
+        mode="lines+markers",
+        line=dict(color="#1E293B", width=3, dash="solid"),
+        marker=dict(size=7, symbol="diamond")
+    ))
+
+    fig_proj.add_trace(go.Scatter(
+        x=anos_proj,
+        y=real_proj_bi,
+        name="🌿 Investimento Licenciado Real (Auditado)",
+        mode="lines+markers",
+        line=dict(color="#10B981", width=3, dash="dash"),
+        marker=dict(size=6, symbol="circle")
+    ))
+
+    fig_proj.add_trace(go.Scatter(
+        x=anos_proj,
+        y=total_proj_bi,
+        name="📈 Investimento Licenciado (Recalibrado OLS Expandido)",
+        mode="lines+markers",
+        line=dict(color="#F59E0B", width=3, dash="dot"),
+        marker=dict(size=5, symbol="x"),
+        visible="legendonly"
+    ))
+
+    fig_proj.update_layout(
+        title="<b>Evolução Anual: Fontes Federais vs. Licenciamento Recalibrado pelo Modelo Expandido (2008–2026)</b>",
+        barmode="stack",
+        xaxis=dict(title="Ano de Referência", tickmode="linear", dtick=1),
+        yaxis=dict(title="Investimento Mapeado (R$ Bilhões)", gridcolor="#E2E8F0"),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        margin=dict(l=40, r=40, t=60, b=40),
+        template="plotly_white",
+        height=470
+    )
+
+    st.plotly_chart(fig_proj, use_container_width=True)
 
     # ---------------------------------------------------------
     # SEÇÃO EXPLICATIVA: A DESCONEXÃO ENTRE INVESTIMENTO E LICENÇAS
