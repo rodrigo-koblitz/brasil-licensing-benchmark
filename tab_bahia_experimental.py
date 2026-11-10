@@ -308,9 +308,9 @@ def render_bahia_experimental_tab():
             y=1.02,
             xanchor="left",
             x=0.0,
-            font=dict(size=11)
+            font=dict(size=13)
         ),
-        margin=dict(l=40, r=40, t=110, b=40)
+        margin=dict(l=40, r=40, t=115, b=40)
     )
 
     if "Normalizado" not in view_scale:
@@ -837,9 +837,9 @@ def render_bahia_experimental_tab():
             y=1.02,
             xanchor="left",
             x=0.0,
-            font=dict(size=11)
+            font=dict(size=13)
         ),
-        margin=dict(l=40, r=40, t=110, b=40),
+        margin=dict(l=40, r=40, t=115, b=40),
         template="plotly_white",
         height=520
     )
