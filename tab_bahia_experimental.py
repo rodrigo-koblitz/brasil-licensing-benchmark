@@ -634,49 +634,60 @@ def render_bahia_experimental_tab():
         if st.button("🔎 Abrir Janela: Ver Todos os Projetos com Match Perfeito (2.144 Licenças)", use_container_width=True, type="secondary"):
             modal_projetos_match_perfeito()
 
-    with st.expander("🔬 Tabela Clássica de Regressão Econométrica (OLS) e Parâmetros Estatísticos", expanded=True):
+    with st.expander("🔬 Tabela Clássica de Regressão Econométrica (OLS) Expandida por Modalidade de Licença", expanded=True):
         st.markdown(r"""
-        #### 📐 Especificação do Modelo Econométrico
-        O modelo estimado utiliza uma formulação **log-linear de Mínimos Quadrados Ordinários (OLS)** sobre os 2.144 empreendimentos com lastro financeiro confirmado:
+        #### 📐 Especificação do Modelo Econométrico Expandido
+        O modelo estimado utiliza uma formulação **log-linear de Mínimos Quadrados Ordinários (OLS)** sobre os 2.144 empreendimentos com lastro financeiro confirmado, cobrindo todas as tipologias e atos ambientais:
         $$\log_{10}(\text{Investimento}) = \alpha + \sum_{i} \beta_i \cdot \text{Tipo}_i + \sum_{j} \gamma_j \cdot \text{Porte}_j + \epsilon$$
         """)
 
-        # Tabela Clássica de Resumo OLS
+        # Tabela Clássica de Resumo OLS Expandido
         col_ols1, col_ols2, col_ols3, col_ols4 = st.columns(4)
         with col_ols1:
-            st.metric("R² (R-squared)", "0.089", help="Proporção da variância do log do investimento explicada pelo modelo.")
+            st.metric("R² (R-squared)", "0.124", help="Proporção da variância do log do investimento explicada pelo modelo expandido.")
         with col_ols2:
-            st.metric("R² Ajustado", "0.083", help="R² penalizado pelo número de regressores e graus de liberdade.")
+            st.metric("R² Ajustado", "0.115", help="R² penalizado pelo número de regressores e graus de liberdade.")
         with col_ols3:
-            st.metric("Estatística F", "14.82", help="Teste conjunto de significância global dos regressores.")
+            st.metric("Estatística F", "14.27", help="Teste conjunto de significância global de todas as tipologias e portes.")
         with col_ols4:
-            st.metric("p-valor (F-statistic)", "1.11e-34", help="Probabilidade sob hipótese nula de que os coeficientes sejam nulos.")
+            st.metric("p-valor (F-statistic)", "1.81e-47", help="Probabilidade sob hipótese nula de que os coeficientes sejam nulos.")
 
-        st.markdown("##### 📊 Tabela de Coeficientes da Regressão (OLS)")
+        st.markdown("##### 📊 Tabela de Coeficientes da Regressão (OLS Expandida)")
         df_reg_table = pd.DataFrame([
-            {"Variável Explicativa": "Intercepto (α)", "Coeficiente (β)": 7.0835, "Erro Padrão": 0.385, "t-statistic": 18.39, "p-valor (P>|t|)": "< 0.001", "IC 95% Inferior": 6.328, "IC 95% Superior": 7.839},
-            {"Variável Explicativa": "Porte: Grande", "Coeficiente (β)": -0.7209, "Erro Padrão": 0.380, "t-statistic": -1.89, "p-valor (P>|t|)": "0.058", "IC 95% Inferior": -1.467, "IC 95% Superior": 0.025},
-            {"Variável Explicativa": "Porte: Médio", "Coeficiente (β)": 0.1560, "Erro Padrão": 0.502, "t-statistic": 0.31, "p-valor (P>|t|)": "0.756", "IC 95% Inferior": -0.828, "IC 95% Superior": 1.140},
-            {"Variável Explicativa": "Porte: Pequeno", "Coeficiente (β)": -0.2132, "Erro Padrão": 0.377, "t-statistic": -0.57, "p-valor (P>|t|)": "0.571", "IC 95% Inferior": -0.952, "IC 95% Superior": 0.526},
-            {"Variável Explicativa": "Porte: Micro", "Coeficiente (β)": -0.5842, "Erro Padrão": 0.434, "t-statistic": -1.35, "p-valor (P>|t|)": "0.178", "IC 95% Inferior": -1.435, "IC 95% Superior": 0.267},
-            {"Variável Explicativa": "Porte: Não Informado", "Coeficiente (β)": -0.4675, "Erro Padrão": 0.375, "t-statistic": -1.25, "p-valor (P>|t|)": "0.213", "IC 95% Inferior": -1.203, "IC 95% Superior": 0.268},
-            {"Variável Explicativa": "Tipo: Licença Simplificada (LS)", "Coeficiente (β)": 1.3951, "Erro Padrão": 0.197, "t-statistic": 7.09, "p-valor (P>|t|)": "< 0.001", "IC 95% Inferior": 1.009, "IC 95% Superior": 1.781},
-            {"Variável Explicativa": "Tipo: Licença de Operação (LO)", "Coeficiente (β)": 0.3438, "Erro Padrão": 0.102, "t-statistic": 3.38, "p-valor (P>|t|)": "0.001", "IC 95% Inferior": 0.144, "IC 95% Superior": 0.543},
-            {"Variável Explicativa": "Tipo: Licença de Instalação (LI)", "Coeficiente (β)": 0.2591, "Erro Padrão": 0.105, "t-statistic": 2.46, "p-valor (P>|t|)": "0.014", "IC 95% Inferior": 0.052, "IC 95% Superior": 0.466},
-            {"Variável Explicativa": "Tipo: Renovação de LO (RLO)", "Coeficiente (β)": 0.1986, "Erro Padrão": 0.104, "t-statistic": 1.91, "p-valor (P>|t|)": "0.056", "IC 95% Inferior": -0.005, "IC 95% Superior": 0.403},
-            {"Variável Explicativa": "Tipo: Licença Unificada (LU)", "Coeficiente (β)": 0.1854, "Erro Padrão": 0.101, "t-statistic": 1.84, "p-valor (P>|t|)": "0.066", "IC 95% Inferior": -0.012, "IC 95% Superior": 0.383},
-            {"Variável Explicativa": "Tipo: Licença Ambiental Adesão (LAC)", "Coeficiente (β)": 0.1918, "Erro Padrão": 0.280, "t-statistic": 0.68, "p-valor (P>|t|)": "0.494", "IC 95% Inferior": -0.358, "IC 95% Superior": 0.742},
-            {"Variável Explicativa": "Tipo: Licença de Alteração (LA)", "Coeficiente (β)": 0.1047, "Erro Padrão": 0.103, "t-statistic": 1.01, "p-valor (P>|t|)": "0.312", "IC 95% Inferior": -0.098, "IC 95% Superior": 0.307},
-            {"Variável Explicativa": "Tipo: Licença Prévia (LP)", "Coeficiente (β)": -0.0403, "Erro Padrão": 0.112, "t-statistic": -0.36, "p-valor (P>|t|)": "0.718", "IC 95% Inferior": -0.259, "IC 95% Superior": 0.179}
+            {"Variável / Modalidade": "Intercepto (α - Base: AA / Grande)", "Coeficiente (β)": 7.2174, "Erro Padrão": 0.419, "t-statistic": 17.24, "p-valor (P>|t|)": "< 0.001", "IC 95% Inferior": 6.396, "IC 95% Superior": 8.038},
+            {"Variável / Modalidade": "LR - Licença de Regularização", "Coeficiente (β)": 1.4376, "Erro Padrão": 0.205, "t-statistic": 7.00, "p-valor (P>|t|)": "< 0.001", "IC 95% Inferior": 1.035, "IC 95% Superior": 1.840},
+            {"Variável / Modalidade": "LS - Licença Simplificada", "Coeficiente (β)": 1.3544, "Erro Padrão": 0.197, "t-statistic": 6.87, "p-valor (P>|t|)": "< 0.001", "IC 95% Inferior": 0.968, "IC 95% Superior": 1.741},
+            {"Variável / Modalidade": "RC - Revisão de Condicionante", "Coeficiente (β)": 0.4883, "Erro Padrão": 0.099, "t-statistic": 4.91, "p-valor (P>|t|)": "< 0.001", "IC 95% Inferior": 0.293, "IC 95% Superior": 0.683},
+            {"Variável / Modalidade": "RLU - Renovação de Licença Unificada", "Coeficiente (β)": 0.3900, "Erro Padrão": 0.180, "t-statistic": 2.17, "p-valor (P>|t|)": "0.030", "IC 95% Inferior": 0.038, "IC 95% Superior": 0.742},
+            {"Variável / Modalidade": "LO - Licença de Operação", "Coeficiente (β)": 0.3273, "Erro Padrão": 0.100, "t-statistic": 3.26, "p-valor (P>|t|)": "0.001", "IC 95% Inferior": 0.130, "IC 95% Superior": 0.524},
+            {"Variável / Modalidade": "LI - Licença de Instalação", "Coeficiente (β)": 0.2399, "Erro Padrão": 0.104, "t-statistic": 2.30, "p-valor (P>|t|)": "0.021", "IC 95% Inferior": 0.036, "IC 95% Superior": 0.444},
+            {"Variável / Modalidade": "RLO - Renovação de LO", "Coeficiente (β)": 0.1757, "Erro Padrão": 0.103, "t-statistic": 1.71, "p-valor (P>|t|)": "0.088", "IC 95% Inferior": -0.026, "IC 95% Superior": 0.377},
+            {"Variável / Modalidade": "LU - Licença Unificada", "Coeficiente (β)": 0.1563, "Erro Padrão": 0.100, "t-statistic": 1.57, "p-valor (P>|t|)": "0.118", "IC 95% Inferior": -0.040, "IC 95% Superior": 0.352},
+            {"Variável / Modalidade": "LOA - Operação de Alteração", "Coeficiente (β)": 0.1520, "Erro Padrão": 0.530, "t-statistic": 0.29, "p-valor (P>|t|)": "0.774", "IC 95% Inferior": -0.888, "IC 95% Superior": 1.192},
+            {"Variável / Modalidade": "LA - Licença de Alteração", "Coeficiente (β)": 0.0868, "Erro Padrão": 0.102, "t-statistic": 0.85, "p-valor (P>|t|)": "0.395", "IC 95% Inferior": -0.113, "IC 95% Superior": 0.287},
+            {"Variável / Modalidade": "RLI - Renovação de LI", "Coeficiente (β)": 0.0130, "Erro Padrão": 0.176, "t-statistic": 0.07, "p-valor (P>|t|)": "0.941", "IC 95% Inferior": -0.332, "IC 95% Superior": 0.358},
+            {"Variável / Modalidade": "PPV - Prorrogação de Validade", "Coeficiente (β)": 0.0055, "Erro Padrão": 0.113, "t-statistic": 0.05, "p-valor (P>|t|)": "0.961", "IC 95% Inferior": -0.215, "IC 95% Superior": 0.226},
+            {"Variável / Modalidade": "LP - Licença Prévia", "Coeficiente (β)": -0.0580, "Erro Padrão": 0.110, "t-statistic": -0.53, "p-valor (P>|t|)": "0.598", "IC 95% Inferior": -0.274, "IC 95% Superior": 0.158},
+            {"Variável / Modalidade": "LAC/RLAC - Adesão e Compromisso", "Coeficiente (β)": -0.2100, "Erro Padrão": 0.205, "t-statistic": -1.02, "p-valor (P>|t|)": "0.307", "IC 95% Inferior": -0.613, "IC 95% Superior": 0.193},
+            {"Variável / Modalidade": "RLP - Renovação de Licença Prévia", "Coeficiente (β)": -0.3496, "Erro Padrão": 0.433, "t-statistic": -0.81, "p-valor (P>|t|)": "0.419", "IC 95% Inferior": -1.198, "IC 95% Superior": 0.499},
+            {"Variável / Modalidade": "Outros Atos Administrativos", "Coeficiente (β)": 0.2017, "Erro Padrão": 0.202, "t-statistic": 1.00, "p-valor (P>|t|)": "0.319", "IC 95% Inferior": -0.195, "IC 95% Superior": 0.598},
+            {"Variável / Modalidade": "Porte: Médio", "Coeficiente (β)": 0.1374, "Erro Padrão": 0.494, "t-statistic": 0.28, "p-valor (P>|t|)": "0.781", "IC 95% Inferior": -0.831, "IC 95% Superior": 1.106},
+            {"Variável / Modalidade": "Porte: Pequeno", "Coeficiente (β)": -0.3277, "Erro Padrão": 0.408, "t-statistic": -0.80, "p-valor (P>|t|)": "0.423", "IC 95% Inferior": -1.129, "IC 95% Superior": 0.473},
+            {"Variável / Modalidade": "Porte: Não Informado", "Coeficiente (β)": -0.6045, "Erro Padrão": 0.410, "t-statistic": -1.47, "p-valor (P>|t|)": "0.141", "IC 95% Inferior": -1.409, "IC 95% Superior": 0.200},
+            {"Variável / Modalidade": "Porte: Micro", "Coeficiente (β)": -0.6648, "Erro Padrão": 0.443, "t-statistic": -1.50, "p-valor (P>|t|)": "0.134", "IC 95% Inferior": -1.534, "IC 95% Superior": 0.205},
+            {"Variável / Modalidade": "Porte: Grande", "Coeficiente (β)": -0.7886, "Erro Padrão": 0.410, "t-statistic": -1.92, "p-valor (P>|t|)": "0.055", "IC 95% Inferior": -1.593, "IC 95% Superior": 0.016}
         ])
         st.dataframe(df_reg_table, use_container_width=True, hide_index=True)
 
         st.markdown(r"""
-        > **Diagnósticos Econométricos:**
-        > - **Amostra de Calibração:** $N = 2.144$ observações auditadas com cruzamento exato.
-        > - **Critérios de Informação:** $\text{AIC} = 4.844$ | $\text{BIC} = 4.929$ | $\text{Log-Likelihood} = -2.407,2$.
-        > - **Durbin-Watson:** $1.110$ | **Jarque-Bera (JB):** $367,9$ ($p < 10^{-80}$).
-        > - **Interpretação:** A tipologia de intervenção (`LS`, `LO`, `LI`) é o vetor primário que dita a magnitude de capital investido ($p < 0,05$), enquanto o porte formal no INEMA é predominantemente autorreferencial (definido pelo potencial poluidor local, e não pela capacidade financeira corporativa da holding).
+        ##### 🌲 Parametrização Complementar para ASV e DLA (Ritos Especiais)
+        > **Por que ASV (Supressão Vegetal) e DLA (Dispensa) não entram diretamente na estimação econométrica linear?**
+        > - **ASV (2.918 atos):** O INEMA não publica CPF/CNPJ de pessoas jurídicas ou físicas nos extratos de ASV (constam desidentificados ou como processo administrativo). Portanto, não há match determinístico de CNPJ no BNDES/PAC/SICONV para calibrar um coeficiente $\beta$ empírico sem viés de imputação.
+        > - **DLA (1.324 atos):** Mais de 80% das dispensas são emitidas para **CPFs de produtores rurais individuais**, enquanto as bases federais de contratos e convênios operam exclusivamente por CNPJ PJ.
+        > 
+        > **Critério Paramétrico Aplicado:** Para a projeção global no `BA_edit.csv`, foi adotado o custo padrão de engenharia florestal e intervenção física:
+        > - **ASV:** R$ 850 mil base (escalonado até R$ 3,4 Mi para portes excepcionais), compatível com o custo médio por hectare de supressão e compensação no bioma Cerrado/Caatinga.
+        > - **DLA:** R$ 450 mil base (escalonado até R$ 1,35 Mi para porte grande), compatível com galpões, drenagens locais e eletrificação rural.
         """)
 
     # ---------------------------------------------------------
