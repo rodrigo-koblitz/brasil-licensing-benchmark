@@ -586,26 +586,97 @@ def render_bahia_experimental_tab():
 
     st.plotly_chart(fig_proj, use_container_width=True)
 
-    with st.expander("🔬 Equação da Regressão e Parâmetros da Estimativa Econométrica", expanded=False):
+    # Janela Modal para visualização de todos os projetos com match direto
+    @st.dialog("🎯 Projetos com Match Perfeito: Licenças Ambientais vs. Fontes Financeiras", width="large")
+    def modal_projetos_match_perfeito():
+        st.markdown("""
+        Abaixo estão listados os **2.144 atos de licenciamento ambiental** emitidos na Bahia 
+        que possuem **vínculo determinístico perfeito (via CNPJ de 14 dígitos)** com as operações 
+        auditadas do **BNDES Direto, PAC Obrasgov e SICONV Convênios**, totalizando **R$ 114,62 Bilhões**.
+        """)
+        try:
+            df_match = pd.read_parquet(os.path.join(DATA_DIR, "licencas_com_match_financeiro_BA.parquet"))
+            
+            c_f1, c_f2 = st.columns([1, 2])
+            with c_f1:
+                fontes_opt = ["Todas"] + sorted(df_match["fonte_financeira"].dropna().unique().tolist())
+                sel_fonte = st.selectbox("Filtrar por Fonte:", fontes_opt)
+            with c_f2:
+                busca = st.text_input("Buscar por Empreendedor, Empreendimento ou Município:")
+            
+            df_show = df_match.copy()
+            if sel_fonte != "Todas":
+                df_show = df_show[df_show["fonte_financeira"] == sel_fonte]
+            if busca:
+                mask = (
+                    df_show["empreendedor"].astype(str).str.contains(busca, case=False, na=False) |
+                    df_show["empreendimento"].astype(str).str.contains(busca, case=False, na=False) |
+                    df_show["municipio"].astype(str).str.contains(busca, case=False, na=False)
+                )
+                df_show = df_show[mask]
+
+            st.caption(f"Mostrando **{len(df_show):,}** de **{len(df_match):,}** licenças vinculadas | Capital Filtrado: **R$ {df_show['valor_real_investimento'].sum()/1e9:.2f} Bilhões**")
+
+            df_format = df_show.copy()
+            df_format["Valor Real (R$)"] = df_format["valor_real_investimento"].apply(lambda x: f"R$ {x:,.2f}")
+            colunas_grid = ["id_licenca", "numero_licenca", "empreendedor", "empreendimento", "municipio", "tipo_licenca", "porte", "fonte_financeira", "Valor Real (R$)"]
+            st.dataframe(
+                df_format[colunas_grid],
+                use_container_width=True,
+                hide_index=True,
+                height=450
+            )
+        except Exception as e:
+            st.error(f"Erro ao carregar dados detalhados de correspondência: {e}")
+
+    col_match_btn, _ = st.columns([3, 2])
+    with col_match_btn:
+        if st.button("🔎 Abrir Janela: Ver Todos os Projetos com Match Perfeito (2.144 Licenças)", use_container_width=True, type="secondary"):
+            modal_projetos_match_perfeito()
+
+    with st.expander("🔬 Tabela Clássica de Regressão Econométrica (OLS) e Parâmetros Estatísticos", expanded=True):
         st.markdown(r"""
-        **1. Modelo de Regressão Log-Linear Empregado:**
-        $$\log_{10}(\text{Investimento}) = \alpha + \sum \beta_i \cdot \text{Tipo}_i + \sum \gamma_j \cdot \text{Porte}_j + \epsilon$$
-        - **Variável Dependente:** $\log_{10}$ do valor financeiro do projeto (distribuição log-normal para mitigar a assimetria severa de megaobras).
-        - **Variáveis Explicativas:** Tipologia formal da licença (`Tipo da licença`) e dimensão volumétrica do empreendimento (`Porte do empreendimento`).
-        - **F-statistic:** 20.46 ($p < 10^{-29}$), confirmando alta significância estatística conjunta da tipologia e do porte na determinação da magnitude de capital.
+        #### 📐 Especificação do Modelo Econométrico
+        O modelo estimado utiliza uma formulação **log-linear de Mínimos Quadrados Ordinários (OLS)** sobre os 2.144 empreendimentos com lastro financeiro confirmado:
+        $$\log_{10}(\text{Investimento}) = \alpha + \sum_{i} \beta_i \cdot \text{Tipo}_i + \sum_{j} \gamma_j \cdot \text{Porte}_j + \epsilon$$
+        """)
 
-        **2. Comparação com as Fontes Oficiais Mapeadas na Bahia (Independente de Licença):**
-        - **BNDES Direto:** R$ 64,69 Bilhões (1.104 contratos; R$ 51,76 Bi entre 2008–2026).
-        - **PAC Intervenções:** R$ 137,72 Bilhões (46.886 obras e intervenções públicas cadastradas).
-        - **SICONV Repasses:** R$ 103,08 Bilhões (69.590 propostas e termos de convênio).
-        - **Total Global das 3 Fontes:** **R$ 305,49 Bilhões**. Deste volume total, **R$ 114,62 Bilhões (37,5%)** estão diretamente atrelados a pessoas jurídicas formalmente licenciadas pelo INEMA/IBAMA.
+        # Tabela Clássica de Resumo OLS
+        col_ols1, col_ols2, col_ols3, col_ols4 = st.columns(4)
+        with col_ols1:
+            st.metric("R² (R-squared)", "0.089", help="Proporção da variância do log do investimento explicada pelo modelo.")
+        with col_ols2:
+            st.metric("R² Ajustado", "0.083", help="R² penalizado pelo número de regressores e graus de liberdade.")
+        with col_ols3:
+            st.metric("Estatística F", "14.82", help="Teste conjunto de significância global dos regressores.")
+        with col_ols4:
+            st.metric("p-valor (F-statistic)", "1.11e-34", help="Probabilidade sob hipótese nula de que os coeficientes sejam nulos.")
 
-        **3. Colunas Adicionadas diretamente ao `BA_edit.csv`:**
-        - `valor_real_investimento`: Valor em R$ mapeado diretamente nos contratos oficiais BNDES/PAC/SICONV.
-        - `fonte_valor_real`: Fonte de origem (`BNDES`, `PAC`, `SICONV` ou combinação).
-        - `valor_estimado_investimento`: Valor previsto pela matriz de regressão estratificada para o binômio (Tipo x Porte).
-        - `valor_consolidado_investimento`: Campo unificado que utiliza o valor real auditado quando disponível, ou o valor estimado nas demais licenças.
-        - `metodologia_precificacao`: Rótulo de auditoria (`Real (Fonte)` ou `Estimado (Regressão Tipo x Porte)`).
+        st.markdown("##### 📊 Tabela de Coeficientes da Regressão (OLS)")
+        df_reg_table = pd.DataFrame([
+            {"Variável Explicativa": "Intercepto (α)", "Coeficiente (β)": 7.0835, "Erro Padrão": 0.385, "t-statistic": 18.39, "p-valor (P>|t|)": "< 0.001", "IC 95% Inferior": 6.328, "IC 95% Superior": 7.839},
+            {"Variável Explicativa": "Porte: Grande", "Coeficiente (β)": -0.7209, "Erro Padrão": 0.380, "t-statistic": -1.89, "p-valor (P>|t|)": "0.058", "IC 95% Inferior": -1.467, "IC 95% Superior": 0.025},
+            {"Variável Explicativa": "Porte: Médio", "Coeficiente (β)": 0.1560, "Erro Padrão": 0.502, "t-statistic": 0.31, "p-valor (P>|t|)": "0.756", "IC 95% Inferior": -0.828, "IC 95% Superior": 1.140},
+            {"Variável Explicativa": "Porte: Pequeno", "Coeficiente (β)": -0.2132, "Erro Padrão": 0.377, "t-statistic": -0.57, "p-valor (P>|t|)": "0.571", "IC 95% Inferior": -0.952, "IC 95% Superior": 0.526},
+            {"Variável Explicativa": "Porte: Micro", "Coeficiente (β)": -0.5842, "Erro Padrão": 0.434, "t-statistic": -1.35, "p-valor (P>|t|)": "0.178", "IC 95% Inferior": -1.435, "IC 95% Superior": 0.267},
+            {"Variável Explicativa": "Porte: Não Informado", "Coeficiente (β)": -0.4675, "Erro Padrão": 0.375, "t-statistic": -1.25, "p-valor (P>|t|)": "0.213", "IC 95% Inferior": -1.203, "IC 95% Superior": 0.268},
+            {"Variável Explicativa": "Tipo: Licença Simplificada (LS)", "Coeficiente (β)": 1.3951, "Erro Padrão": 0.197, "t-statistic": 7.09, "p-valor (P>|t|)": "< 0.001", "IC 95% Inferior": 1.009, "IC 95% Superior": 1.781},
+            {"Variável Explicativa": "Tipo: Licença de Operação (LO)", "Coeficiente (β)": 0.3438, "Erro Padrão": 0.102, "t-statistic": 3.38, "p-valor (P>|t|)": "0.001", "IC 95% Inferior": 0.144, "IC 95% Superior": 0.543},
+            {"Variável Explicativa": "Tipo: Licença de Instalação (LI)", "Coeficiente (β)": 0.2591, "Erro Padrão": 0.105, "t-statistic": 2.46, "p-valor (P>|t|)": "0.014", "IC 95% Inferior": 0.052, "IC 95% Superior": 0.466},
+            {"Variável Explicativa": "Tipo: Renovação de LO (RLO)", "Coeficiente (β)": 0.1986, "Erro Padrão": 0.104, "t-statistic": 1.91, "p-valor (P>|t|)": "0.056", "IC 95% Inferior": -0.005, "IC 95% Superior": 0.403},
+            {"Variável Explicativa": "Tipo: Licença Unificada (LU)", "Coeficiente (β)": 0.1854, "Erro Padrão": 0.101, "t-statistic": 1.84, "p-valor (P>|t|)": "0.066", "IC 95% Inferior": -0.012, "IC 95% Superior": 0.383},
+            {"Variável Explicativa": "Tipo: Licença Ambiental Adesão (LAC)", "Coeficiente (β)": 0.1918, "Erro Padrão": 0.280, "t-statistic": 0.68, "p-valor (P>|t|)": "0.494", "IC 95% Inferior": -0.358, "IC 95% Superior": 0.742},
+            {"Variável Explicativa": "Tipo: Licença de Alteração (LA)", "Coeficiente (β)": 0.1047, "Erro Padrão": 0.103, "t-statistic": 1.01, "p-valor (P>|t|)": "0.312", "IC 95% Inferior": -0.098, "IC 95% Superior": 0.307},
+            {"Variável Explicativa": "Tipo: Licença Prévia (LP)", "Coeficiente (β)": -0.0403, "Erro Padrão": 0.112, "t-statistic": -0.36, "p-valor (P>|t|)": "0.718", "IC 95% Inferior": -0.259, "IC 95% Superior": 0.179}
+        ])
+        st.dataframe(df_reg_table, use_container_width=True, hide_index=True)
+
+        st.markdown(r"""
+        > **Diagnósticos Econométricos:**
+        > - **Amostra de Calibração:** $N = 2.144$ observações auditadas com cruzamento exato.
+        > - **Critérios de Informação:** $\text{AIC} = 4.844$ | $\text{BIC} = 4.929$ | $\text{Log-Likelihood} = -2.407,2$.
+        > - **Durbin-Watson:** $1.110$ | **Jarque-Bera (JB):** $367,9$ ($p < 10^{-80}$).
+        > - **Interpretação:** A tipologia de intervenção (`LS`, `LO`, `LI`) é o vetor primário que dita a magnitude de capital investido ($p < 0,05$), enquanto o porte formal no INEMA é predominantemente autorreferencial (definido pelo potencial poluidor local, e não pela capacidade financeira corporativa da holding).
         """)
 
     # ---------------------------------------------------------
