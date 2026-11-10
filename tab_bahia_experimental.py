@@ -627,115 +627,123 @@ def render_bahia_experimental_tab():
         st.dataframe(df_duplicidade, use_container_width=True, hide_index=True)
 
     # ---------------------------------------------------------
-    # PROJEÇÃO FINANCEIRA RECALCULADA PELO MODELO EXPANDIDO
+    # PROJEÇÃO FINANCEIRA RECALCULADA PELO MODELO EXPANDIDO E DESDUPLICADO
     # ---------------------------------------------------------
     st.markdown("### 📈 Projeção Financeira dos Empreendimentos Licenciados: Real vs. Estimado (Recalibrada)")
     st.markdown("""
-    Abaixo apresentamos a projeção global do investimento **recalculada rigorosamente com base nos coeficientes da Especificação do Modelo Econométrico Expandido acima**.
-    O novo ajuste reduziu o valor estimado de R$ 1,75 Tri para **R$ 1,20 Trilhão**, eliminando distorções de superestimativa através da ponderação individual de cada uma das 17 modalidades.
+    Esta projeção consolida os resultados da **auditoria de duplicidade** e da **parametrização econométrica expandida**:
+    - O valor real das fontes é calculado de forma **estritamente desduplicada**, expurgando os **R$ 40,97 Bi** do PAC Histórico que já constavam na base do SICONV.
+    - O capital real auditado vinculado a licenças ambientais emitidas totaliza **R$ 103,42 Bilhões líquidos** em **2.137 licenças únicas**.
+    - Para as 37.836 licenças sem aporte federal direto, a projeção anual acumulada soma **R$ 480,46 Bilhões**, totalizando um impacto econômico consolidado de **R$ 571,24 Bilhões** no período 2008–2026.
     """)
 
-    # Linha 1 de métricas: Investimento das Fontes Oficiais (Independente de Licença)
-    st.markdown("##### 🏛️ Total de Recursos Mapeados nas Fontes Federais na Bahia (Independente de Licenciamento)")
+    # Linha 1 de métricas: Fontes Federais Desduplicadas
+    st.markdown("##### 🏛️ Total de Recursos Mapeados nas Fontes Federais na Bahia (Estritamente Desduplicado)")
     f1, f2, f3, f4 = st.columns(4)
     with f1:
         st.metric(
-            label="Total das 3 Fontes (BA)",
-            value="R$ 305,49 Bi",
-            help="Soma global de todo o capital registrado na Bahia via BNDES Direto, PAC/Obrasgov e SICONV Propostas."
+            label="Total Federal Líquido",
+            value="R$ 264,52 Bi",
+            delta="-R$ 40,97 Bi duplicidade",
+            help="Soma desduplicada: BNDES Direto (R$ 64,69 Bi) + PAC Obrasgov exclusivo (R$ 96,76 Bi) + SICONV Propostas (R$ 103,08 Bi)."
         )
     with f2:
         st.metric(
-            label="BNDES Direto Total",
+            label="BNDES Direto",
             value="R$ 64,69 Bi",
-            help="Total contratado em operações diretas do BNDES para a Bahia (1.104 contratos)."
+            help="1.104 contratos de crédito corporativo direto contratados na Bahia."
         )
     with f3:
         st.metric(
-            label="PAC Obras Total",
-            value="R$ 137,72 Bi",
-            help="Investimento global cadastrado para as 46.886 obras e intervenções estruturantes do PAC na Bahia."
+            label="PAC Obrasgov Puro",
+            value="R$ 96,76 Bi",
+            help="11.292 obras públicas federais ativas cadastradas no sistema Obrasgov (exclusivo)."
         )
     with f4:
         st.metric(
-            label="SICONV Propostas Total",
+            label="SICONV Propostas",
             value="R$ 103,08 Bi",
-            help="Valor global de todas as 69.590 propostas e convênios municipais/estaduais aprovados no SICONV."
+            help="69.590 propostas e termos de convênio federativos cadastrados para a Bahia."
         )
 
-    # Linha 2 de métricas: Real Licenciado vs Estimado Novo
-    st.markdown("##### 🌿 Investimento Vinculado ao Licenciamento Ambiental (Novo Modelo Expandido)")
+    # Linha 2 de métricas: Real Licenciado vs Estimado Recalibrado
+    st.markdown("##### 🌿 Investimento Vinculado ao Licenciamento Ambiental (Auditado vs. OLS Expandido)")
     p1, p2, p3, p4 = st.columns(4)
     with p1:
         st.metric(
-            label="Investimento Real Mapeado",
-            value="R$ 114,62 Bi",
-            delta="37,5% do total federal",
-            help="Capital auditado diretamente via cruzamento de CNPJ com BNDES, PAC e SICONV."
+            label="Investimento Real Auditado",
+            value="R$ 103,42 Bi",
+            delta="39,1% do total federal",
+            help="Capital auditado vinculado a licenças ambientais com expurgo de duplicidades contábeis."
         )
     with p2:
         st.metric(
-            label="Investimento Estimado (Novo OLS)",
-            value="R$ 1,20 Tri",
-            delta="-R$ 550 Bi vs modelo anterior",
-            help="Soma projetada estritamente com os coeficientes OLS do modelo expandido para os 37.829 atos sem aporte federal direto."
+            label="Investimento Estimado (OLS)",
+            value="R$ 480,46 Bi",
+            delta="Série 2008-2026",
+            help="Soma projetada estritamente com os coeficientes OLS do modelo expandido para os atos sem aporte federal direto."
         )
     with p3:
         st.metric(
             label="Total Consolidado da Atividade",
-            value="R$ 1,32 Tri",
-            help="Investimento econômico total potencial mobilizado pelos atos ambientais no estado com a nova calibração."
+            value="R$ 571,24 Bi",
+            help="Investimento econômico total potencial mobilizado pelos atos ambientais no estado com a nova calibração desduplicada."
         )
     with p4:
         st.metric(
             label="Licenças com Valor Real",
-            value="2.144 atos (5,4%)",
-            help="Percentual de licenças com lastro financeiro federal direto auditável."
+            value="2.137 atos (5,3%)",
+            help="Percentual de licenças com lastro financeiro federal direto auditável após desduplicação."
         )
 
-    # Gráfico de Projeção Anual Recalibrado pelo Novo OLS
+    # Gráfico de Projeção Anual Recalibrado e Desduplicado
     anos_proj = list(range(2008, 2027))
-    real_proj_bi = [0.003, 0.0, 0.033, 0.0, 0.691, 8.436, 4.458, 3.904, 6.458, 5.719, 29.963, 6.843, 6.349, 5.744, 5.150, 5.178, 4.405, 1.870, 1.084]
+    # Valores apurados na base BA_edit estritamente desduplicada (em Bilhões de R$)
+    real_proj_bi = [0.003, 0.0, 0.024, 0.0, 0.672, 8.089, 4.333, 3.805, 6.406, 5.651, 28.765, 6.272, 5.328, 4.722, 4.779, 5.094, 3.997, 1.823, 1.015]
     est_proj_bi = [93.62, 75.15, 60.84, 73.93, 19.26, 19.07, 14.20, 17.58, 19.05, 14.36, 10.40, 10.09, 10.46, 9.29, 9.81, 8.27, 6.67, 5.20, 3.22]
     total_proj_bi = [r + e for r, e in zip(real_proj_bi, est_proj_bi)]
 
-    bndes_macro_bi = [0.76, 1.08, 1.80, 1.65, 5.38, 4.84, 2.84, 3.67, 0.78, 4.42, 3.59, 2.32, 3.89, 0.71, 3.41, 3.32, 1.60, 2.93, 2.77]
-    pac_macro_bi   = [1.74, 6.06, 4.27, 7.69, 4.67, 7.76, 2.84, 3.67, 2.26, 0.00, 0.00, 0.00, 0.00, 30.37, 3.19, 3.39, 23.22, 27.87, 8.70]
-    siconv_macro_bi= [1.74, 6.06, 4.27, 7.69, 4.67, 7.76, 2.84, 3.67, 2.26, 4.84, 2.88, 3.62, 1.57, 5.37, 4.74, 11.94, 9.78, 12.15, 5.22]
-    total_fontes_bi= [b + p + s for b, p, s in zip(bndes_macro_bi, pac_macro_bi, siconv_macro_bi)]
+    # Séries das fontes federais desduplicadas (BNDES + PAC Obrasgov Puro + SICONV)
+    bndes_macro_bi    = [0.76, 1.08, 1.80, 1.65, 5.38, 4.84, 2.84, 3.67, 0.78, 4.42, 3.59, 2.32, 3.89, 0.71, 3.41, 3.32, 1.60, 2.93, 2.77]
+    pac_obrasgov_bi   = [0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 30.37, 3.19, 3.39, 23.22, 27.87, 8.70]
+    siconv_macro_bi   = [1.74, 6.06, 4.27, 7.69, 4.67, 7.76, 2.84, 3.67, 2.26, 4.84, 2.88, 3.62, 1.57, 5.37, 4.74, 11.94, 9.78, 12.15, 5.22]
+    total_dedup_bi    = [b + p + s for b, p, s in zip(bndes_macro_bi, pac_obrasgov_bi, siconv_macro_bi)]
 
     fig_proj = go.Figure()
 
+    # Barras empilhadas das fontes federais desduplicadas
     fig_proj.add_trace(go.Bar(
         x=anos_proj,
         y=bndes_macro_bi,
-        name="🏛️ BNDES Direto (Total BA)",
+        name="🏛️ BNDES Direto (Crédito Corporativo)",
         marker_color="#0284C7"
     ))
 
     fig_proj.add_trace(go.Bar(
         x=anos_proj,
-        y=pac_macro_bi,
-        name="🏗️ PAC Obras (Total BA)",
+        y=pac_obrasgov_bi,
+        name="🏗️ PAC Obrasgov Puro (Obras Federais Ativas)",
         marker_color="#EA580C"
     ))
 
     fig_proj.add_trace(go.Bar(
         x=anos_proj,
         y=siconv_macro_bi,
-        name="📑 SICONV Convênios (Total BA)",
+        name="📑 SICONV Convênios (Repasses Municipais/Estaduais)",
         marker_color="#8B5CF6"
     ))
 
+    # Linha: Total Federal Desduplicado
     fig_proj.add_trace(go.Scatter(
         x=anos_proj,
-        y=total_fontes_bi,
-        name="💵 Soma Total 3 Fontes Federais",
+        y=total_dedup_bi,
+        name="💵 Total Federal Desduplicado (Líquido)",
         mode="lines+markers",
         line=dict(color="#1E293B", width=3, dash="solid"),
         marker=dict(size=7, symbol="diamond")
     ))
 
+    # Linha: Investimento Real Auditado em Licenças
     fig_proj.add_trace(go.Scatter(
         x=anos_proj,
         y=real_proj_bi,
@@ -745,10 +753,11 @@ def render_bahia_experimental_tab():
         marker=dict(size=6, symbol="circle")
     ))
 
+    # Linha: Total Consolidado do Licenciamento (Real + OLS Expandido)
     fig_proj.add_trace(go.Scatter(
         x=anos_proj,
         y=total_proj_bi,
-        name="📈 Investimento Licenciado (Recalibrado OLS Expandido)",
+        name="📈 Total Consolidado Licenciado (Real + OLS Expandido)",
         mode="lines+markers",
         line=dict(color="#F59E0B", width=3, dash="dot"),
         marker=dict(size=5, symbol="x"),
@@ -756,7 +765,7 @@ def render_bahia_experimental_tab():
     ))
 
     fig_proj.update_layout(
-        title="<b>Evolução Anual: Fontes Federais vs. Licenciamento Recalibrado pelo Modelo Expandido (2008–2026)</b>",
+        title="<b>Evolução Anual: Fontes Federais Desduplicadas vs. Licenciamento Recalibrado (2008–2026)</b>",
         barmode="stack",
         xaxis=dict(title="Ano de Referência", tickmode="linear", dtick=1),
         yaxis=dict(title="Investimento Mapeado (R$ Bilhões)", gridcolor="#E2E8F0"),
