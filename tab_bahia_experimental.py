@@ -563,6 +563,70 @@ def render_bahia_experimental_tab():
         """)
 
     # ---------------------------------------------------------
+    # NOVA SEÇÃO: REVISÃO DAS OBRAS E A PROCURA POR DUPLICIDADE
+    # ---------------------------------------------------------
+    st.markdown("### 🔍 Revisão das Obras e a Procura por Duplicidade (BNDES, PAC e SICONV)")
+    st.markdown("""
+    Quando operamos com três bancos de dados financeiros federais simultâneos (**BNDES Direto, PAC Obrasgov e SICONV Propostas**), 
+    surge o risco contábil de **dupla contagem (overlap financeiro)** caso a mesma obra pública ou repasse seja registrado em mais de um sistema.
+    
+    Realizamos uma auditoria minuciosa em nível de **ID de projeto, número de convênio e CNPJ executor** para quantificar a interseção real entre as fontes:
+    """)
+
+    dup1, dup2, dup3, dup4 = st.columns(4)
+    with dup1:
+        st.metric(
+            label="Soma Bruta das Fontes",
+            value="R$ 305,49 Bi",
+            help="Soma aritmética simples das 3 bases sem expurgo de duplicidades contábeis."
+        )
+    with dup2:
+        st.metric(
+            label="Sobreposição Exata Detectada",
+            value="R$ 40,97 Bi",
+            delta="-13,4% de sobreposição",
+            help="35.594 contratos do PAC histórico (2008-2016) que foram originados diretamente de propostas do SICONV."
+        )
+    with dup3:
+        st.metric(
+            label="Total Federal Desduplicado",
+            value="R$ 264,52 Bi",
+            help="Capital federal real e independente (BNDES Direto + PAC Obrasgov exclusivo + SICONV único consolidado)."
+        )
+    with dup4:
+        st.metric(
+            label="Licenciado Real Desduplicado",
+            value="R$ 103,42 Bi",
+            delta="39,1% de aderência líquida",
+            help="Montante auditado vinculado a licenças ambientais emitidas após eliminação estrita de qualquer sobreposição contábil."
+        )
+
+    col_rev1, col_rev2 = st.columns(2)
+    with col_rev1:
+        st.info("""
+        **1. Onde ocorre a Duplicidade Real? (PAC vs. SICONV)**
+        - **A Origem do Overlap:** O Programa de Aceleração do Crescimento (PAC 1 e PAC 2, entre 2008 e 2016) operou primordialmente via **termos de compromisso e convênios cadastrados no Portal dos Convênios (SICONV)**.
+        - **Mapeamento Exato:** Dos 46.886 registros do PAC na Bahia, **35.594 intervenções (somando R$ 40,97 Bilhões)** possuem chave primária idêntica (`id_proposta` do SICONV).
+        - **Solução de Desduplicação:** Ao isolar o **Obrasgov puro** (11.292 obras públicas ativas, somando R$ 96,76 Bi) e combiná-lo com a base integral do SICONV (R$ 103,08 Bi), o capital federal líquido cai de R$ 305,49 Bi para **R$ 264,52 Bilhões líquidos**.
+        """)
+    with col_rev2:
+        st.info("""
+        **2. BNDES vs. PAC/SICONV: Há Sobreposição de Recursos?**
+        - **Natureza dos Instrumentos:** O **BNDES Direto opera via crédito e dívida corporativa** contratada por pessoas jurídicas privadas ou estatais (ex.: concessionárias de energia, saneamento e logística), enquanto PAC e SICONV são **repasses de Orçamento Geral da União (OGU)** a fundo perdido.
+        - **Auditoria de CNPJ:** Apenas **12 pessoas jurídicas** na Bahia captaram simultaneamente crédito BNDES e executaram contratos PAC/SICONV (ex.: CCR Metrô, Coelba e Embasa). 
+        - **Regra de Rateio Adotada:** Para evitar que uma mesma licença recebesse contagem duplicada, o valor foi rateado proporcionalmente pelo número de atos emitidos para o mesmo CNPJ, assegurando que o capital auditado vinculado às licenças ambientais seja de **R$ 103,42 Bilhões líquidos**.
+        """)
+
+    with st.expander("📊 Matriz de Sobreposição Contábil entre as Fontes Financeiras na Bahia", expanded=False):
+        df_duplicidade = pd.DataFrame([
+            {"Fonte Primária": "BNDES Operações Diretas", "Registros": "1.104 contratos", "Valor Bruto (R$)": "R$ 64,69 Bi", "Sobreposição Detectada": "R$ 0,00 (Crédito corporativo privado exclusivo)", "Valor Líquido Desduplicado": "R$ 64,69 Bi"},
+            {"Fonte Primária": "PAC - Obrasgov Exclusivo (Obras Federais)", "Registros": "11.292 obras", "Valor Bruto (R$)": "R$ 96,76 Bi", "Sobreposição Detectada": "R$ 0,00 (Obras diretas de infraestrutura federal)", "Valor Líquido Desduplicado": "R$ 96,76 Bi"},
+            {"Fonte Primária": "SICONV Propostas / Convênios Únicos", "Registros": "69.590 propostas", "Valor Bruto (R$)": "R$ 103,08 Bi", "Sobreposição Detectada": "R$ 40,97 Bi (registradas concomitantemente no PAC 1 e 2)", "Valor Líquido Desduplicado": "R$ 103,08 Bi"},
+            {"Fonte Primária": "PAC Histórico extraído do SICONV", "Registros": "35.594 obras", "Valor Bruto (R$)": "R$ 40,97 Bi", "Sobreposição Detectada": "100% sobreposto com a base SICONV integral", "Valor Líquido Desduplicado": "R$ 0,00 (Expurgado para evitar bi-tributação/dupla contagem)"}
+        ])
+        st.dataframe(df_duplicidade, use_container_width=True, hide_index=True)
+
+    # ---------------------------------------------------------
     # PROJEÇÃO FINANCEIRA RECALCULADA PELO MODELO EXPANDIDO
     # ---------------------------------------------------------
     st.markdown("### 📈 Projeção Financeira dos Empreendimentos Licenciados: Real vs. Estimado (Recalibrada)")
