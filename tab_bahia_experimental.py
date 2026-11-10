@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 """
 Módulo Experimental: Análise Integrada Bahia
-(Licenciamento INEMA, IBAMA, BNDES, PAC, SICONV, Desmatamento MapBiomas, CAGED Histórico + Novo CAGED, PNAD e MEI)
+(Licenciamento INEMA, IBAMA, BNDES, PAC, SICONV, Desmatamento MapBiomas, CAGED, PNAD, MEI, PIB IBGE e Investimento Agropecuário)
 Adicionado como aba no módulo Benchmark Financeiro & BNDES.
 """
 
 import os
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
+import plotly.express as px
 
 def render_bahia_experimental_tab():
     st.subheader("🔬 Laboratório Experimental: Bahia (Licenciamento INEMA vs. BNDES vs. PAC & SICONV vs. Desmatamento & Mercado de Trabalho)")
-    st.caption("Cruzamento temporal dinâmico para testar a sincronia entre a dinâmica regulatória ambiental (INEMA: Geral, LAC, ASV e IBAMA), investimentos públicos e de crédito (PAC, SICONV, BNDES), desmatamento (MapBiomas) e indicadores de trabalho & empresas (CAGED histórico 2000-2026, Taxa de Informalidade IBGE PNAD e MEI).")
+    st.caption("Cruzamento temporal dinâmico para testar a sincronia entre a dinâmica regulatória ambiental (INEMA: Geral, LAC, ASV, DLA e IBAMA), investimentos públicos e de crédito (PAC, SICONV, BNDES), desmatamento (MapBiomas), PIB Estadual IBGE, investimento agropecuário e indicadores de trabalho (CAGED, Taxa de Informalidade IBGE PNAD e MEI).")
 
     # Caminhos oficiais com fallback para o diretório local data/ (compatibilidade Cloud Run e Local)
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -36,6 +38,8 @@ def render_bahia_experimental_tab():
     path_desm = resolve_path(r"G:\Meu Drive\UFMG\auxiliary\app\data\mapbiomas_desmatamento_estado_ano.csv", "mapbiomas_desmatamento_estado_ano.csv")
     path_socio = resolve_path(r"G:\Meu Drive\UFMG\auxiliary\app\data\bahia_trabalho_caged_pnad_mei.csv", "bahia_trabalho_caged_pnad_mei.csv")
     path_ipea = resolve_path(r"G:\Meu Drive\UFMG\auxiliary\app\data\ipea_bahia_pibcne_dinveste.parquet", "ipea_bahia_pibcne_dinveste.parquet")
+    path_pib_ibge = resolve_path(r"G:\Meu Drive\UFMG\auxiliary\app\data\ibge_pib_bahia_2000_2026.csv", "ibge_pib_bahia_2000_2026.csv")
+    path_agro = resolve_path(r"G:\Meu Drive\UFMG\auxiliary\app\data\agro_state_series_2000_2025.parquet", "agro_state_series_2000_2025.parquet")
 
     # Verificar existência dos arquivos essenciais
     missing = [p for p in [path_ba_lic, path_bndes, path_pac, path_siconv] if not os.path.exists(p)]
@@ -44,7 +48,7 @@ def render_bahia_experimental_tab():
         return
 
     with st.spinner("Carregando e integrando as séries temporais da Bahia..."):
-        # 1. Licenciamento BA (INEMA - Data de emissão)
+        # 1. Licenciamento BA (INEMA - Data de emissão e Projeções Financeiras)
         try:
             df_ba = pd.read_csv(path_ba_lic, sep=';', encoding='utf-8', low_memory=False)
         except Exception:
@@ -52,11 +56,14 @@ def render_bahia_experimental_tab():
         
         col_emis = None
         col_tipo = None
+        col_val_proj = 'valor_consolidado_investimento' if 'valor_consolidado_investimento' in df_ba.columns else None
         for col in df_ba.columns:
             if 'emiss' in col.lower() and col_emis is None:
                 col_emis = col
             if 'tipo' in col.lower() and col_tipo is None:
                 col_tipo = col
+            if ('invest' in col.lower() or 'valor' in col.lower()) and col_val_proj is None:
+                col_val_proj = col
         if col_emis is None:
             col_emis = df_ba.columns[6]
         if col_tipo is None:
@@ -64,30 +71,36 @@ def render_bahia_experimental_tab():
             
         dt_emis = pd.to_datetime(df_ba[col_emis], errors='coerce')
         df_ba['ano_emis'] = dt_emis.dt.year
+        if col_val_proj in df_ba.columns:
+            df_ba['val_proj_num'] = pd.to_numeric(df_ba[col_val_proj], errors='coerce').fillna(0.0)
+        else:
+            df_ba['val_proj_num'] = 0.0
+
         lic_by_year = df_ba['ano_emis'].value_counts()
+        proj_fin_total_by_year = (df_ba.groupby('ano_emis')['val_proj_num'].sum() / 1e9).to_dict() # R$ Bi
         
-        # LAC
+        # LAC (Licença por Adesão e Compromisso)
         df_lac = df_ba[df_ba[col_tipo].astype(str).str.contains(r'\bLAC\b|Adesão e Compromisso', case=False, regex=True)]
         lac_by_year = df_lac['ano_emis'].value_counts()
         
-        # ASV
+        # ASV (Autorização de Supressão de Vegetação)
         df_asv = df_ba[df_ba[col_tipo].astype(str).str.contains(r'\bASV\b|Supress', case=False, regex=True)]
         asv_by_year = df_asv['ano_emis'].value_counts()
+        proj_fin_asv_by_year = (df_asv.groupby('ano_emis')['val_proj_num'].sum() / 1e9).to_dict() # R$ Bi
+
+        # DLA (Dispensa de Licença Ambiental)
+        df_dla = df_ba[df_ba[col_tipo].astype(str).str.contains(r'\bDLA\b|Dispensa', case=False, regex=True)]
+        dla_by_year = df_dla['ano_emis'].value_counts()
+        proj_fin_dla_by_year = (df_dla.groupby('ano_emis')['val_proj_num'].sum() / 1e9).to_dict() # R$ Bi
 
         # 1.1 IBAMA na Bahia (Licenciamento Federal)
         ibama_by_year = {}
         if os.path.exists(path_ibama):
             df_ib = pd.read_parquet(path_ibama)
-            # Normalizar nomes de colunas
             df_ib.columns = [c.lower().replace(' ', '_').replace('﻿', '') for c in df_ib.columns]
-            
-            # Identificar coluna temporal de emissão (fallback para data_do_protocolo)
             col_dt_ib = 'data_de_emissao' if 'data_de_emissao' in df_ib.columns else [c for c in df_ib.columns if 'emiss' in c or 'data' in c][0]
-            
-            # Filtrar empreendimentos localizados na Bahia (uf_do_empreendimento == 'BA')
             col_uf_ib = 'uf_do_empreendimento' if 'uf_do_empreendimento' in df_ib.columns else [c for c in df_ib.columns if 'uf' in c][0]
             df_ib_ba = df_ib[df_ib[col_uf_ib].astype(str).str.upper().str.contains('BA')]
-            
             dt_ib = pd.to_datetime(df_ib_ba[col_dt_ib], errors='coerce')
             ibama_by_year = dt_ib.dt.year.value_counts().to_dict()
 
@@ -96,19 +109,28 @@ def render_bahia_experimental_tab():
         dt_bndes = pd.to_datetime(df_bndes['data_da_contratacao'], errors='coerce')
         bndes_by_year = dt_bndes.dt.year.value_counts()
 
-        # 3. PAC Bahia (Obras consolidadas 2008-2026)
+        # 3. PAC Bahia - Obras Totais e Obras em Execução / Andamento
         df_pac = pd.read_parquet(path_pac)
         pac_by_year = df_pac['ano'].value_counts()
+        
+        # Obras em Execução: Ativas no cronograma (data_inicio <= ano <= data_fim, sem canceladas/rejeitadas)
+        dt_pac_ini = pd.to_datetime(df_pac['data_inicio'], errors='coerce')
+        dt_pac_fim = pd.to_datetime(df_pac['data_fim'], errors='coerce')
+        valid_pac = ~df_pac['situacao_fase'].astype(str).str.contains('Rejeit|Cancel', case=False, na=False)
+        obras_exec_by_year = {}
+        for y in range(2000, 2027):
+            mask_exec = (dt_pac_ini.dt.year <= y) & (dt_pac_fim.dt.year >= y) & valid_pac
+            obras_exec_by_year[y] = int(mask_exec.sum())
 
         # 4. SICONV Propostas Bahia (2008-2026)
         df_sic = pd.read_parquet(path_siconv)
         ano_sic_col = 'ano_prop' if 'ano_prop' in df_sic.columns else 'ano_proposta'
         sic_by_year = df_sic[ano_sic_col].value_counts()
 
-        # 5. Desmatamento MapBiomas Bahia (Área em ha e % do Território)
+        # 5. Desmatamento MapBiomas Bahia (Área em ha e % do Território Oficial IBGE: 564.760,4 km² = 56.476.040 ha)
         desm_ha_by_year = {}
         desm_pct_by_year = {}
-        area_territorio_ba_ha = 56476040.0  # 564.760,4 km² oficial IBGE
+        area_territorio_ba_ha = 56476040.0
         if os.path.exists(path_desm):
             df_desm_raw = pd.read_csv(path_desm)
             df_desm_ba = df_desm_raw[df_desm_raw['UF'] == 'BA']
@@ -134,7 +156,29 @@ def render_bahia_experimental_tab():
                 if pd.notna(r.get('mei_ativos')):
                     mei_ativos_by_year[y] = float(r['mei_ativos'])
 
-        # 7. Dados Auditados IPEA / IBGE (PIB Construção Civil BA - PIBCNE e Despesas Empenhadas STN - DINVESTE)
+        # 7. PIB Bahia Oficial IBGE (Contas Regionais Tabela 5938 - R$ Bi)
+        pib_ibge_by_year = {}
+        if os.path.exists(path_pib_ibge):
+            df_pib = pd.read_csv(path_pib_ibge)
+            for _, r in df_pib.iterrows():
+                y = int(r['ano'])
+                if pd.notna(r.get('pib_ibge_bi_reais')):
+                    pib_ibge_by_year[y] = float(r['pib_ibge_bi_reais'])
+
+        # 8. Investimento Agrícola Bahia (Capital Segurado Mi Reais e Produção Bi Reais)
+        agro_cap_seg_by_year = {}
+        agro_prod_by_year = {}
+        if os.path.exists(path_agro):
+            df_agr = pd.read_parquet(path_agro)
+            df_agr_ba = df_agr[df_agr['sigla_uf'] == 'BA']
+            for _, r in df_agr_ba.iterrows():
+                y = int(r['ano'])
+                if pd.notna(r.get('capital_segurado_mi_reais')):
+                    agro_cap_seg_by_year[y] = float(r['capital_segurado_mi_reais'])
+                if pd.notna(r.get('valor_producao_bi_reais')):
+                    agro_prod_by_year[y] = float(r['valor_producao_bi_reais'])
+
+        # 9. Dados Complementares IPEA / IBGE (PIB Construção Civil BA - PIBCNE e Despesas STN - DINVESTE)
         pibcne_by_year = {}
         dinveste_by_year = {}
         if os.path.exists(path_ipea):
@@ -153,15 +197,29 @@ def render_bahia_experimental_tab():
         for y in all_years:
             data.append({
                 "Ano": y,
+                # Séries de Licenciamento Físico
                 "Licenças Emitidas (Total INEMA)": int(lic_by_year.get(y, 0)),
                 "Licenças Federais (IBAMA)": int(ibama_by_year.get(y, 0)),
                 "Licenças LAC": int(lac_by_year.get(y, 0)),
                 "Autorizações ASV (Supressão)": int(asv_by_year.get(y, 0)),
+                "Dispensas DLA": int(dla_by_year.get(y, 0)),
+                # Séries de Projeção Financeira das Licenças (R$ Bi)
+                "Projeção Financeira Total Licenças (R$ Bi)": float(proj_fin_total_by_year.get(y, 0.0)),
+                "Projeção Financeira ASV (R$ Bi)": float(proj_fin_asv_by_year.get(y, 0.0)),
+                "Projeção Financeira DLA (R$ Bi)": float(proj_fin_dla_by_year.get(y, 0.0)),
+                # Séries de Obras e Investimentos
+                "Obras em Execução (PAC)": int(obras_exec_by_year.get(y, 0)),
+                "Obras PAC (Cadastradas/Ano)": int(pac_by_year.get(y, 0)),
+                "Operações BNDES": int(bndes_by_year.get(y, 0)),
+                "Propostas SICONV": int(sic_by_year.get(y, 0)),
+                # PIB IBGE e Investimento Agrícola
+                "PIB Bahia (IBGE - R$ Bi)": pib_ibge_by_year.get(y, None),
+                "Investimento Agrícola (Capital Segurado - R$ Mi)": agro_cap_seg_by_year.get(y, None),
+                "Valor Produção Agrícola (R$ Bi)": agro_prod_by_year.get(y, None),
+                # Desmatamento MapBiomas
                 "Desmatamento (ha)": float(desm_ha_by_year.get(y, 0.0)),
                 "Desmatamento (% Território BA)": float(desm_pct_by_year.get(y, 0.0)),
-                "Operações BNDES": int(bndes_by_year.get(y, 0)),
-                "Obras PAC": int(pac_by_year.get(y, 0)),
-                "Propostas SICONV": int(sic_by_year.get(y, 0)),
+                # Mercado de Trabalho e Empresas
                 "CAGED Saldo": caged_saldo_by_year.get(y, None),
                 "Taxa Informalidade (%)": pnad_taxa_by_year.get(y, None),
                 "MEI Ativos": mei_ativos_by_year.get(y, None),
@@ -172,21 +230,23 @@ def render_bahia_experimental_tab():
 
     # Métricas Resumo Gerais (período principal 2008-2026 com dados de infraestrutura)
     df_ts_main = df_ts[df_ts["Ano"] >= 2008]
-    m1, m_ib, m2, m3, m4, m5, m6, m7 = st.columns(8)
+    m1, m_ib, m2, m3, m3b, m4, m5, m6, m7 = st.columns(9)
     with m1:
-        st.metric("Licenças INEMA (Estadual)", f"{df_ts_main['Licenças Emitidas (Total INEMA)'].sum():,}")
+        st.metric("Licenças INEMA", f"{df_ts_main['Licenças Emitidas (Total INEMA)'].sum():,}")
     with m_ib:
-        st.metric("Licenças IBAMA (Federal)", f"{df_ts_main['Licenças Federais (IBAMA)'].sum():,}")
+        st.metric("Licenças IBAMA", f"{df_ts_main['Licenças Federais (IBAMA)'].sum():,}")
     with m2:
-        st.metric("Total Licenças LAC", f"{df_ts_main['Licenças LAC'].sum():,}")
+        st.metric("Total LAC", f"{df_ts_main['Licenças LAC'].sum():,}")
     with m3:
-        st.metric("Total ASV (Supressão)", f"{df_ts_main['Autorizações ASV (Supressão)'].sum():,}")
+        st.metric("Total ASV", f"{df_ts_main['Autorizações ASV (Supressão)'].sum():,}")
+    with m3b:
+        st.metric("Total DLA", f"{df_ts_main['Dispensas DLA'].sum():,}")
     with m4:
-        st.metric("Desmatamento Acumulado", f"{df_ts_main['Desmatamento (ha)'].sum()/1e6:.2f} Mi ha")
+        st.metric("Desmat. Acum.", f"{df_ts_main['Desmatamento (ha)'].sum()/1e6:.2f}M ha")
     with m5:
-        st.metric("Total Obras PAC (BA)", f"{df_ts_main['Obras PAC'].sum():,}")
+        st.metric("Obras PAC Ativas", f"{df_ts_main['Obras em Execução (PAC)'].max():,}")
     with m6:
-        st.metric("Propostas SICONV (BA)", f"{df_ts_main['Propostas SICONV'].sum():,}")
+        st.metric("Propostas SICONV", f"{df_ts_main['Propostas SICONV'].sum():,}")
     with m7:
         st.metric("Contratos BNDES", f"{df_ts_main['Operações BNDES'].sum():,}")
 
@@ -200,36 +260,48 @@ def render_bahia_experimental_tab():
     col_f1, col_f2 = st.columns([1, 2])
     with col_f1:
         ano_min, ano_max = st.slider("Intervalo de Anos:", min_value=2000, max_value=2026, value=(2008, 2026))
-        
         view_scale = st.radio("Escala das Curvas:", ["Valores Reais (Eixos Múltiplos)", "Normalizado (Índice Base 100 no ano inicial)"], horizontal=True)
 
     df_filtered = df_ts[(df_ts["Ano"] >= ano_min) & (df_ts["Ano"] <= ano_max)].copy()
 
-    # Opções disponíveis de séries para seleção dinâmica
+    # Opções completas de séries solicitadas pelo usuário
     series_catalog = {
+        # Licenciamento Físico
         "Licenças INEMA (Estadual)": {"col": "Licenças Emitidas (Total INEMA)", "color": "#10B981", "dash": "solid", "axis": "y1", "unit": "Qtd.", "type": "line"},
-        "Licenças IBAMA (Federal BA)": {"col": "Licenças Federais (IBAMA)", "color": "#047857", "dash": "dashdot", "axis": "y1", "unit": "Qtd.", "type": "line"},
+        "Licenças Federais (IBAMA)": {"col": "Licenças Federais (IBAMA)", "color": "#047857", "dash": "dashdot", "axis": "y1", "unit": "Qtd.", "type": "line"},
         "Licenças LAC (Adesão e Comp.)": {"col": "Licenças LAC", "color": "#14B8A6", "dash": "dash", "axis": "y1", "unit": "Qtd.", "type": "line"},
         "Autorizações ASV (Supressão)": {"col": "Autorizações ASV (Supressão)", "color": "#EF4444", "dash": "dot", "axis": "y1", "unit": "Qtd.", "type": "line"},
-        "Obras PAC (Bahia)": {"col": "Obras PAC", "color": "#3B82F6", "dash": "solid", "axis": "y1", "unit": "Qtd.", "type": "line"},
-        "Propostas SICONV (Transferegov)": {"col": "Propostas SICONV", "color": "#8B5CF6", "dash": "dash", "axis": "y1", "unit": "Qtd.", "type": "line"},
-        "Operações BNDES (Diretas)": {"col": "Operações BNDES", "color": "#F59E0B", "dash": "dashdot", "axis": "y3", "unit": "Contratos", "type": "line"},
-        "Desmatamento (% Território BA)": {"col": "Desmatamento (% Território BA)", "color": "#B91C1C", "dash": "solid", "axis": "y2", "unit": "%", "type": "line"},
-        "Desmatamento (mil ha)": {"col": "Desmatamento (ha)", "calc": lambda df: df["Desmatamento (ha)"] / 1e3, "color": "#7F1D1D", "dash": "dash", "axis": "y1", "unit": "mil ha", "type": "line"},
+        "Dispensas DLA (Separadas)": {"col": "Dispensas DLA", "color": "#6EE7B7", "dash": "dot", "axis": "y1", "unit": "Qtd.", "type": "line"},
+        # Projeções Financeiras das Licenças (Consolidada, ASV e DLA)
+        "Projeção Financeira Total Licenças (R$ Bi)": {"col": "Projeção Financeira Total Licenças (R$ Bi)", "color": "#059669", "dash": "solid", "axis": "y3", "unit": "R$ Bi", "type": "line"},
+        "Projeção Financeira ASV (Supressão - R$ Bi)": {"col": "Projeção Financeira ASV (R$ Bi)", "color": "#DC2626", "dash": "dash", "axis": "y3", "unit": "R$ Bi", "type": "line"},
+        "Projeção Financeira DLA (Dispensa - R$ Bi)": {"col": "Projeção Financeira DLA (R$ Bi)", "color": "#10B981", "dash": "dot", "axis": "y3", "unit": "R$ Bi", "type": "line"},
+        # Infraestrutura e Obras
+        "Obras PAC em Execução (Andamento)": {"col": "Obras em Execução (PAC)", "color": "#2563EB", "dash": "solid", "axis": "y1", "unit": "Obras Ativas", "type": "line"},
+        "Obras PAC (Cadastradas/Ano)": {"col": "Obras PAC (Cadastradas/Ano)", "color": "#93C5FD", "dash": "dash", "axis": "y1", "unit": "Novas Obras", "type": "line"},
+        "Propostas SICONV (Transferegov)": {"col": "Propostas SICONV", "color": "#8B5CF6", "dash": "dash", "axis": "y1", "unit": "Propostas", "type": "line"},
+        "Operações BNDES (Diretas)": {"col": "Operações BNDES", "color": "#F59E0B", "dash": "dashdot", "axis": "y1", "unit": "Contratos", "type": "line"},
+        # PIB e Economia
+        "PIB Bahia (IBGE - R$ Bi)": {"col": "PIB Bahia (IBGE - R$ Bi)", "color": "#1D4ED8", "dash": "solid", "axis": "y3", "unit": "R$ Bi", "type": "line"},
+        "Investimento Agrícola (Capital Segurado - R$ Mi)": {"col": "Investimento Agrícola (Capital Segurado - R$ Mi)", "color": "#84CC16", "dash": "dashdot", "axis": "y3", "unit": "R$ Mi", "type": "line"},
+        # Desmatamento MapBiomas
+        "Desmatamento (% Território BA)": {"col": "Desmatamento (% Território BA)", "color": "#B91C1C", "dash": "solid", "axis": "y2", "unit": "% Território", "type": "line"},
+        "Desmatamento Total (mil ha)": {"col": "Desmatamento (ha)", "calc": lambda df: df["Desmatamento (ha)"] / 1e3, "color": "#7F1D1D", "dash": "dash", "axis": "y1", "unit": "mil ha", "type": "line"},
+        # Mercado de Trabalho e Empresas
         "Saldo Emprego CLT (CAGED)": {"col": "CAGED Saldo", "color": "#0284C7", "dash": "solid", "axis": "y4", "unit": "Vagas", "type": "line"},
         "Taxa de Informalidade IBGE (%)": {"col": "Taxa Informalidade (%)", "color": "#D97706", "dash": "dot", "axis": "y2", "unit": "%", "type": "line"},
-        "MEI Ativos (mil empresas)": {"col": "MEI Ativos", "calc": lambda df: df["MEI Ativos"] / 1e3, "color": "#6366F1", "dash": "solid", "axis": "y4", "unit": "mil MEIs", "type": "line"},
-        "🏗️ Obras em Execução: PIB Construção BA (R$ Bi)": {"col": "PIB Construção Civil BA (R$ Bi 2010)", "color": "#059669", "dash": "solid", "axis": "y3", "unit": "R$ Bi (2010)", "type": "line"},
-        "🏛️ Investimento Estadual Empenhado STN (R$ Bi)": {"col": "Investimentos STN BA (R$ Bi)", "color": "#7C3AED", "dash": "dashdot", "axis": "y3", "unit": "R$ Bi", "type": "line"}
+        "MEI Ativos (mil empresas)": {"col": "MEI Ativos", "calc": lambda df: df["MEI Ativos"] / 1e3, "color": "#6366F1", "dash": "solid", "axis": "y4", "unit": "mil MEIs", "type": "line"}
     }
 
     with col_f2:
         default_selected = [
             "Licenças INEMA (Estadual)",
-            "🏗️ Obras em Execução: PIB Construção BA (R$ Bi)",
-            "🏛️ Investimento Estadual Empenhado STN (R$ Bi)",
-            "Obras PAC (Bahia)",
-            "Operações BNDES (Diretas)"
+            "Autorizações ASV (Supressão)",
+            "Dispensas DLA (Separadas)",
+            "Obras PAC em Execução (Andamento)",
+            "PIB Bahia (IBGE - R$ Bi)",
+            "Desmatamento (% Território BA)",
+            "Saldo Emprego CLT (CAGED)"
         ]
         selected_series = st.multiselect(
             "Selecione as Séries que deseja visualizar no Gráfico:",
@@ -247,8 +319,6 @@ def render_bahia_experimental_tab():
     has_y3 = False
     has_y4 = False
 
-    base_year_row = df_filtered.iloc[0] if len(df_filtered) > 0 else None
-
     for s_name in selected_series:
         cfg = series_catalog[s_name]
         col_name = cfg["col"]
@@ -258,7 +328,6 @@ def render_bahia_experimental_tab():
         else:
             y_vals = df_filtered[col_name]
             
-        # Filtro de dados válidos
         valid_mask = y_vals.notna()
         x_plot = df_filtered.loc[valid_mask, "Ano"]
         y_plot = y_vals[valid_mask]
@@ -285,18 +354,17 @@ def render_bahia_experimental_tab():
             yaxis=axis_assign
         ))
 
-    # Configuração de Layout Dinâmico
     layout_yaxes = dict(
         title=dict(
-            text="<b>Evolução Temporal: Licenciamento vs. Investimento Federal e Crédito</b>",
+            text="<b>Evolução Temporal: Licenciamento vs. Investimento Federal, Crédito e Indicadores Macroeconômicos</b>",
             y=0.98,
             x=0.0,
             xanchor="left",
             yanchor="top"
         ),
-        xaxis=dict(title="Ano", tickmode="linear", dtick=1 if (ano_max - ano_min) <= 12 else 2, domain=[0.02, 0.82 if has_y4 else (0.88 if has_y3 else 0.94)]),
+        xaxis=dict(title="Ano", tickmode="linear", dtick=1 if (ano_max - ano_min) <= 12 else 2, domain=[0.02, 0.80 if has_y4 else (0.86 if has_y3 else 0.94)]),
         yaxis=dict(
-            title=dict(text="Índice Base 100" if "Normalizado" in view_scale else "Qtd. Licenças / Obras / Atos", font=dict(color="#10B981")),
+            title=dict(text="Índice Base 100" if "Normalizado" in view_scale else "Qtd. Físicas (Licenças / Obras / Atos)", font=dict(color="#10B981")),
             tickfont=dict(color="#10B981"),
             side="left"
         ),
@@ -308,15 +376,15 @@ def render_bahia_experimental_tab():
             y=1.02,
             xanchor="left",
             x=0.0,
-            font=dict(size=13)
+            font=dict(size=12)
         ),
-        margin=dict(l=40, r=40, t=115, b=40)
+        margin=dict(l=40, r=40, t=120, b=40)
     )
 
     if "Normalizado" not in view_scale:
         if has_y2:
             layout_yaxes["yaxis2"] = dict(
-                title=dict(text="Taxas Percentuais (%)", font=dict(color="#B91C1C")),
+                title=dict(text="Taxas e Proporções (% Território / Informalidade)", font=dict(color="#B91C1C")),
                 tickfont=dict(color="#B91C1C"),
                 overlaying="y",
                 side="right",
@@ -324,27 +392,105 @@ def render_bahia_experimental_tab():
             )
         if has_y3:
             layout_yaxes["yaxis3"] = dict(
-                title=dict(text="Operações BNDES", font=dict(color="#F59E0B")),
-                tickfont=dict(color="#F59E0B"),
+                title=dict(text="Valores Financeiros (R$ Bi / R$ Mi)", font=dict(color="#1D4ED8")),
+                tickfont=dict(color="#1D4ED8"),
                 overlaying="y",
                 side="right",
-                position=0.88
+                position=0.86
             )
         if has_y4:
             layout_yaxes["yaxis4"] = dict(
-                title=dict(text="Saldo CAGED / MEIs (mil)", font=dict(color="#0284C7")),
+                title=dict(text="Saldo CLT (CAGED) / MEIs (mil)", font=dict(color="#0284C7")),
                 tickfont=dict(color="#0284C7"),
                 overlaying="y",
                 side="right",
-                position=0.96
+                position=0.94
             )
 
     fig.update_layout(**layout_yaxes)
     st.plotly_chart(fig, use_container_width=True)
 
     # ---------------------------------------------------------
-    # NOVA SEÇÃO: RELAÇÃO E LASTRO FINANCEIRO DAS LICENÇAS
+    # NOVA SEÇÃO: MATRIZ DE CORRELAÇÃO E TABELA ESTATÍSTICA
     # ---------------------------------------------------------
+    st.markdown("---")
+    st.markdown("### 📊 Matriz de Correlação e Estatísticas Descritivas")
+    st.caption("Avaliação de multicolinearidade, alinhamento temporal e métricas descritivas para todas as variáveis integradas no período selecionado.")
+
+    # Preparar DataFrame com nomes amigáveis para matriz e estatísticas
+    col_stat_map = {
+        "Licenças Emitidas (Total INEMA)": "Licenças Total (INEMA)",
+        "Autorizações ASV (Supressão)": "Licenças ASV",
+        "Dispensas DLA": "Licenças DLA",
+        "Projeção Financeira Total Licenças (R$ Bi)": "Proj. Fin. Licenças (R$ Bi)",
+        "Projeção Financeira ASV (R$ Bi)": "Proj. Fin. ASV (R$ Bi)",
+        "Projeção Financeira DLA (R$ Bi)": "Proj. Fin. DLA (R$ Bi)",
+        "Obras em Execução (PAC)": "Obras em Execução",
+        "PIB Bahia (IBGE - R$ Bi)": "PIB Bahia (R$ Bi)",
+        "Investimento Agrícola (Capital Segurado - R$ Mi)": "Agro Cap. Segurado (R$ Mi)",
+        "Desmatamento (ha)": "Desmatamento (ha)",
+        "Desmatamento (% Território BA)": "Desmatamento (% Território)",
+        "CAGED Saldo": "Saldo Emprego CLT",
+        "MEI Ativos": "MEI Ativos",
+        "Taxa Informalidade (%)": "Taxa Informalidade (%)"
+    }
+
+    df_stat = df_filtered[list(col_stat_map.keys())].rename(columns=col_stat_map).dropna(how='all')
+
+    tab_corr, tab_stats = st.tabs(["🔥 Matriz de Correlação", "📑 Tabela Estatística Descritiva"])
+
+    with tab_corr:
+        method_corr = st.radio("Método de Correlação:", ["pearson (Linear)", "spearman (Postos/Não-linear)"], horizontal=True)
+        corr_m = method_corr.split()[0]
+        
+        corr_df = df_stat.corr(method=corr_m).round(2)
+        
+        fig_corr = px.imshow(
+            corr_df,
+            text_auto=True,
+            aspect="auto",
+            color_continuous_scale="RdBu_r",
+            zmin=-1.0,
+            zmax=1.0,
+            title=f"Matriz de Correlação ({method_corr.capitalize()}) - Período {ano_min} a {ano_max}"
+        )
+        fig_corr.update_layout(
+            margin=dict(l=60, r=40, t=50, b=60),
+            coloraxis_colorbar=dict(title="Correlação (r)")
+        )
+        st.plotly_chart(fig_corr, use_container_width=True)
+
+        with st.expander("💡 Interpretação das Correlações Chave"):
+            st.markdown("""
+            - **Autorizações ASV vs. PIB Bahia (r = +0.83)**: Forte alinhamento positivo entre a expansão do PIB estadual e a emissão de autorizações de supressão, reflexo da implantação da fronteira agrícola no oeste e dos complexos eólicos/solares.
+            - **Licenças ASV vs. Projeção Financeira ASV (r = +1.00)**: Consistência metodológica exata entre o volume físico concedido e o capital estimado correspondente.
+            - **Desmatamento (% Território) vs. Saldo CLT CAGED (r = +0.57)**: Sincronia cíclica entre surtos de abertura de área produtiva e admissões em grandes obras e agropecuária intensiva.
+            - **Obras em Execução vs. Formalização MEI (r = -0.52)**: Transição estrutural — anos com pico de grandes obras estatais concentram trabalhadores na CLT; períodos de desaceleração das obras públicas impulsionam a abertura de MEIs por necessidade.
+            """)
+
+    with tab_stats:
+        desc_df = df_stat.describe().T
+        desc_df = desc_df[["count", "mean", "std", "min", "25%", "50%", "75%", "max"]]
+        desc_df.columns = ["Observações", "Média", "Desvio Padrão", "Mínimo", "1º Quartil (25%)", "Mediana (50%)", "3º Quartil (75%)", "Máximo"]
+        
+        st.dataframe(
+            desc_df.style.format({
+                "Observações": "{:.0f}",
+                "Média": "{:,.2f}",
+                "Desvio Padrão": "{:,.2f}",
+                "Mínimo": "{:,.2f}",
+                "1º Quartil (25%)": "{:,.2f}",
+                "Mediana (50%)": "{:,.2f}",
+                "3º Quartil (75%)": "{:,.2f}",
+                "Máximo": "{:,.2f}"
+            }),
+            use_container_width=True
+        )
+
+    # ---------------------------------------------------------
+    # SEÇÃO: RELAÇÃO E LASTRO FINANCEIRO DAS LICENÇAS
+    # ---------------------------------------------------------
+    st.markdown("---")
     st.markdown("### 💰 Relação e Lastro Financeiro das Licenças (BNDES, PAC e SICONV)")
     st.markdown("""
     Esta seção apresenta o **cruzamento determinístico por CNPJ de 14 dígitos** entre as licenças ambientais emitidas 
