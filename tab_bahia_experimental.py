@@ -270,6 +270,13 @@ def render_bahia_experimental_tab():
 
     # Configuração de Layout Dinâmico
     layout_yaxes = dict(
+        title=dict(
+            text="<b>Evolução Temporal: Licenciamento vs. Investimento Federal e Crédito</b>",
+            y=0.98,
+            x=0.0,
+            xanchor="left",
+            yanchor="top"
+        ),
         xaxis=dict(title="Ano", tickmode="linear", dtick=1 if (ano_max - ano_min) <= 12 else 2, domain=[0.02, 0.82 if has_y4 else (0.88 if has_y3 else 0.94)]),
         yaxis=dict(
             title=dict(text="Índice Base 100" if "Normalizado" in view_scale else "Qtd. Licenças / Obras / Atos", font=dict(color="#10B981")),
@@ -278,7 +285,15 @@ def render_bahia_experimental_tab():
         ),
         hovermode="x unified",
         template="plotly_white",
-        legend=dict(orientation="h", yanchor="bottom", y=1.04, xanchor="center", x=0.5)
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="left",
+            x=0.0,
+            font=dict(size=11)
+        ),
+        margin=dict(l=40, r=40, t=110, b=40)
     )
 
     if "Normalizado" not in view_scale:
@@ -711,25 +726,25 @@ def render_bahia_experimental_tab():
 
     fig_proj = go.Figure()
 
-    # Barras empilhadas das fontes federais desduplicadas
+    # Nomes mais concisos para a legenda não sobrepor o título
     fig_proj.add_trace(go.Bar(
         x=anos_proj,
         y=bndes_macro_bi,
-        name="🏛️ BNDES Direto (Crédito Corporativo)",
+        name="BNDES Direto",
         marker_color="#0284C7"
     ))
 
     fig_proj.add_trace(go.Bar(
         x=anos_proj,
         y=pac_obrasgov_bi,
-        name="🏗️ PAC Obrasgov Puro (Obras Federais Ativas)",
+        name="PAC Obrasgov",
         marker_color="#EA580C"
     ))
 
     fig_proj.add_trace(go.Bar(
         x=anos_proj,
         y=siconv_macro_bi,
-        name="📑 SICONV Convênios (Repasses Municipais/Estaduais)",
+        name="SICONV Convênios",
         marker_color="#8B5CF6"
     ))
 
@@ -737,7 +752,7 @@ def render_bahia_experimental_tab():
     fig_proj.add_trace(go.Scatter(
         x=anos_proj,
         y=total_dedup_bi,
-        name="💵 Total Federal Desduplicado (Líquido)",
+        name="Total Federal Líquido",
         mode="lines+markers",
         line=dict(color="#1E293B", width=3, dash="solid"),
         marker=dict(size=7, symbol="diamond")
@@ -747,7 +762,7 @@ def render_bahia_experimental_tab():
     fig_proj.add_trace(go.Scatter(
         x=anos_proj,
         y=real_proj_bi,
-        name="🌿 Investimento Licenciado Real (Auditado)",
+        name="Licenciado Real Auditado",
         mode="lines+markers",
         line=dict(color="#10B981", width=3, dash="dash"),
         marker=dict(size=6, symbol="circle")
@@ -757,7 +772,7 @@ def render_bahia_experimental_tab():
     fig_proj.add_trace(go.Scatter(
         x=anos_proj,
         y=total_proj_bi,
-        name="📈 Total Consolidado Licenciado (Real + OLS Expandido)",
+        name="Total Consolidado Licenciado (OLS)",
         mode="lines+markers",
         line=dict(color="#F59E0B", width=3, dash="dot"),
         marker=dict(size=5, symbol="x"),
@@ -765,14 +780,27 @@ def render_bahia_experimental_tab():
     ))
 
     fig_proj.update_layout(
-        title="<b>Evolução Anual: Fontes Federais Desduplicadas vs. Licenciamento Recalibrado (2008–2026)</b>",
+        title=dict(
+            text="<b>Evolução Anual: Fontes Federais Desduplicadas vs. Licenciamento Recalibrado (2008–2026)</b>",
+            y=0.98,
+            x=0.0,
+            xanchor="left",
+            yanchor="top"
+        ),
         barmode="stack",
         xaxis=dict(title="Ano de Referência", tickmode="linear", dtick=1),
         yaxis=dict(title="Investimento Mapeado (R$ Bilhões)", gridcolor="#E2E8F0"),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        margin=dict(l=40, r=40, t=60, b=40),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="left",
+            x=0.0,
+            font=dict(size=11)
+        ),
+        margin=dict(l=40, r=40, t=100, b=40),
         template="plotly_white",
-        height=470
+        height=500
     )
 
     st.plotly_chart(fig_proj, use_container_width=True)
@@ -907,7 +935,13 @@ def render_bahia_experimental_tab():
     ))
 
     fig_big.update_layout(
-        title="<b>Grandes Empreendimentos na Bahia: Capital Estruturante (R$ Bi) vs. Licenciamento de Alto Impacto (2008–2026)</b>",
+        title=dict(
+            text="<b>Grandes Empreendimentos na Bahia: Capital Estruturante (R$ Bi) vs. Licenciamento de Alto Impacto (2008–2026)</b>",
+            y=0.98,
+            x=0.0,
+            xanchor="left",
+            yanchor="top"
+        ),
         barmode="stack",
         xaxis=dict(title="Ano de Referência", tickmode="linear", dtick=1),
         yaxis=dict(
@@ -921,10 +955,17 @@ def render_bahia_experimental_tab():
             overlaying="y",
             side="right"
         ),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        margin=dict(l=40, r=40, t=60, b=40),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="left",
+            x=0.0,
+            font=dict(size=11)
+        ),
+        margin=dict(l=40, r=40, t=100, b=40),
         template="plotly_white",
-        height=470
+        height=500
     )
 
     st.plotly_chart(fig_big, use_container_width=True)
