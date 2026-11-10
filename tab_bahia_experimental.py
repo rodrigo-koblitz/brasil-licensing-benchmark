@@ -522,51 +522,66 @@ def render_bahia_experimental_tab():
 
     fig_proj = go.Figure()
 
-    # Barras empilhadas do licenciamento
+    # 1. Barras empilhadas dos valores reais de cada fonte mapeada (Independente de licença)
     fig_proj.add_trace(go.Bar(
         x=anos_proj,
-        y=real_proj_bi,
-        name="Investimento Licenciado Real (Auditado)",
-        marker_color="#10B981"
+        y=bndes_macro_bi,
+        name="🏛️ BNDES Direto (Total BA)",
+        marker_color="#0284C7"
     ))
 
     fig_proj.add_trace(go.Bar(
         x=anos_proj,
-        y=est_proj_bi,
-        name="Investimento Licenciado Estimado (Regressão)",
-        marker_color="#F59E0B",
-        opacity=0.75
+        y=pac_macro_bi,
+        name="🏗️ PAC Obras (Total BA)",
+        marker_color="#EA580C"
     ))
 
-    # Linha: Total das 3 fontes financeiras independentes de licença
+    fig_proj.add_trace(go.Bar(
+        x=anos_proj,
+        y=siconv_macro_bi,
+        name="📑 SICONV Convênios (Total BA)",
+        marker_color="#8B5CF6"
+    ))
+
+    # 2. Linhas de comparação do Licenciamento Ambiental
     fig_proj.add_trace(go.Scatter(
         x=anos_proj,
         y=total_fontes_bi,
-        name="🏛️ Total Geral 3 Fontes (BNDES+PAC+SICONV)",
+        name="💵 Soma Total 3 Fontes Federais",
         mode="lines+markers",
-        line=dict(color="#6366F1", width=3, dash="dash"),
+        line=dict(color="#1E293B", width=3, dash="solid"),
         marker=dict(size=7, symbol="diamond")
     ))
 
-    # Linha: Total Consolidado do Licenciamento
+    fig_proj.add_trace(go.Scatter(
+        x=anos_proj,
+        y=real_proj_bi,
+        name="🌿 Investimento Licenciado Real (Auditado)",
+        mode="lines+markers",
+        line=dict(color="#10B981", width=3, dash="dash"),
+        marker=dict(size=6, symbol="circle")
+    ))
+
     fig_proj.add_trace(go.Scatter(
         x=anos_proj,
         y=total_proj_bi,
-        name="🌿 Total Consolidado da Atividade Licenciada",
+        name="📈 Investimento Licenciado Consolidado (Real + Estimado)",
         mode="lines+markers",
-        line=dict(color="#3B82F6", width=3, dash="solid"),
-        marker=dict(size=6)
+        line=dict(color="#F59E0B", width=3, dash="dot"),
+        marker=dict(size=5, symbol="x"),
+        visible="legendonly"
     ))
 
     fig_proj.update_layout(
-        title="<b>Evolução Anual: Investimento Federal Mapeado vs. Atividade Licenciada na Bahia (2008–2026)</b>",
+        title="<b>Evolução Anual do Investimento Total na Bahia: BNDES, PAC e SICONV vs. Licenciamento Ambiental (2008–2026)</b>",
         barmode="stack",
         xaxis=dict(title="Ano de Referência", tickmode="linear", dtick=1),
-        yaxis=dict(title="Investimento Total (R$ Bilhões)", gridcolor="#E2E8F0"),
+        yaxis=dict(title="Investimento Mapeado (R$ Bilhões)", gridcolor="#E2E8F0"),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
         margin=dict(l=40, r=40, t=60, b=40),
         template="plotly_white",
-        height=450
+        height=470
     )
 
     st.plotly_chart(fig_proj, use_container_width=True)
