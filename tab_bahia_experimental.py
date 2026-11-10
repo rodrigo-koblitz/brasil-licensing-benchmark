@@ -608,6 +608,45 @@ def render_bahia_experimental_tab():
         - `metodologia_precificacao`: Rótulo de auditoria (`Real (Fonte)` ou `Estimado (Regressão Tipo x Porte)`).
         """)
 
+    # ---------------------------------------------------------
+    # SEÇÃO EXPLICATIVA: A DESCONEXÃO ENTRE INVESTIMENTO E LICENÇAS
+    # ---------------------------------------------------------
+    st.markdown("### 🧩 Explicando a Desconexão: Investimento Global vs. Emissão de Licenças")
+    st.markdown("""
+    Ao confrontar a trajetória do **investimento financeiro federal (BNDES, PAC e SICONV)** com a **curva de emissão de licenças ambientais**, 
+    observa-se uma nítida divergência, especialmente a partir de **2021–2025**: enquanto os aportes e cadastros financeiros disparam 
+    (atingindo picos de mais de R$ 35–43 bilhões/ano), a quantidade de licenças ambientais emitidas recua gradativamente 
+    (de 1.919 atos em 2021 para 1.275 em 2025).
+    
+    Esta aparente desconexão resulta de **quatro fenômenos estruturais e institucionais** investigados nos dados:
+    """)
+
+    col_d1, col_d2 = st.columns(2)
+    with col_d1:
+        st.info("""
+        **1. Descompasso Temporal: Empenho Orçamentário vs. Rito Ambiental**
+        - **Origem Contábil:** Bases como PAC (Obrasgov) e SICONV registram o valor global da intervenção no momento do **cadastro formal ou da celebração do convênio**.
+        - **Déficit Temporal:** Uma megaobra como o *Canal do Sertão Baiano* (R$ 6,66 Bi) ou trechos da *FIOL* (R$ 8,93 Bi) é cadastrada financeiramente de forma pontual (ex.: 2021), mas as licenças prévias (LP) e de instalação (LI) foram concedidas anos antes ou são fracionadas ao longo de uma década.
+        - **Impacto:** O dinheiro aparece como um pico súbito de capital cadastrado, enquanto a esteira de licenciamento é contínua e diluída.
+        """)
+        st.info("""
+        **2. Fragmentação Federativa da Competência de Licenciar**
+        - **Competência Federal (IBAMA):** As obras mais caras da Bahia (FIOL, rodovias federais BR-101/116, expansões marítimas) são licenciadas pela União via IBAMA, e **não constam na base estadual do INEMA**.
+        - **Municipalização do Licenciamento:** Pela Lei Complementar nº 140/2011, municípios baianos passaram a licenciar impactos locais. Milhares de intervenções urbanas financiadas pelo SICONV foram licenciadas pelas secretarias municipais de meio ambiente, ficando fora do cômputo estadual.
+        """)
+    with col_d2:
+        st.info("""
+        **3. Concentração Extrema do Capital em Poucos Projetos**
+        - **Assimetria de Pareto:** No PAC e BNDES, **menos de 3% dos contratos concentram mais de 70% de todo o capital**.
+        - **Efeito Gráfico:** Uma única intervenção cadastrada no sistema federal pode carregar R$ 5 a 10 bilhões em uma única linha, enquanto o órgão ambiental estadual emite centenas de licenças para postos de combustíveis, torres de telefonia e pequenas indústrias que somam menos de R$ 50 milhões juntas.
+        - **Resultado:** A curva financeira responde à alocação de macroprojetos políticos, enquanto a curva de licenças reflete a dinâmica econômica da média empresa.
+        """)
+        st.info("""
+        **4. Tipologia das Intervenções vs. Exigibilidade de Licença**
+        - **Obras sem Licença Complexa:** Milhares de registros do PAC referem-se a reformas internas, quadras poliesportivas escolares (ex.: 2.649 registros do FNDE) e adequações prediais de saúde que exigem apenas **Dispensa (DLA)** ou sequer possuem intervenção ambiental passível de licenciamento estadual.
+        - **Efeito Regulatório:** O aumento nos repasses de infraestrutura social não acarreta aumento na emissão de licenças de grande impacto (LI/LO).
+        """)
+
     # Bloco Informativo de Mercado de Trabalho e Metodologia
     st.markdown("### 💼 Painel Histórico: Emprego Formal, Informalidade e MEI na Bahia (2000–2026)")
     c1, c2, c3 = st.columns(3)
