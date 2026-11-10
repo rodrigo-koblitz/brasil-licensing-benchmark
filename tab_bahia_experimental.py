@@ -647,6 +647,143 @@ def render_bahia_experimental_tab():
         - **Efeito Regulatório:** O aumento nos repasses de infraestrutura social não acarreta aumento na emissão de licenças de grande impacto (LI/LO).
         """)
 
+    # ---------------------------------------------------------
+    # NOVA SEÇÃO: FOCO EXCLUSIVO EM GRANDES EMPREENDIMENTOS
+    # ---------------------------------------------------------
+    st.markdown("### 🏗️ Grandes Empreendimentos: Isolando o Efeito Macro (PAC, BNDES e Licenças de Grande Porte)")
+    st.markdown(r"""
+    Para eliminar o ruído estatístico causado por milhares de pequenas intervenções locais (como obras escolares do FNDE, 
+    postos de combustível e dispensas), isolamos nesta seção **exclusivamente os macroprojetos estruturantes**:
+    - **PAC Intervenções Estruturantes:** Obras $\ge$ R$ 100 Milhões (Ferrovias, Metrô, Canais, Rodovias e Saneamento).
+    - **BNDES Contratos Estruturantes:** Operações de financiamento direto $\ge$ R$ 100 Milhões (Complexos Eólicos, Celulose, Gás, Energia e Indústria Pesada).
+    - **Licenciamento de Grande Impacto:** Licenças do **INEMA de porte Grande e Excepcional** + Licenciamento Federal do **IBAMA na Bahia**.
+    """)
+
+    b1, b2, b3, b4 = st.columns(4)
+    with b1:
+        st.metric(
+            label="Capital Macroprojetos (PAC + BNDES)",
+            value="R$ 114,23 Bi",
+            help="Soma do capital contratado/cadastrado apenas em projetos de grande porte (>= R$ 100 Mi) na Bahia."
+        )
+    with b2:
+        st.metric(
+            label="PAC Megaobras (>= R$ 100M)",
+            value="R$ 72,55 Bi",
+            delta="52,7% do valor total PAC",
+            help="137 intervenções de infraestrutura pesada concentram mais da metade de todo o valor do PAC na Bahia."
+        )
+    with b3:
+        st.metric(
+            label="BNDES Megacontratos (>= R$ 100M)",
+            value="R$ 41,68 Bi",
+            delta="64,4% do valor total BNDES",
+            help="118 contratos de financiamento corporativo de grande porte concentram 64,4% de todo o crédito direto."
+        )
+    with b4:
+        st.metric(
+            label="Atos INEMA Grande/Excepcional",
+            value="3.374 atos",
+            delta="8,4% do total INEMA",
+            help="Atos de licenciamento destinados a empreendimentos de grande e excepcional porte emitidos pelo INEMA."
+        )
+
+    # Gráfico de Macroprojetos: Capital Estruturante vs Licenças de Grande Porte
+    anos_macro = list(range(2008, 2027))
+    bndes_big_bi = [0.43, 0.40, 1.33, 0.52, 2.81, 2.64, 1.02, 2.42, 0.00, 0.97, 2.36, 0.93, 3.44, 0.00, 2.92, 3.16, 1.41, 2.14, 2.55]
+    pac_big_bi   = [0.00, 0.27, 0.00, 2.99, 1.30, 1.23, 0.00, 0.71, 0.13, 0.00, 0.00, 0.00, 0.00, 29.25, 1.38, 1.21, 18.35, 9.98, 5.76]
+    total_big_capital_bi = [b + p for b, p in zip(bndes_big_bi, pac_big_bi)]
+
+    inema_big_acts = [146, 128, 140, 143, 231, 235, 172, 140, 79, 108, 116, 118, 123, 168, 133, 115, 85, 81, 47]
+    ibama_ba_acts  = [18, 16, 17, 16, 11, 14, 20, 24, 26, 11, 13, 15, 18, 14, 12, 18, 12, 16, 21]
+
+    fig_big = go.Figure()
+
+    # Barras de Capital Estruturante (Eixo Y1)
+    fig_big.add_trace(go.Bar(
+        x=anos_macro,
+        y=bndes_big_bi,
+        name="🏛️ BNDES Megacontratos (>= R$ 100M)",
+        marker_color="#0284C7",
+        yaxis="y1"
+    ))
+
+    fig_big.add_trace(go.Bar(
+        x=anos_macro,
+        y=pac_big_bi,
+        name="🏗️ PAC Megaobras (>= R$ 100M)",
+        marker_color="#EA580C",
+        yaxis="y1"
+    ))
+
+    # Linhas de Licenciamento de Grande Impacto (Eixo Y2)
+    fig_big.add_trace(go.Scatter(
+        x=anos_macro,
+        y=inema_big_acts,
+        name="🏭 Licenças INEMA Grande/Excepcional (Qtd)",
+        mode="lines+markers",
+        line=dict(color="#10B981", width=3),
+        marker=dict(size=7, symbol="circle"),
+        yaxis="y2"
+    ))
+
+    fig_big.add_trace(go.Scatter(
+        x=anos_macro,
+        y=ibama_ba_acts,
+        name="🏛️ Licenças Federais IBAMA na BA (Qtd)",
+        mode="lines+markers",
+        line=dict(color="#6366F1", width=2.5, dash="dash"),
+        marker=dict(size=6, symbol="square"),
+        yaxis="y2"
+    ))
+
+    fig_big.update_layout(
+        title="<b>Grandes Empreendimentos na Bahia: Capital Estruturante (R$ Bi) vs. Licenciamento de Alto Impacto (2008–2026)</b>",
+        barmode="stack",
+        xaxis=dict(title="Ano de Referência", tickmode="linear", dtick=1),
+        yaxis=dict(
+            title=dict(text="Capital Estruturante (R$ Bilhões)", font=dict(color="#1E293B")),
+            tickfont=dict(color="#1E293B"),
+            gridcolor="#E2E8F0"
+        ),
+        yaxis2=dict(
+            title=dict(text="Atos Ambientais Emitidos (Qtd)", font=dict(color="#10B981")),
+            tickfont=dict(color="#10B981"),
+            overlaying="y",
+            side="right"
+        ),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        margin=dict(l=40, r=40, t=60, b=40),
+        template="plotly_white",
+        height=470
+    )
+
+    st.plotly_chart(fig_big, use_container_width=True)
+
+    # Detalhamento dos Principais Macroprojetos Estruturantes
+    st.markdown("#### 📋 Top Empreendimentos Estruturantes Mapeados na Bahia")
+    c_tab1, c_tab2 = st.tabs(["🏗️ Maiores Obras de Infraestrutura (PAC)", "🏛️ Maiores Financiamentos Corporativos (BNDES)"])
+    with c_tab1:
+        df_top_pac = pd.DataFrame([
+            {"Empreendimento": "Ferrovia de Integração Oeste-Leste (FIOL - EF-334)", "Investimento (R$)": "R$ 13,43 Bi", "Órgão / Executor": "VALEC / INFRA S.A.", "Ano": "2021 / 2026", "Licenciamento": "Federal (IBAMA)"},
+            {"Empreendimento": "Canal do Sertão Baiano", "Investimento (R$)": "R$ 6,66 Bi", "Órgão / Executor": "21ª Cia Engenharia Construção / CODEVASF", "Ano": "2021", "Licenciamento": "Federal (IBAMA) / INEMA"},
+            {"Empreendimento": "Sistema Metroviário Salvador e Lauro de Freitas (Tramos 3 e 4)", "Investimento (R$)": "R$ 2,36 Bi", "Órgão / Executor": "Governo do Estado da Bahia / CCR Metrô", "Ano": "2024", "Licenciamento": "Estadual (INEMA)"},
+            {"Empreendimento": "Sistema Integrado de Transporte Metropolitano RMS", "Investimento (R$)": "R$ 2,10 Bi", "Órgão / Executor": "Secretaria de Desenvolvimento Urbano (SEDUR)", "Ano": "2025", "Licenciamento": "Estadual (INEMA)"},
+            {"Empreendimento": "Corredores Estruturais e BRT de Salvador", "Investimento (R$)": "R$ 1,22 Bi", "Órgão / Executor": "SEDUR / Município de Salvador", "Ano": "2025", "Licenciamento": "Municipal / INEMA"}
+        ])
+        st.dataframe(df_top_pac, use_container_width=True, hide_index=True)
+
+    with c_tab2:
+        df_top_bndes = pd.DataFrame([
+            {"Beneficiário / Empresa": "Ventos de Santo Antônio Comercializadora", "Investimento (R$)": "R$ 2,89 Bi", "Setor": "Energia Eólica (Complexo Babilônia)", "Ano": "2023", "Licenciamento": "Estadual (INEMA - LU)"},
+            {"Beneficiário / Empresa": "Transportadora Associada de Gás (TAG)", "Investimento (R$)": "R$ 2,21 Bi", "Setor": "Gasoduto Cabiúnas-Catu (GASENE)", "Ano": "2007", "Licenciamento": "Federal (IBAMA) / INEMA"},
+            {"Beneficiário / Empresa": "Companhia do Metrô da Bahia (CCR)", "Investimento (R$)": "R$ 2,26 Bi", "Setor": "Mobilidade Urbana (Metrô Salvador)", "Ano": "2015 / 2017", "Licenciamento": "Estadual (INEMA - LI/LO)"},
+            {"Beneficiário / Empresa": "Engie Brasil Energia S.A.", "Investimento (R$)": "R$ 1,50 Bi", "Setor": "Energia Eólica (Complexo Serra do Assuruá)", "Ano": "2022", "Licenciamento": "Estadual (INEMA - LU)"},
+            {"Beneficiário / Empresa": "Coelba (Grupo Neoenergia / Iberdrola)", "Investimento (R$)": "R$ 4,31 Bi", "Setor": "Redes de Distribuição Elétrica", "Ano": "2018–2024", "Licenciamento": "Estadual (INEMA - LI/RLO)"},
+            {"Beneficiário / Empresa": "Veracel Celulose S.A. / Suzano S.A.", "Investimento (R$)": "R$ 2,49 Bi", "Setor": "Papel e Celulose", "Ano": "2004–2006", "Licenciamento": "Estadual (INEMA - LO)"}
+        ])
+        st.dataframe(df_top_bndes, use_container_width=True, hide_index=True)
+
     # Bloco Informativo de Mercado de Trabalho e Metodologia
     st.markdown("### 💼 Painel Histórico: Emprego Formal, Informalidade e MEI na Bahia (2000–2026)")
     c1, c2, c3 = st.columns(3)
