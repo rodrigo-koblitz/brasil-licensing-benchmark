@@ -35,6 +35,7 @@ def render_bahia_experimental_tab():
     path_siconv = resolve_path(r"G:\Meu Drive\UFMG\data_pac\siconv_obras\siconv_propostas_BA_2008_2026_consolidado.parquet", "siconv_propostas_BA_2008_2026_consolidado.parquet")
     path_desm = resolve_path(r"G:\Meu Drive\UFMG\auxiliary\app\data\mapbiomas_desmatamento_estado_ano.csv", "mapbiomas_desmatamento_estado_ano.csv")
     path_socio = resolve_path(r"G:\Meu Drive\UFMG\auxiliary\app\data\bahia_trabalho_caged_pnad_mei.csv", "bahia_trabalho_caged_pnad_mei.csv")
+    path_ipea = resolve_path(r"G:\Meu Drive\UFMG\auxiliary\app\data\ipea_bahia_pibcne_dinveste.parquet", "ipea_bahia_pibcne_dinveste.parquet")
 
     # Verificar existência dos arquivos essenciais
     missing = [p for p in [path_ba_lic, path_bndes, path_pac, path_siconv] if not os.path.exists(p)]
@@ -133,6 +134,18 @@ def render_bahia_experimental_tab():
                 if pd.notna(r.get('mei_ativos')):
                     mei_ativos_by_year[y] = float(r['mei_ativos'])
 
+        # 7. Dados Auditados IPEA / IBGE (PIB Construção Civil BA - PIBCNE e Despesas Empenhadas STN - DINVESTE)
+        pibcne_by_year = {}
+        dinveste_by_year = {}
+        if os.path.exists(path_ipea):
+            df_ip = pd.read_parquet(path_ipea)
+            for _, r in df_ip.iterrows():
+                y = int(r['ano'])
+                if pd.notna(r.get('pibcne_bilhoes_2010')):
+                    pibcne_by_year[y] = float(r['pibcne_bilhoes_2010'])
+                if pd.notna(r.get('dinveste_bilhoes')):
+                    dinveste_by_year[y] = float(r['dinveste_bilhoes'])
+
         # Anos da análise: 2000 a 2026 completo
         all_years = list(range(2000, 2027))
 
@@ -151,7 +164,9 @@ def render_bahia_experimental_tab():
                 "Propostas SICONV": int(sic_by_year.get(y, 0)),
                 "CAGED Saldo": caged_saldo_by_year.get(y, None),
                 "Taxa Informalidade (%)": pnad_taxa_by_year.get(y, None),
-                "MEI Ativos": mei_ativos_by_year.get(y, None)
+                "MEI Ativos": mei_ativos_by_year.get(y, None),
+                "PIB Construção Civil BA (R$ Bi 2010)": pibcne_by_year.get(y, None),
+                "Investimentos STN BA (R$ Bi)": dinveste_by_year.get(y, None)
             })
         df_ts = pd.DataFrame(data)
 
@@ -203,16 +218,18 @@ def render_bahia_experimental_tab():
         "Desmatamento (mil ha)": {"col": "Desmatamento (ha)", "calc": lambda df: df["Desmatamento (ha)"] / 1e3, "color": "#7F1D1D", "dash": "dash", "axis": "y1", "unit": "mil ha", "type": "line"},
         "Saldo Emprego CLT (CAGED)": {"col": "CAGED Saldo", "color": "#0284C7", "dash": "solid", "axis": "y4", "unit": "Vagas", "type": "line"},
         "Taxa de Informalidade IBGE (%)": {"col": "Taxa Informalidade (%)", "color": "#D97706", "dash": "dot", "axis": "y2", "unit": "%", "type": "line"},
-        "MEI Ativos (mil empresas)": {"col": "MEI Ativos", "calc": lambda df: df["MEI Ativos"] / 1e3, "color": "#6366F1", "dash": "solid", "axis": "y4", "unit": "mil MEIs", "type": "line"}
+        "MEI Ativos (mil empresas)": {"col": "MEI Ativos", "calc": lambda df: df["MEI Ativos"] / 1e3, "color": "#6366F1", "dash": "solid", "axis": "y4", "unit": "mil MEIs", "type": "line"},
+        "🏗️ Obras em Execução: PIB Construção BA (R$ Bi)": {"col": "PIB Construção Civil BA (R$ Bi 2010)", "color": "#059669", "dash": "solid", "axis": "y3", "unit": "R$ Bi (2010)", "type": "line"},
+        "🏛️ Investimento Estadual Empenhado STN (R$ Bi)": {"col": "Investimentos STN BA (R$ Bi)", "color": "#7C3AED", "dash": "dashdot", "axis": "y3", "unit": "R$ Bi", "type": "line"}
     }
 
     with col_f2:
         default_selected = [
             "Licenças INEMA (Estadual)",
+            "🏗️ Obras em Execução: PIB Construção BA (R$ Bi)",
+            "🏛️ Investimento Estadual Empenhado STN (R$ Bi)",
             "Obras PAC (Bahia)",
-            "Operações BNDES (Diretas)",
-            "Desmatamento (% Território BA)",
-            "Saldo Emprego CLT (CAGED)"
+            "Operações BNDES (Diretas)"
         ]
         selected_series = st.multiselect(
             "Selecione as Séries que deseja visualizar no Gráfico:",
@@ -724,6 +741,10 @@ def render_bahia_experimental_tab():
     siconv_macro_bi   = [1.74, 6.06, 4.27, 7.69, 4.67, 7.76, 2.84, 3.67, 2.26, 4.84, 2.88, 3.62, 1.57, 5.37, 4.74, 11.94, 9.78, 12.15, 5.22]
     total_dedup_bi    = [b + p + s for b, p, s in zip(bndes_macro_bi, pac_obrasgov_bi, siconv_macro_bi)]
 
+    # Séries Oficiais Auditadas IPEA / IBGE / STN (Bahia)
+    pibcne_audit_bi   = [7.54, 8.89, 10.94, 11.23, 11.09, 11.98, 12.22, 10.84, 9.37, 8.05, 7.36, 7.02, 6.31, 6.12, 6.78, 6.94, None, None, None]
+    dinveste_audit_bi = [1.42, 1.57, 2.23, 1.75, 2.27, 2.69, 2.84, 2.57, 3.49, 2.94, 3.23, 2.93, 3.27, 5.62, 11.78, 9.43, 9.09, 9.65, None]
+
     fig_proj = go.Figure()
 
     # Nomes mais concisos para a legenda não sobrepor o título
@@ -748,14 +769,34 @@ def render_bahia_experimental_tab():
         marker_color="#8B5CF6"
     ))
 
-    # Linha: Total Federal Desduplicado
+    # Linha: Total Federal Desduplicado (Anúncios / Crédito / Editais)
     fig_proj.add_trace(go.Scatter(
         x=anos_proj,
         y=total_dedup_bi,
-        name="Total Federal Líquido",
+        name="Total Federal Líquido (Editais)",
         mode="lines+markers",
-        line=dict(color="#1E293B", width=3, dash="solid"),
-        marker=dict(size=7, symbol="diamond")
+        line=dict(color="#1E293B", width=2.5, dash="solid"),
+        marker=dict(size=6, symbol="diamond")
+    ))
+
+    # Linha Padrão-Ouro: PIB Construção Civil BA (PIBCNE - IBGE)
+    fig_proj.add_trace(go.Scatter(
+        x=anos_proj,
+        y=pibcne_audit_bi,
+        name="🏗️ Obras em Execução: PIB Construção BA (IBGE)",
+        mode="lines+markers",
+        line=dict(color="#059669", width=3.5, dash="solid"),
+        marker=dict(size=8, symbol="circle")
+    ))
+
+    # Linha: Investimento Estadual Empenhado STN (DINVESTE)
+    fig_proj.add_trace(go.Scatter(
+        x=anos_proj,
+        y=dinveste_audit_bi,
+        name="🏛️ Investimento Empenhado STN (DINVESTE)",
+        mode="lines+markers",
+        line=dict(color="#9333EA", width=2.5, dash="dashdot"),
+        marker=dict(size=6, symbol="square")
     ))
 
     # Linha: Investimento Real Auditado em Licenças
@@ -764,8 +805,8 @@ def render_bahia_experimental_tab():
         y=real_proj_bi,
         name="Licenciado Real Auditado",
         mode="lines+markers",
-        line=dict(color="#10B981", width=3, dash="dash"),
-        marker=dict(size=6, symbol="circle")
+        line=dict(color="#10B981", width=2.5, dash="dash"),
+        marker=dict(size=5, symbol="circle")
     ))
 
     # Linha: Total Consolidado do Licenciamento (Real + OLS Expandido)
@@ -774,14 +815,14 @@ def render_bahia_experimental_tab():
         y=total_proj_bi,
         name="Total Consolidado Licenciado (OLS)",
         mode="lines+markers",
-        line=dict(color="#F59E0B", width=3, dash="dot"),
+        line=dict(color="#F59E0B", width=2.5, dash="dot"),
         marker=dict(size=5, symbol="x"),
         visible="legendonly"
     ))
 
     fig_proj.update_layout(
         title=dict(
-            text="<b>Evolução Anual: Fontes Federais Desduplicadas vs. Licenciamento Recalibrado (2008–2026)</b>",
+            text="<b>Evolução Anual: Fontes Federais Desduplicadas vs. Obras em Execução (PIBCNE/DINVESTE) vs. Licenciamento</b>",
             y=0.98,
             x=0.0,
             xanchor="left",
@@ -789,7 +830,7 @@ def render_bahia_experimental_tab():
         ),
         barmode="stack",
         xaxis=dict(title="Ano de Referência", tickmode="linear", dtick=1),
-        yaxis=dict(title="Investimento Mapeado (R$ Bilhões)", gridcolor="#E2E8F0"),
+        yaxis=dict(title="Investimento / Atividade (R$ Bilhões)", gridcolor="#E2E8F0"),
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -798,201 +839,20 @@ def render_bahia_experimental_tab():
             x=0.0,
             font=dict(size=11)
         ),
-        margin=dict(l=40, r=40, t=100, b=40),
+        margin=dict(l=40, r=40, t=110, b=40),
         template="plotly_white",
-        height=500
+        height=520
     )
 
     st.plotly_chart(fig_proj, use_container_width=True)
 
-    # ---------------------------------------------------------
-    # SEÇÃO EXPLICATIVA: A DESCONEXÃO ENTRE INVESTIMENTO E LICENÇAS
-    # ---------------------------------------------------------
-    st.markdown("### 🧩 Explicando a Desconexão: Investimento Global vs. Emissão de Licenças")
-    st.markdown("""
-    Ao confrontar a trajetória do **investimento financeiro federal (BNDES, PAC e SICONV)** com a **curva de emissão de licenças ambientais**, 
-    observa-se uma nítida divergência, especialmente a partir de **2021–2025**: enquanto os aportes e cadastros financeiros disparam 
-    (atingindo picos de mais de R$ 35–43 bilhões/ano), a quantidade de licenças ambientais emitidas recua gradativamente 
-    (de 1.919 atos em 2021 para 1.275 em 2025).
-    
-    Esta aparente desconexão resulta de **quatro fenômenos estruturais e institucionais** investigados nos dados:
+    # Box Explicativo da Convergência entre PIBCNE e Obras Físicas
+    st.info("""
+    💡 **Interpretação Econômica do Gráfico Recalibrado:**
+    - **A Curva Verde (PIBCNE - IBGE)** representa o **volume físico real da Construção Civil na Bahia** (canteiros ativos, consumo de cimento, terraplanagem e obras em andamento). Nota-se o pico de 2014 (R$ 12,22 Bi) e a retração contínua até 2021 (R$ 6,12 Bi), espelhando o ritmo efetivo das obras.
+    - **As Barras e a Linha Escura (Editais/Crédito Federal)** registram o **anúncio cadastral e o crédito plurianual**. Em 2021, o salto de R$ 30,37 Bi no PAC decorre do cadastramento de megaobras (FIOL e Canal do Sertão), que não se transformaram imediatamente em cimento no chão naquele mesmo ano.
+    - **A Curva Roxa (DINVESTE - STN)** captura as **despesas de capital empenhadas pelo governo estadual**, evidenciando o salto de contratações em 2022 (R$ 11,78 Bi) que impulsionou a retomada das obras nos anos seguintes.
     """)
-
-    col_d1, col_d2 = st.columns(2)
-    with col_d1:
-        st.info("""
-        **1. Descompasso Temporal: Empenho Orçamentário vs. Rito Ambiental**
-        - **Origem Contábil:** Bases como PAC (Obrasgov) e SICONV registram o valor global da intervenção no momento do **cadastro formal ou da celebração do convênio**.
-        - **Déficit Temporal:** Uma megaobra como o *Canal do Sertão Baiano* (R$ 6,66 Bi) ou trechos da *FIOL* (R$ 8,93 Bi) é cadastrada financeiramente de forma pontual (ex.: 2021), mas as licenças prévias (LP) e de instalação (LI) foram concedidas anos antes ou são fracionadas ao longo de uma década.
-        - **Impacto:** O dinheiro aparece como um pico súbito de capital cadastrado, enquanto a esteira de licenciamento é contínua e diluída.
-        """)
-        st.info("""
-        **2. Fragmentação Federativa da Competência de Licenciar**
-        - **Competência Federal (IBAMA):** As obras mais caras da Bahia (FIOL, rodovias federais BR-101/116, expansões marítimas) são licenciadas pela União via IBAMA, e **não constam na base estadual do INEMA**.
-        - **Municipalização do Licenciamento:** Pela Lei Complementar nº 140/2011, municípios baianos passaram a licenciar impactos locais. Milhares de intervenções urbanas financiadas pelo SICONV foram licenciadas pelas secretarias municipais de meio ambiente, ficando fora do cômputo estadual.
-        """)
-    with col_d2:
-        st.info("""
-        **3. Concentração Extrema do Capital em Poucos Projetos**
-        - **Assimetria de Pareto:** No PAC e BNDES, **menos de 3% dos contratos concentram mais de 70% de todo o capital**.
-        - **Efeito Gráfico:** Uma única intervenção cadastrada no sistema federal pode carregar R$ 5 a 10 bilhões em uma única linha, enquanto o órgão ambiental estadual emite centenas de licenças para postos de combustíveis, torres de telefonia e pequenas indústrias que somam menos de R$ 50 milhões juntas.
-        - **Resultado:** A curva financeira responde à alocação de macroprojetos políticos, enquanto a curva de licenças reflete a dinâmica econômica da média empresa.
-        """)
-        st.info("""
-        **4. Tipologia das Intervenções vs. Exigibilidade de Licença**
-        - **Obras sem Licença Complexa:** Milhares de registros do PAC referem-se a reformas internas, quadras poliesportivas escolares (ex.: 2.649 registros do FNDE) e adequações prediais de saúde que exigem apenas **Dispensa (DLA)** ou sequer possuem intervenção ambiental passível de licenciamento estadual.
-        - **Efeito Regulatório:** O aumento nos repasses de infraestrutura social não acarreta aumento na emissão de licenças de grande impacto (LI/LO).
-        """)
-
-    # ---------------------------------------------------------
-    # NOVA SEÇÃO: FOCO EXCLUSIVO EM GRANDES EMPREENDIMENTOS
-    # ---------------------------------------------------------
-    st.markdown("### 🏗️ Grandes Empreendimentos: Isolando o Efeito Macro (PAC, BNDES e Licenças de Grande Porte)")
-    st.markdown(r"""
-    Para eliminar o ruído estatístico causado por milhares de pequenas intervenções locais (como obras escolares do FNDE, 
-    postos de combustível e dispensas), isolamos nesta seção **exclusivamente os macroprojetos estruturantes**:
-    - **PAC Intervenções Estruturantes:** Obras $\ge$ R$ 100 Milhões (Ferrovias, Metrô, Canais, Rodovias e Saneamento).
-    - **BNDES Contratos Estruturantes:** Operações de financiamento direto $\ge$ R$ 100 Milhões (Complexos Eólicos, Celulose, Gás, Energia e Indústria Pesada).
-    - **Licenciamento de Grande Impacto:** Licenças do **INEMA de porte Grande e Excepcional** + Licenciamento Federal do **IBAMA na Bahia**.
-    """)
-
-    b1, b2, b3, b4 = st.columns(4)
-    with b1:
-        st.metric(
-            label="Capital Macroprojetos (PAC + BNDES)",
-            value="R$ 114,23 Bi",
-            help="Soma do capital contratado/cadastrado apenas em projetos de grande porte (>= R$ 100 Mi) na Bahia."
-        )
-    with b2:
-        st.metric(
-            label="PAC Megaobras (>= R$ 100M)",
-            value="R$ 72,55 Bi",
-            delta="52,7% do valor total PAC",
-            help="137 intervenções de infraestrutura pesada concentram mais da metade de todo o valor do PAC na Bahia."
-        )
-    with b3:
-        st.metric(
-            label="BNDES Megacontratos (>= R$ 100M)",
-            value="R$ 41,68 Bi",
-            delta="64,4% do valor total BNDES",
-            help="118 contratos de financiamento corporativo de grande porte concentram 64,4% de todo o crédito direto."
-        )
-    with b4:
-        st.metric(
-            label="Atos INEMA Grande/Excepcional",
-            value="3.374 atos",
-            delta="8,4% do total INEMA",
-            help="Atos de licenciamento destinados a empreendimentos de grande e excepcional porte emitidos pelo INEMA."
-        )
-
-    # Gráfico de Macroprojetos: Capital Estruturante vs Licenças de Grande Porte
-    anos_macro = list(range(2008, 2027))
-    bndes_big_bi = [0.43, 0.40, 1.33, 0.52, 2.81, 2.64, 1.02, 2.42, 0.00, 0.97, 2.36, 0.93, 3.44, 0.00, 2.92, 3.16, 1.41, 2.14, 2.55]
-    pac_big_bi   = [0.00, 0.27, 0.00, 2.99, 1.30, 1.23, 0.00, 0.71, 0.13, 0.00, 0.00, 0.00, 0.00, 29.25, 1.38, 1.21, 18.35, 9.98, 5.76]
-    total_big_capital_bi = [b + p for b, p in zip(bndes_big_bi, pac_big_bi)]
-
-    inema_big_acts = [146, 128, 140, 143, 231, 235, 172, 140, 79, 108, 116, 118, 123, 168, 133, 115, 85, 81, 47]
-    ibama_ba_acts  = [18, 16, 17, 16, 11, 14, 20, 24, 26, 11, 13, 15, 18, 14, 12, 18, 12, 16, 21]
-
-    fig_big = go.Figure()
-
-    # Barras de Capital Estruturante (Eixo Y1)
-    fig_big.add_trace(go.Bar(
-        x=anos_macro,
-        y=bndes_big_bi,
-        name="🏛️ BNDES Megacontratos (>= R$ 100M)",
-        marker_color="#0284C7",
-        yaxis="y1"
-    ))
-
-    fig_big.add_trace(go.Bar(
-        x=anos_macro,
-        y=pac_big_bi,
-        name="🏗️ PAC Megaobras (>= R$ 100M)",
-        marker_color="#EA580C",
-        yaxis="y1"
-    ))
-
-    # Linhas de Licenciamento de Grande Impacto (Eixo Y2)
-    fig_big.add_trace(go.Scatter(
-        x=anos_macro,
-        y=inema_big_acts,
-        name="🏭 Licenças INEMA Grande/Excepcional (Qtd)",
-        mode="lines+markers",
-        line=dict(color="#10B981", width=3),
-        marker=dict(size=7, symbol="circle"),
-        yaxis="y2"
-    ))
-
-    fig_big.add_trace(go.Scatter(
-        x=anos_macro,
-        y=ibama_ba_acts,
-        name="🏛️ Licenças Federais IBAMA na BA (Qtd)",
-        mode="lines+markers",
-        line=dict(color="#6366F1", width=2.5, dash="dash"),
-        marker=dict(size=6, symbol="square"),
-        yaxis="y2"
-    ))
-
-    fig_big.update_layout(
-        title=dict(
-            text="<b>Grandes Empreendimentos na Bahia: Capital Estruturante (R$ Bi) vs. Licenciamento de Alto Impacto (2008–2026)</b>",
-            y=0.98,
-            x=0.0,
-            xanchor="left",
-            yanchor="top"
-        ),
-        barmode="stack",
-        xaxis=dict(title="Ano de Referência", tickmode="linear", dtick=1),
-        yaxis=dict(
-            title=dict(text="Capital Estruturante (R$ Bilhões)", font=dict(color="#1E293B")),
-            tickfont=dict(color="#1E293B"),
-            gridcolor="#E2E8F0"
-        ),
-        yaxis2=dict(
-            title=dict(text="Atos Ambientais Emitidos (Qtd)", font=dict(color="#10B981")),
-            tickfont=dict(color="#10B981"),
-            overlaying="y",
-            side="right"
-        ),
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="left",
-            x=0.0,
-            font=dict(size=11)
-        ),
-        margin=dict(l=40, r=40, t=100, b=40),
-        template="plotly_white",
-        height=500
-    )
-
-    st.plotly_chart(fig_big, use_container_width=True)
-
-    # Detalhamento dos Principais Macroprojetos Estruturantes
-    st.markdown("#### 📋 Top Empreendimentos Estruturantes Mapeados na Bahia")
-    c_tab1, c_tab2 = st.tabs(["🏗️ Maiores Obras de Infraestrutura (PAC)", "🏛️ Maiores Financiamentos Corporativos (BNDES)"])
-    with c_tab1:
-        df_top_pac = pd.DataFrame([
-            {"Empreendimento": "Ferrovia de Integração Oeste-Leste (FIOL - EF-334)", "Investimento (R$)": "R$ 13,43 Bi", "Órgão / Executor": "VALEC / INFRA S.A.", "Ano": "2021 / 2026", "Licenciamento": "Federal (IBAMA)"},
-            {"Empreendimento": "Canal do Sertão Baiano", "Investimento (R$)": "R$ 6,66 Bi", "Órgão / Executor": "21ª Cia Engenharia Construção / CODEVASF", "Ano": "2021", "Licenciamento": "Federal (IBAMA) / INEMA"},
-            {"Empreendimento": "Sistema Metroviário Salvador e Lauro de Freitas (Tramos 3 e 4)", "Investimento (R$)": "R$ 2,36 Bi", "Órgão / Executor": "Governo do Estado da Bahia / CCR Metrô", "Ano": "2024", "Licenciamento": "Estadual (INEMA)"},
-            {"Empreendimento": "Sistema Integrado de Transporte Metropolitano RMS", "Investimento (R$)": "R$ 2,10 Bi", "Órgão / Executor": "Secretaria de Desenvolvimento Urbano (SEDUR)", "Ano": "2025", "Licenciamento": "Estadual (INEMA)"},
-            {"Empreendimento": "Corredores Estruturais e BRT de Salvador", "Investimento (R$)": "R$ 1,22 Bi", "Órgão / Executor": "SEDUR / Município de Salvador", "Ano": "2025", "Licenciamento": "Municipal / INEMA"}
-        ])
-        st.dataframe(df_top_pac, use_container_width=True, hide_index=True)
-
-    with c_tab2:
-        df_top_bndes = pd.DataFrame([
-            {"Beneficiário / Empresa": "Ventos de Santo Antônio Comercializadora", "Investimento (R$)": "R$ 2,89 Bi", "Setor": "Energia Eólica (Complexo Babilônia)", "Ano": "2023", "Licenciamento": "Estadual (INEMA - LU)"},
-            {"Beneficiário / Empresa": "Transportadora Associada de Gás (TAG)", "Investimento (R$)": "R$ 2,21 Bi", "Setor": "Gasoduto Cabiúnas-Catu (GASENE)", "Ano": "2007", "Licenciamento": "Federal (IBAMA) / INEMA"},
-            {"Beneficiário / Empresa": "Companhia do Metrô da Bahia (CCR)", "Investimento (R$)": "R$ 2,26 Bi", "Setor": "Mobilidade Urbana (Metrô Salvador)", "Ano": "2015 / 2017", "Licenciamento": "Estadual (INEMA - LI/LO)"},
-            {"Beneficiário / Empresa": "Engie Brasil Energia S.A.", "Investimento (R$)": "R$ 1,50 Bi", "Setor": "Energia Eólica (Complexo Serra do Assuruá)", "Ano": "2022", "Licenciamento": "Estadual (INEMA - LU)"},
-            {"Beneficiário / Empresa": "Coelba (Grupo Neoenergia / Iberdrola)", "Investimento (R$)": "R$ 4,31 Bi", "Setor": "Redes de Distribuição Elétrica", "Ano": "2018–2024", "Licenciamento": "Estadual (INEMA - LI/RLO)"},
-            {"Beneficiário / Empresa": "Veracel Celulose S.A. / Suzano S.A.", "Investimento (R$)": "R$ 2,49 Bi", "Setor": "Papel e Celulose", "Ano": "2004–2006", "Licenciamento": "Estadual (INEMA - LO)"}
-        ])
-        st.dataframe(df_top_bndes, use_container_width=True, hide_index=True)
 
     # Bloco Informativo de Mercado de Trabalho e Metodologia
     st.markdown("### 💼 Painel Histórico: Emprego Formal, Informalidade e MEI na Bahia (2000–2026)")
